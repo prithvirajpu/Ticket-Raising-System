@@ -15,6 +15,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    'core_app',
+    'users',
+
     'rest_framework',
     'corsheaders',
 ]
@@ -74,9 +78,27 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
+
+from datetime import timedelta
+SIMPLE_JWT={
+    "ACCESS_TOKEN_LIFETIME":timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME":timedelta(days=1),
+    "AUTH_HEADER_TYPES":("Bearer",),
+}
+
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
+AUTH_USER_MODEL='users.User'
