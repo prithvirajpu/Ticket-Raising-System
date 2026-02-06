@@ -94,6 +94,15 @@ SIMPLE_JWT={
     "REFRESH_TOKEN_LIFETIME":timedelta(days=1),
     "AUTH_HEADER_TYPES":("Bearer",),
 }
+CORS_ALLOW_CREDENTIALS = True
+
+if DEBUG:
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
+# else:
+#     CORS_ALLOWED_ORIGINS = ["https://yourdomain.com"]
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'

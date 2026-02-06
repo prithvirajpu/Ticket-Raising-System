@@ -1,0 +1,11 @@
+class UserRole:
+    ADMIN="ADMIN"
+    MANAGER="MANAGER"
+    TEAM_LEAD="TEAM_LEAD"
+    AGENT="AGENT"
+    CLIENT="CLIENT"
+    USER="USER"
+class ApprovalStatus:
+    PENDING="PENDING"
+    APPROVED="APPROVED"
+    REJECTED="REJECTED"
