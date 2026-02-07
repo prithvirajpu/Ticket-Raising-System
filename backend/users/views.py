@@ -17,27 +17,18 @@ class LoginView(APIView):
         user=serializer.validated_data['user']
         refresh=RefreshToken.for_user(user)
 
-        response=Response({
-            'message':'Login successful',
+        return Response({
+            'access':str(refresh.access_token),
+            'refresh':str(refresh),
             'role':user.role,
         },status=status.HTTP_200_OK)
-
-        response.set_cookie(
-            'access_token',
-            str(refresh.access_token),
-            httponly=True,
-            secure=False,
-            samesite='Lax',
-            max_age=15*60)
-        response.set_cookie(
-            'refresh_token',
-            str(refresh),
-            httponly=True,
-            secure=False,
-            samesite='Lax',
-            max_age=7*24*60*60
-        )
-        return response
+    
+# class LogoutView(APIView):
+#     def post(self,request):
+#         response=Response({'detail':'Logged Out'})
+#         response.delete_cookie('access')
+#         response.delete_cookie('refresh')
+#         return response
     
 class PendingUsersView(ListAPIView):
     permission_classes=[IsAdmin]
