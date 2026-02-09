@@ -11,7 +11,8 @@ class User(AbstractBaseUser,PermissionsMixin):
                           choices=[(i,i)for i in vars(UserRole).values() if isinstance(i,str)],
                           default=UserRole.USER)
     approval_status=models.CharField(max_length=20,
-                                    choices=[(i,i) for i in vars(ApprovalStatus).values() if isinstance(i,str)])
+                                    choices=[(i,i) for i in vars(ApprovalStatus).values() if isinstance(i,str)],
+                                    default=ApprovalStatus.PENDING)
     is_active=models.BooleanField(default=False)
     is_staff=models.BooleanField(default=False)
     created_at=models.DateTimeField(auto_now_add=True)

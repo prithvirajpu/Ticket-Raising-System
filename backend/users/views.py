@@ -6,9 +6,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import User
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import LoginSerializer,UserApprovalSerializer
+from .serializers import LoginSerializer,UserApprovalSerializer,ClientSignupSerializer,AgentSignupSerializer
 
 class LoginView(APIView):
+    permission_classes=[]
 
     def post(self,request):
         serializer=LoginSerializer(data=request.data)
@@ -29,7 +30,25 @@ class LoginView(APIView):
 #         response.delete_cookie('access')
 #         response.delete_cookie('refresh')
 #         return response
-    
+
+class ClientSignupView(APIView):
+    permission_classes=[]
+    def post(self,request):
+        serializer=ClientSignupSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'message':'Client'},
+                        status=status.HTTP_201_CREATED)
+
+class AgentSignupView(APIView):
+    permission_classes=[]
+    def post(self,request):
+        serializer=AgentSignupSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'message':'Agent application submitted. Await admin approval'},
+                        status=status.HTTP_201_CREATED)
+
 class PendingUsersView(ListAPIView):
     permission_classes=[IsAdmin]
     serializer_class=UserApprovalSerializer
@@ -48,9 +67,15 @@ class ApproveUserView(APIView):
             return Response({
                 'details':'User not found'},
                 status=status.HTTP_404_NOT_FOUND)
+        role=request.data.get('role',user.role)
+        user.role=role
+        user.approval_status=ApprovalStatus.APPROVED
+        user.is_active=True
+
         serializer=UserApprovalSerializer(user,data=request.data,partial=True)
         serializer.is_valid(raise_exception=True)
-        serializer.save(approval_status=ApprovalStatus.APPROVED,is_active=True)
+        serializer.save()
+
         return Response({
             "details":'User Approved Successfully'},
             status=status.HTTP_200_OK)

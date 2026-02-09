@@ -88,10 +88,9 @@ if DEBUG:
         "http://127.0.0.1:5173",
     ]
 
-
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "users.authentication.CookieJWTAuthentication",
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }
 
@@ -111,7 +110,7 @@ CSRF_COOKIE_SECURE = False
 
 from datetime import timedelta
 SIMPLE_JWT={
-    "ACCESS_TOKEN_LIFETIME":timedelta(minutes=15),
+    "ACCESS_TOKEN_LIFETIME":timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME":timedelta(days=1),
     "AUTH_HEADER_TYPES":("Bearer",),
 }
