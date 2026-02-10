@@ -59,7 +59,10 @@ class PendingUsersView(ListAPIView):
 class ApproveUserView(APIView):
     permission_classes=[IsAdmin]
 
-    def post(self,request):
+    def post(self,request,*args,**kwargs):
+        print("=== DEBUG ===")
+        print("request.data:", request.data)
+        print("Content-Type:", request.content_type)
         user_id=self.kwargs['pk']
         try:
             user=User.objects.get(id=user_id)
