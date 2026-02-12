@@ -31,7 +31,7 @@ class UserApprovalSerializer(serializers.ModelSerializer):
 
 class ClientSignupSerializer(serializers.ModelSerializer):
     password=serializers.CharField(write_only=True)
-
+    
     class Meta:
         model=User
         fields=['email','password']
