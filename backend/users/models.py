@@ -7,6 +7,8 @@ class User(AbstractBaseUser,PermissionsMixin):
     objects=UserManager()
     email=models.EmailField(unique=True)
     name=models.CharField(max_length=100)
+    phone=models.CharField(max_length=15,default='0000000000')
+    business_type=models.CharField(max_length=50,blank=True)
     role=models.CharField(max_length=20,
                           choices=[(i,i)for i in vars(UserRole).values() if isinstance(i,str)],
                           default=UserRole.USER)

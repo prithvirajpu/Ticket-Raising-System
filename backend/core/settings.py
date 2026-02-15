@@ -1,6 +1,8 @@
 from pathlib import Path
 import os
+from datetime import timedelta
 from dotenv import load_dotenv
+import cloudinary
 
 load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,12 +23,15 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'corsheaders',
+
+    'cloudinary',
+    'cloudinary_storage',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -78,6 +83,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+cloudinary.config(
+    cloud_name = os.getenv('CLOUDINARY_CLOUD_NAME'),
+    api_key = os.getenv('CLOUDINARY_API_KEY'),
+    api_secret = os.getenv('CLOUDINARY_API_SECRET')
+)
+DEFAULT_FILE_STORAGE='cloudinary_storage.storage.MediaCloudinaryStorage'
+
 EMAIL_BACKEND=os.getenv('EMAIL_BACKEND')
 EMAIL_HOST=os.getenv('EMAIL_HOST')
 EMAIL_PORT=os.getenv('EMAIL_PORT')
@@ -93,7 +105,9 @@ if DEBUG:
     CORS_ALLOWED_ORIGINS = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "http://localhost:3000",
     ]
+CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -101,21 +115,20 @@ REST_FRAMEWORK = {
     ),
 }
 
-CORS_ALLOW_CREDENTIALS = True
-
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
 
 SESSION_COOKIE_SAMESITE = "Lax"
-CSRF_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "None"
 
 SESSION_COOKIE_SECURE = False  
-CSRF_COOKIE_SECURE = False     
+CSRF_COOKIE_SECURE = False 
 
+SESSION_COOKIE_AGE = 300  
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-from datetime import timedelta
 SIMPLE_JWT={
     "ACCESS_TOKEN_LIFETIME":timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME":timedelta(days=1),
