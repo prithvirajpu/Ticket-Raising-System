@@ -14,7 +14,8 @@ from core_app.constants import UserRole
 from core_app.models import EmailOTP,AgentApplication
 from core_app.utils import generate_otp,send_otp_email
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import LoginSerializer,UserApprovalSerializer,ClientSignupSerializer,AgentSignupSerializer,VerifyOTPSerializer
+from rest_framework.parsers import MultiPartParser, FormParser
+from .serializers import LoginSerializer,UserApprovalSerializer,ClientSignupSerializer,AgentSignupSerializer,VerifyOTPSerializer,ForgotPasswordSerializer,ResetPasswordSerializer
 
 class LoginView(APIView):
     permission_classes=[]
@@ -53,75 +54,172 @@ class ClientSignupView(APIView):
         email=serializer.validated_data['email']
         if User.objects.filter(email=email).exists():
             return Response({'error': 'Email already registered'}, status=status.HTTP_400_BAD_REQUEST)
-        user=serializer.save()
-        EmailOTP.objects.filter(email=email).delete()
+        serializer.save()
+        EmailOTP.objects.filter(email=email,purpose='SIGNUP').delete()
         otp_code=generate_otp()
         print('otp_code',otp_code)
-        EmailOTP.objects.create(email=email,otp=otp_code)
+        otp_obj=EmailOTP.objects.create(email=email,otp=otp_code,purpose='SIGNUP')
+        expiry_time=otp_obj.created_at+timezone.timedelta(minutes=1)
         send_otp_email(email,otp_code)
-        return Response({'message':'OTP sent to you email'},
-                        status=status.HTTP_200_OK)
-    
-class AgentSignupView(APIView):
-    permission_classes=[]
-
-    def post(self,request):
-        serializer=AgentSignupSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        application=serializer.save()
-        email=serializer.validated_data['email']
-        otp=generate_otp()
-        print(otp)
-        EmailOTP.objects.create(email=application.email,otp=otp)
-        send_otp_email(email,otp)
-        return Response({'message':'Agent application submitted. Await admin approval'},
+        return Response({'message':'OTP sent to you email',"expires_at":expiry_time.isoformat()},
                         status=status.HTTP_201_CREATED)
 
-class VerifyOTPView(APIView):
-    permission_classes=[]
+class AgentSignupView(APIView):
+    permission_classes = []
+    parser_classes = (MultiPartParser, FormParser)
 
-    def post(self,request):
-        serializer=VerifyOTPSerializer(data=request.data)
+    def post(self, request):
+        email = request.data.get("email")
+        if not email:
+            return Response({"error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Copy data and attach files
+        data = request.data.copy()
+        resume = request.FILES.get("resume")
+        certificates = request.FILES.getlist("certificates")
+        if resume:
+            data["resume"] = resume
+        if certificates:
+            data.setlist("certificates", certificates)
+
+        # Check if agent exists
+        agent = AgentApplication.objects.filter(email=email).first()
+        created = False
+
+        if agent:
+            # Update existing agent partially
+            serializer = AgentSignupSerializer(agent, data=data, partial=True)
+        else:
+            # Create new agent
+            serializer = AgentSignupSerializer(data=data)
+
+        # Validate serializer
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Save (certificates are handled inside serializer)
+        agent = serializer.save()
+        created = agent is not None and not agent.status == "PENDING"
+
+        # Generate OTP
+        EmailOTP.objects.filter(email=email, purpose="AGENT").delete()
+        otp = generate_otp()
+        print("Generated OTP:", otp)
+        otp_obj = EmailOTP.objects.create(email=email, otp=otp, is_verified=False, purpose="AGENT")
+        expiry_time = otp_obj.created_at + timezone.timedelta(minutes=1)
+        send_otp_email(email, otp)
+
+        message = "Agent application submitted. OTP sent to email for verification."
+        if not created:
+            message = "Existing agent found. OTP resent for email verification."
+
+        return Response(
+            {
+                "message": message,
+                "expires_at": expiry_time.isoformat()
+            },
+            status=status.HTTP_201_CREATED
+        )
+
+class VerifyOTPView(APIView):
+    permission_classes = []
+
+    def post(self, request):
+        serializer = VerifyOTPSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        email=serializer.validated_data['email']
-        otp=serializer.validated_data['otp']
+        email = serializer.validated_data['email']
+        otp = serializer.validated_data['otp']
+        purpose = serializer.validated_data.get('purpose', 'SIGNUP')
 
-        otp_obj=EmailOTP.objects.filter(email=email,otp=otp).first()
+        otp_obj = EmailOTP.objects.filter(
+            email=email,
+            otp=otp,
+            is_verified=False,
+            purpose=purpose
+        ).first()
+
         if not otp_obj:
-            return Response({'error':'Invalid OTP'},status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'error': 'Invalid OTP'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         if otp_obj.is_expired():
             otp_obj.delete()
-            return Response({'error':'OTP expired'},status=status.HTTP_400_BAD_REQUEST)
-        existing_user=User.objects.filter(email=email).first()
-        if existing_user:
-            if not existing_user.is_verified:
-                existing_user.is_verified=True
-                existing_user.is_active=True
-                existing_user.save()
-            otp_obj.delete()
-            return Response({'message':'User email verified.'})
-        application=AgentApplication.objects.filter(email=email).first()
-        if application:
-            if not application.email_verified:
-                application.email_verified=True
+            return Response(
+                {'error': 'OTP expired'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        otp_obj.is_verified = True
+        otp_obj.save()
+        if purpose == 'RESET':
+            return Response({'message': 'OTP verified for password reset'})
+
+        if purpose == 'SIGNUP':
+            user = User.objects.filter(email=email).first()
+            if user:
+                user.is_verified = True
+                user.is_active = True
+                user.save()
+                otp_obj.delete()
+                return Response({'message': 'User email verified'})
+
+        if purpose == 'AGENT':
+            application = AgentApplication.objects.filter(email=email).first()
+            if application:
+                application.email_verified = True
                 application.save()
+                otp_obj.delete()
+                return Response({'message': 'Application email verified'})
+
+        return Response(
+            {'error': 'Invalid verification flow'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+class ResetPasswordView(APIView):
+    permission_classes = []
+
+    def post(self, request):
+        serializer = ResetPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+        new_password = serializer.validated_data['new_password']
+
+        user = User.objects.filter(email=email).first()
+        if not user:
+            return Response({'error': 'User not found'},status=status.HTTP_404_NOT_FOUND)
+        otp_obj = EmailOTP.objects.filter(email=email,purpose='RESET',is_verified=True).first()
+        if otp_obj.is_expired():
             otp_obj.delete()
-            return Response({'message':'Application email verified'})
+            return Response(
+                {'error': 'OTP expired'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        if not otp_obj:
+            return Response({'error': 'OTP not verified'},status=status.HTTP_400_BAD_REQUEST)
+        user.set_password(new_password)
+        user.save()
         otp_obj.delete()
-        return Response({'error':'Account not found'},status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': 'Password reset successful'},status=status.HTTP_200_OK)
     
 class ResendOTPView(APIView):
     permission_classes = []
 
     def post(self, request):
         email = request.data.get('email')
+        purpose = request.data.get('purpose')
         if not email:
             return Response(
                 {'error': 'Email is required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        otp_obj = EmailOTP.objects.filter(email=email).first()
+        if not email or not purpose:
+            return Response(
+                {'error': 'Email and purpose are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        otp_obj = EmailOTP.objects.filter(email=email,purpose=purpose).first()
 
         if otp_obj and otp_obj.created_at > timezone.now() - timedelta(minutes=1):
             return Response(
@@ -132,10 +230,11 @@ class ResendOTPView(APIView):
             otp_obj.delete()
         new_otp = generate_otp()
         print(new_otp)  
-        EmailOTP.objects.create(email=email, otp=new_otp)
+        otp_obj=EmailOTP.objects.create(email=email, otp=new_otp,purpose=purpose)
+        expiry_time=otp_obj.created_at+timezone.timedelta(minutes=1)
         send_otp_email(email, new_otp)
         return Response(
-            {'message': 'OTP resent successfully'},
+            {'message': 'OTP resent successfully',"expires_at":expiry_time.isoformat()},
             status=status.HTTP_200_OK
         )
 
@@ -144,19 +243,21 @@ class ForgotPasswordView(APIView):
 
     def post(self,request):
         print('passing data',request.data)
-        serializer=ClientSignupSerializer(data=request.data,partial=True)
+        serializer=ForgotPasswordSerializer(data=request.data,partial=True)
         serializer.is_valid(raise_exception=True)
         email=serializer.validated_data['email']
         print('email is',email)
         if not User.objects.filter(email__iexact=email).exists():
             return Response({'error':'Email not found'},status=status.HTTP_400_BAD_REQUEST)
-        EmailOTP.objects.filter(email=email).delete()
+        EmailOTP.objects.filter(email=email, purpose='RESET').delete()
         otp=generate_otp()
         print(otp)
-        EmailOTP.objects.create(email=email,otp=otp)
+        otp_obj=EmailOTP.objects.create(email=email,otp=otp,purpose='RESET')
+        expiry_time=otp_obj.created_at+timezone.timedelta(minutes=1)
         send_otp_email(email,otp)
         print('email sent success')
-        return Response({'message':"OTP sent successfully"})
+        return Response({'message':"OTP sent successfully",
+                         "expires_at":expiry_time.isoformat()})
         
 
 class PendingUsersView(ListAPIView):
@@ -184,6 +285,7 @@ class ApproveUserView(APIView):
                                  is_active=True,is_verified=agent.email_verified,password=agent.password)
         agent.status="APPROVED"
         agent.save()
+        
         return Response({
             "details":'Agent request approved as {role}.'},
             status=status.HTTP_200_OK)
@@ -204,3 +306,26 @@ class RejectUserView(APIView):
         agent.save(update_fields=['status','is_active'])
         return Response({'details':'User rejected'}
                         ,status=status.HTTP_200_OK)
+
+class AgentApplicationDetailView(APIView):
+    permission_classes=[IsAdmin]
+
+    def get(self,request,pk):
+        print('pk',pk)
+        try:
+            agent=AgentApplication.objects.get(id=pk)
+        except AgentApplication.DoesNotExist:
+            return Response({'error':'Agent not found'},status=status.HTTP_404_NOT_FOUND)
+        data = {
+            "id": agent.id,
+            "full_name": agent.full_name,
+            "email": agent.email,
+            "phone": agent.phone,
+            "resume": agent.resume.url if agent.resume else None,
+            "certificates": [cert.file.url for cert in agent.certificates.all()],
+            "created_at": agent.applied_at,
+        }
+        print(data)
+
+        return Response(data, status=status.HTTP_200_OK)
+    
