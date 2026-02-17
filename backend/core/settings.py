@@ -154,3 +154,5 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 AUTH_USER_MODEL='users.User'
+
+GOOGLE_CLIENT_ID = os.getenv('My_GOOGLE_CLIENT_ID')

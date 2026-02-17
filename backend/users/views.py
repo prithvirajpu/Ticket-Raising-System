@@ -5,17 +5,24 @@ from django.db import transaction
 import random
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated
 from core_app.permissions import IsAdmin
 from core_app.constants import ApprovalStatus
 from rest_framework.response import Response
 from rest_framework import status
 from .models import User
 from core_app.constants import UserRole 
-from core_app.models import EmailOTP,AgentApplication
+from core_app.models import EmailOTP,AgentApplication,AgentCertificate
 from core_app.utils import generate_otp,send_otp_email
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.parsers import MultiPartParser, FormParser
-from .serializers import LoginSerializer,UserApprovalSerializer,ClientSignupSerializer,AgentSignupSerializer,VerifyOTPSerializer,ForgotPasswordSerializer,ResetPasswordSerializer
+from core_app.utils import generate_jwt_token   
+from google.oauth2 import id_token as google_id_token
+from google.auth.transport import requests
+from django.conf import settings 
+from .serializers import (
+    LoginSerializer,UserApprovalSerializer,ClientSignupSerializer,AgentSignupSerializer,
+    VerifyOTPSerializer,ForgotPasswordSerializer,ResetPasswordSerializer)
 
 class LoginView(APIView):
     permission_classes=[]
@@ -69,6 +76,8 @@ class AgentSignupView(APIView):
     parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request):
+        print("=== FULL REQUEST DATA ===", dict(request.data))
+        print("=== FILES ===", [f.name for f in request.FILES.getlist('certificates')])
         email = request.data.get("email")
         if not email:
             return Response({"error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -89,12 +98,17 @@ class AgentSignupView(APIView):
         if agent:
             # Update existing agent partially
             serializer = AgentSignupSerializer(agent, data=data, partial=True)
+            print("=== IS VALID ===", serializer.is_valid())
+            print("=== ERRORS ===", serializer.errors)  
         else:
             # Create new agent
             serializer = AgentSignupSerializer(data=data)
+            print("=== IS VALID ===", serializer.is_valid())
+            print("=== ERRORS ===", serializer.errors)  
 
         # Validate serializer
         if not serializer.is_valid():
+            print("=== DETAILED ERRORS ===", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         # Save (certificates are handled inside serializer)
@@ -326,6 +340,154 @@ class AgentApplicationDetailView(APIView):
             "created_at": agent.applied_at,
         }
         print(data)
-
         return Response(data, status=status.HTTP_200_OK)
     
+class GoogleClientAuthView(APIView):
+    permission_classes = []
+
+    def post(self, request):
+        token = request.data.get("id_token")
+        role = request.data.get("role")  
+
+        if not token:
+            return Response(
+                {"error": "Missing token"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # Verify Google token
+            idinfo = google_id_token.verify_oauth2_token(
+                token,
+                requests.Request(),
+                settings.GOOGLE_CLIENT_ID
+            )
+
+            email = idinfo.get("email")
+
+            if not email:
+                return Response(
+                    {"error": "Unable to fetch email from Google."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # ====================================================
+            # 🔥 LOGIN FLOW (No role provided)
+            # ====================================================
+            if not role:
+                user = User.objects.filter(email=email).first()
+
+                if not user:
+                    return Response(
+                        {"error": "Account not found. Please sign up first."},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+            # ====================================================
+            # 🔥 SIGNUP FLOW (Role provided)
+            # ====================================================
+            else:
+
+                if role == "CLIENT":
+
+                    user, created = User.objects.get_or_create(
+                        email=email,
+                        defaults={
+                            "role": "CLIENT",
+                            "approval_status": "APPROVED",
+                            "profile_completed": False,
+                            "is_active": True,
+                            "is_verified": True,
+                        },
+                    )
+
+                elif role == "AGENT":
+
+                    user, created = User.objects.get_or_create(
+                        email=email,
+                        defaults={
+                            "role": "AGENT",
+                            "approval_status": "PENDING",
+                            "profile_completed": False,
+                            "is_active": True,
+                            "is_verified": True,
+                        },
+                    )
+
+                    AgentApplication.objects.get_or_create(
+                        email=email,
+                        defaults={
+                            "status": "PENDING",
+                            "email_verified": True,
+                        },
+                    )
+
+                else:
+                    return Response(
+                        {"error": "Invalid role"},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                # 🚨 Prevent role switching
+                if not created and user.role != role:
+                    return Response(
+                        {"error": f"Account already exists as {user.role}"},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+            # ====================================================
+            # Generate JWT
+            # ====================================================
+            jwt_token = generate_jwt_token(user)
+
+            return Response({
+                "message": "Login successful",
+                "user_id": user.id,
+                "email": user.email,
+                "role": user.role,
+                "approval_status": user.approval_status,
+                "profile_completed": user.profile_completed,
+                "access": jwt_token["access"],
+                "refresh": jwt_token["refresh"],
+            }, status=status.HTTP_200_OK)
+
+        except ValueError:
+            return Response(
+                {"error": "Invalid Google token"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+class UpdateClientProfileView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def put(self,request):
+        user=request.user
+        user.company_name=request.data.get('company_name')
+        user.business_type=request.data.get('business_type')
+        user.phone=request.data.get('phone')
+        user.save()
+        return Response({'message':'Profile updated'})
+    
+class UpdateAgentProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        user = request.user
+        agent_app = AgentApplication.objects.get(email=user.email)
+
+        user.phone = request.data.get("phone")
+        user.skills = request.data.get("skills")
+        user.resume = request.FILES.get("resume")
+        user.profile_completed=True
+        user.save()
+
+        certificates = request.FILES.getlist("certificates")
+
+        for cert in certificates:
+            AgentCertificate.objects.create(
+                agent=user,
+                file=cert
+            )
+
+        return Response({"message": "Profile completed",
+                         "status": agent_app.status,})

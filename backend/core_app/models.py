@@ -38,6 +38,7 @@ class AgentApplication(models.Model):
 
     def __str__(self):
         return self.full_name
+    
 class AgentCertificate(models.Model):
     agent = models.ForeignKey(AgentApplication, on_delete=models.CASCADE,related_name="certificates")
     file = models.FileField(upload_to="certificates/" ,storage=raw_storage)

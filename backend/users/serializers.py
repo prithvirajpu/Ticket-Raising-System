@@ -78,8 +78,8 @@ class AgentSignupSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Passwords do not match')
         return data
     
-    def create(self, validated_data, certificates=None):
-        certificates = certificates or []
+    def create(self, validated_data):
+        certificates = validated_data.pop('certificates', [])
         validated_data.pop("confirm_password")
         password = validated_data.pop("password")
         validated_data["password"] = make_password(password)
