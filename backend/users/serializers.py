@@ -4,6 +4,11 @@ from .models import User
 from core_app.constants import ApprovalStatus,UserRole
 from core_app.models import AgentApplication,AgentCertificate
 from django.contrib.auth.hashers import make_password,check_password
+from django.db import transaction
+import logging
+
+logger=logging.getLogger(__name__)
+
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -14,7 +19,7 @@ class LoginSerializer(serializers.Serializer):
             email=data['email'],
             password=data['password']
         )
-        
+        logger.debug("user here %s",user)
         if not user:
             raise serializers.ValidationError('Invalid credentials')
         
@@ -24,7 +29,6 @@ class LoginSerializer(serializers.Serializer):
         if not user.is_active:
             raise serializers.ValidationError('Account is inactive')
         
-        # 3. NON-USER roles need approval
         if user.role != UserRole.USER:
             if user.approval_status != ApprovalStatus.APPROVED:
                 raise serializers.ValidationError('Account pending admin approval')
@@ -82,16 +86,29 @@ class AgentSignupSerializer(serializers.ModelSerializer):
         certificates = validated_data.pop('certificates', [])
         validated_data.pop("confirm_password")
         password = validated_data.pop("password")
-        validated_data["password"] = make_password(password)
-        validated_data["status"] = "PENDING"
 
-        agent = AgentApplication.objects.create(**validated_data)
+        with transaction.atomic():
 
-        for cert in certificates:
-            AgentCertificate.objects.create(agent=agent, file=cert)
+            agent = AgentApplication.objects.create(
+                **validated_data,
+                password=make_password(password),
+                status="PENDING"
+            )
+            user = User.objects.create(
+                email=agent.email,
+                password=make_password(password),
+                role=UserRole.AGENT,
+                approval_status=ApprovalStatus.PENDING,
+                is_active=True,
+                is_verified=True,
+                profile_completed=True
+            )
+
+            # 3️⃣ Save Certificates
+            for cert in certificates:
+                AgentCertificate.objects.create(agent=agent, file=cert)
+
         return agent
-
-
 
 class VerifyOTPSerializer(serializers.Serializer):
     email = serializers.EmailField()

@@ -1,7 +1,9 @@
 from django.db import models
+from django.utils import timezone
 from core_app.constants import UserRole, ApprovalStatus
 from django.contrib.auth.models import AbstractBaseUser,PermissionsMixin
 from .manager import UserManager
+
 
 class User(AbstractBaseUser,PermissionsMixin):
     objects=UserManager()
@@ -28,4 +30,12 @@ class User(AbstractBaseUser,PermissionsMixin):
 
     def __str__(self):
         return self.email
+    
+class PasswordResetToken(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE)
+    token=models.CharField(max_length=128,unique=True)
+    created_at=models.DateTimeField(auto_now_add=True)
+
+    def is_expired(self):
+        return timezone.now()>self.created_at+timezone.timedelta(minutes=5)
     
