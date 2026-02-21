@@ -14,32 +14,42 @@ class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
+    from django.contrib.auth import authenticate
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
     def validate(self, data):
-        user = authenticate(
-            email=data['email'],
-            password=data['password']
-        )
-        logger.debug("user here %s",user)
-        if not user:
-            raise serializers.ValidationError('Invalid credentials')
+        # Try to authenticate in User model first
+        user = authenticate(email=data['email'], password=data['password'])
+
+        if user:
+            # Existing user logic
+            if not user.is_verified:
+                raise serializers.ValidationError('Email not verified')
+            if not user.is_active:
+                raise serializers.ValidationError('Account is inactive')
+            if user.role != UserRole.USER and user.approval_status != ApprovalStatus.APPROVED:
+                raise serializers.ValidationError('Waiting for admin approval')
+            
+            data['user'] = user
+            return data
+
+        # If no User exists, check AgentApplication
+        application = AgentApplication.objects.filter(email=data['email']).first()
+        if application:
+            if application.status != "APPROVED":
+                raise serializers.ValidationError('Waiting for admin approval')
+            if not application.email_verified:
+                raise serializers.ValidationError('Email not verified')
         
-        if not user.is_verified:
-            raise serializers.ValidationError('Email not verified')
-        
-        if not user.is_active:
-            raise serializers.ValidationError('Account is inactive')
-        
-        if user.role != UserRole.USER:
-            if user.approval_status != ApprovalStatus.APPROVED:
-                raise serializers.ValidationError('Account pending admin approval')
-        
-        data['user'] = user
-        return data
+        raise serializers.ValidationError('Invalid credentials')
 
 class UserApprovalSerializer(serializers.ModelSerializer):
     class Meta:
         model=AgentApplication
-        fields = ['id', 'email', 'phone', 'status']
+        fields = ['id', 'email', 'phone', 'status','full_name','applied_at']
 
 class ClientSignupSerializer(serializers.ModelSerializer):
     email=serializers.EmailField()
@@ -49,18 +59,35 @@ class ClientSignupSerializer(serializers.ModelSerializer):
         model=User
         fields=['email','password']
     def validate(self, data):
-        if User.objects.filter(email=data['email']).exists() or AgentApplication.objects.filter(email=data['email']).exists():
+        email=data.get('email')
+        existing_user=User.objects.filter(email=email).first()
+        if existing_user and existing_user.is_verified:
             raise serializers.ValidationError('Email already exist')
+        
+        existing_application = AgentApplication.objects.filter(email=email).first()
+        if existing_application and existing_application.email_verified:
+            raise serializers.ValidationError("Email already used as Agent")    
+        
         return data
-    def create(self,validated_data):
-        user=User.objects.create_user(
-                    email=validated_data['email'],
-                    password=validated_data['password'],
-                    role=UserRole.CLIENT,
-                    approval_status=ApprovalStatus.APPROVED,
-                    is_active=False,
-                    is_verified=False
-                    )
+    def create(self, validated_data):
+        password = validated_data.pop("password")
+
+        existing_user = User.objects.filter(email=validated_data["email"]).first()
+
+        if existing_user and not existing_user.is_verified:
+            existing_user.set_password(password)
+            existing_user.save()
+            return existing_user
+
+        user = User.objects.create_user(
+            password=password,
+            role=UserRole.CLIENT,
+            approval_status=ApprovalStatus.APPROVED,
+            is_active=False,
+            is_verified=False,
+            **validated_data
+        )
+
         return user
 
 class AgentSignupSerializer(serializers.ModelSerializer):
@@ -75,11 +102,17 @@ class AgentSignupSerializer(serializers.ModelSerializer):
         model=AgentApplication
         fields=['full_name','email','phone','skills','resume','certificates','password','confirm_password']
 
-    def validate(self,data):
-        if User.objects.filter(email=data['email']).exists() or AgentApplication.objects.filter(email=data['email']).exists():
-            raise serializers.ValidationError('Email already exist')
-        if data['password']!=data['confirm_password']:
-            raise serializers.ValidationError('Passwords do not match')
+    def validate(self, data):
+        email = data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError("Email already exist")
+        existing_user = User.objects.filter(email=email).first()
+
+        if existing_user and existing_user.is_verified:
+            raise serializers.ValidationError("Email already exist")
+        
+        if data.get('password') != data.get('confirm_password'):
+            raise serializers.ValidationError("Passwords do not match")
         return data
     
     def create(self, validated_data):
@@ -92,19 +125,10 @@ class AgentSignupSerializer(serializers.ModelSerializer):
             agent = AgentApplication.objects.create(
                 **validated_data,
                 password=make_password(password),
-                status="PENDING"
+                status="PENDING",
+                email_verified=False,
+                is_active=False
             )
-            user = User.objects.create(
-                email=agent.email,
-                password=make_password(password),
-                role=UserRole.AGENT,
-                approval_status=ApprovalStatus.PENDING,
-                is_active=True,
-                is_verified=True,
-                profile_completed=True
-            )
-
-            # 3️⃣ Save Certificates
             for cert in certificates:
                 AgentCertificate.objects.create(agent=agent, file=cert)
 

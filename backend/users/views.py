@@ -4,6 +4,7 @@ from django.contrib.auth.hashers import make_password
 from django.db import transaction
 import secrets
 from rest_framework.views import APIView
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from core_app.permissions import IsAdmin
@@ -54,8 +55,6 @@ class ClientSignupView(APIView):
         serializer=ClientSignupSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         email=serializer.validated_data['email']
-        if User.objects.filter(email=email).exists():
-            return Response({'error': 'Email already registered'}, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
         EmailOTP.objects.filter(email=email,purpose='SIGNUP').delete()
         otp_code=generate_otp()
@@ -154,13 +153,26 @@ class VerifyOTPView(APIView):
 
         if purpose == 'AGENT':
             application = AgentApplication.objects.filter(email=email).first()
-            if application:
-                application.email_verified = True
-                application.save()
-                otp_obj.delete()
-                return Response({'message': 'Application email verified'})
-
-        return Response( {'error': 'Invalid verification flow'}, status=status.HTTP_400_BAD_REQUEST)
+            if not application:
+                return Response({'error':'Application not found'},status=status.HTTP_404_NOT_FOUND)
+            if application.email_verified:
+                return Response({'message': 'Email already verified'})
+            
+            application.email_verified = True
+            application.is_active=True
+            application.save()
+            existing_user=User.objects.filter(email=email).first()
+            if not existing_user:
+                User.objects.create(email=application.email,
+                                    name=application.full_name,
+                                    password=application.password,
+                                    role=UserRole.AGENT,
+                                    approval_status=ApprovalStatus.PENDING,
+                                    is_active=application.is_active,
+                                    is_verified=True,
+                                    profile_completed=True)
+            otp_obj.delete()
+            return Response( {'message': 'Agent email verified successfully . Account created'}, status=status.HTTP_201_CREATED)
     
 class ResetPasswordView(APIView):
     permission_classes = []
@@ -261,34 +273,73 @@ class ForgotPasswordView(APIView):
             status=status.HTTP_200_OK
         )
         
+class PendingUsersPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = "page_size"
+    max_page_size = 100
+
 class PendingUsersView(ListAPIView):
-    permission_classes=[IsAdmin]
-    serializer_class=UserApprovalSerializer
+    permission_classes = [IsAdmin]
+    serializer_class = UserApprovalSerializer
+    pagination_class = PendingUsersPagination
 
     def get_queryset(self):
-        return AgentApplication.objects.filter(status='PENDING')
+        return AgentApplication.objects.filter(
+            status="PENDING"
+        ).order_by("-applied_at")
     
 class ApproveUserView(APIView):
-    permission_classes=[IsAdmin]
+    permission_classes = [IsAdmin]
 
-    def post(self,request,*args,**kwargs):
-        user_id=kwargs.get('pk')
+    def post(self, request, *args, **kwargs):
+        user_id = kwargs.get('pk')
+
         try:
-            agent=AgentApplication.objects.get(id=user_id,status='PENDING')
+            agent = AgentApplication.objects.get(
+                id=user_id,
+                status='PENDING'
+            )
         except AgentApplication.DoesNotExist:
-            return Response({
-                'details':'Agent not found'},
-                status=status.HTTP_404_NOT_FOUND)
-        role=request.data.get('role')
+            return Response(
+                {'details': 'Agent not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        role = request.data.get('role')
+
         if role not in [UserRole.AGENT, UserRole.MANAGER, UserRole.TEAM_LEAD]:
-            return Response({'error': 'Invalid role'}, status=400)
-        user=User.objects.create(email=agent.email,name=agent.full_name,phone=agent.phone,role=role,approval_status=ApprovalStatus.APPROVED,
-                                 is_active=True,is_verified=agent.email_verified,password=agent.password)
-        agent.status="APPROVED"
+            return Response(
+                {'error': 'Invalid role'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user = User.objects.filter(email=agent.email).first()
+
+        if user:
+            user.role = role
+            user.approval_status = ApprovalStatus.APPROVED
+            user.is_active = True
+            user.is_verified = agent.email_verified
+            user.save()
+        else:
+            user = User.objects.create(
+                email=agent.email,
+                name=agent.full_name,
+                phone=agent.phone,
+                role=role,
+                approval_status=ApprovalStatus.APPROVED,
+                is_active=True,
+                is_verified=agent.email_verified,
+                password=agent.password  
+            )
+
+        agent.status = "APPROVED"
         agent.save()
-        
-        return Response({
-            "details":'Agent request approved as {role}.'},status=status.HTTP_200_OK)
+
+        return Response(
+            {"details": f"Agent request approved as {role}."},
+            status=status.HTTP_200_OK
+        )
 
 class RejectUserView(APIView):
     permission_classes=[IsAdmin]
@@ -439,19 +490,24 @@ class ClientListView(APIView):
             "clients": data
         }, status=status.HTTP_200_OK)
 
+
 class AgentListView(APIView):
     permission_classes = [IsAuthenticated, IsAdmin]
 
     def get(self, request):
-        agents = User.objects.filter(role="AGENT").order_by("-created_at")
+        agents = User.objects.filter(role="AGENT",approval_status=ApprovalStatus.APPROVED).order_by("-created_at")
+        paginator=PageNumberPagination()
+        paginator.page_size=1
+
+        page=paginator.paginate_queryset(agents,request)
 
         total_agents = agents.count()
-        active_agents = agents.filter(is_active=True).count()
-        inactive_agents = agents.filter(is_active=False).count()
+        active_agents = agents.filter(approval_status=ApprovalStatus.APPROVED).count()
+        inactive_agents = agents.filter(approval_status=ApprovalStatus.PENDING).count()
 
         data = []
 
-        for agent in agents:
+        for agent in page:
             data.append({
                 "id": agent.id,
                 "name": agent.name,
@@ -461,9 +517,10 @@ class AgentListView(APIView):
                 "date_joined": agent.created_at,
             })
 
-        return Response({
+        return paginator.get_paginated_response({
             "total_agents": total_agents,
             "active_agents": active_agents,
             "inactive_agents": inactive_agents,
             "agents": data
-        }, status=status.HTTP_200_OK)
+        })
+    
