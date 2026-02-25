@@ -47,7 +47,6 @@ class LoginView(APIView):
             'role':user.role,
         },status=status.HTTP_200_OK)
 
-
 class ClientSignupView(APIView):
     permission_classes=[]
     
@@ -58,7 +57,6 @@ class ClientSignupView(APIView):
         serializer.save()
         EmailOTP.objects.filter(email=email,purpose='SIGNUP').delete()
         otp_code=generate_otp()
-        print('otp_code',otp_code)
         otp_obj=EmailOTP.objects.create(email=email,otp=otp_code,purpose='SIGNUP')
         expiry_time=otp_obj.created_at+timedelta(minutes=1)
         send_otp_email(email,otp_code)
@@ -96,7 +94,6 @@ class AgentSignupView(APIView):
 
         EmailOTP.objects.filter(email=email, purpose="AGENT").delete()
         otp = generate_otp()
-        print("Generated OTP:", otp)
         otp_obj = EmailOTP.objects.create(email=email, otp=otp, is_verified=False, purpose="AGENT")
         expiry_time = otp_obj.created_at + timedelta(minutes=1)
         send_otp_email(email, otp)
@@ -214,7 +211,7 @@ class ResendOTPView(APIView):
         EmailOTP.objects.filter(email=email,purpose=purpose).delete()
 
         new_otp = generate_otp()
-        print(new_otp)  
+
         otp_obj=EmailOTP.objects.create(email=email, otp=new_otp,purpose=purpose)
         expiry_time=otp_obj.created_at+timedelta(minutes=1)
         send_otp_email(email, new_otp)
@@ -254,7 +251,6 @@ class ForgotPasswordView(APIView):
             ).delete()
 
             otp = generate_otp()
-            print(otp)
 
             otp_obj = EmailOTP.objects.create(
                 email=email,
@@ -361,7 +357,6 @@ class AgentApplicationDetailView(APIView):
     permission_classes=[IsAdmin]
 
     def get(self,request,pk):
-        print('pk',pk)
         try:
             agent=AgentApplication.objects.get(id=pk)
         except AgentApplication.DoesNotExist:

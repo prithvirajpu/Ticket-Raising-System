@@ -1,0 +1,33 @@
+# =====================
+# ENV FILES
+# =====================
+.env
+.env.*
+
+# =====================
+# BACKEND (Django)
+# =====================
+backend/venv/
+backend/__pycache__/
+backend/**/*.pyc
+backend/db.sqlite3
+backend/.vscode/
+backend/.idea/
+
+# Django logs
+backend/*.log
+
+# =====================
+# FRONTEND (React)
+# =====================
+frontend/node_modules/
+frontend/build/
+frontend/.env
+frontend/.vscode/
+frontend/.idea/
+
+# =====================
+# OS FILES
+# =====================
+.DS_Store
+Thumbs.db
