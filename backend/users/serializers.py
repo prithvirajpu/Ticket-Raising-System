@@ -14,15 +14,10 @@ class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
-    from django.contrib.auth import authenticate
-
-class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    password = serializers.CharField(write_only=True)
-
     def validate(self, data):
-        # Try to authenticate in User model first
-        user = authenticate(email=data['email'], password=data['password'])
+        request=self.context.get('request')
+        email=data['email'].strip().lower()
+        user = authenticate(request=request,username=email, password=data['password'])
 
         if user:
             # Existing user logic
@@ -30,21 +25,25 @@ class LoginSerializer(serializers.Serializer):
                 raise serializers.ValidationError('Email not verified')
             if not user.is_active:
                 raise serializers.ValidationError('Account is inactive')
+            if user.approval_status==ApprovalStatus.REJECTED:
+                raise serializers.ValidationError('Application rejected')
             if user.role != UserRole.USER and user.approval_status != ApprovalStatus.APPROVED:
                 raise serializers.ValidationError('Waiting for admin approval')
             
             data['user'] = user
             return data
+        else:
+            raise serializers.ValidationError('Invalid credentials')
 
-        # If no User exists, check AgentApplication
-        application = AgentApplication.objects.filter(email=data['email']).first()
-        if application:
-            if application.status != "APPROVED":
-                raise serializers.ValidationError('Waiting for admin approval')
-            if not application.email_verified:
-                raise serializers.ValidationError('Email not verified')
+        # application = AgentApplication.objects.filter(email=data['email']).first()
+        # print(application)
+        # if application:
+        #     if application.status != "APPROVED":
+        #         raise serializers.ValidationError('Waiting for admin approval')
+        #     if not application.email_verified:
+        #         raise serializers.ValidationError('Email not verified')
         
-        raise serializers.ValidationError('Invalid credentials')
+        # raise serializers.ValidationError('Invalid credentials')
 
 class UserApprovalSerializer(serializers.ModelSerializer):
     class Meta:
@@ -57,12 +56,12 @@ class ClientSignupSerializer(serializers.ModelSerializer):
     
     class Meta:
         model=User
-        fields=['email','password']
+        fields=['email','password','business_type','phone']
     def validate(self, data):
         email=data.get('email')
         existing_user=User.objects.filter(email=email).first()
         if existing_user and existing_user.is_verified:
-            raise serializers.ValidationError('Email already exist')
+            raise serializers.ValidationError('Email already exists')
         
         existing_application = AgentApplication.objects.filter(email=email).first()
         if existing_application and existing_application.email_verified:
@@ -76,6 +75,8 @@ class ClientSignupSerializer(serializers.ModelSerializer):
 
         if existing_user and not existing_user.is_verified:
             existing_user.set_password(password)
+            existing_user.business_type=validated_data.get('business_type','')
+            existing_user.phone=validated_data.get('phone','')
             existing_user.save()
             return existing_user
 
@@ -145,5 +146,6 @@ class ForgotPasswordSerializer(serializers.Serializer):
 
 class ResetPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
+    reset_token = serializers.CharField(required=True)
     new_password = serializers.CharField(write_only=True)
 

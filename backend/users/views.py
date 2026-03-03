@@ -31,21 +31,28 @@ class LoginView(APIView):
     permission_classes=[]
 
     def post(self,request):
-        serializer=LoginSerializer(data=request.data)
+        serializer=LoginSerializer(data=request.data,context={'request':request})
         serializer.is_valid(raise_exception=True)
 
         user=serializer.validated_data['user']
         refresh=RefreshToken.for_user(user)
-        if not user.is_verified:
-            return Response({'detail':'email not verified'},status=status.HTTP_403_FORBIDDEN)
-        if user.approval_status=='PENDING':
-            return Response({'detail':'Waiting for the Admin Approval'},status=status.HTTP_400_BAD_REQUEST)
-
         return Response({
             'access':str(refresh.access_token),
             'refresh':str(refresh),
             'role':user.role,
         },status=status.HTTP_200_OK)
+    
+class CheckUserExistsView(APIView):
+    permission_classes=[]
+    
+    def post(self,request):
+        email=request.data.get('email')
+        errors={}
+        if email and User.objects.filter(email=email).exists():
+            errors['email']='Email already exists'
+        if errors:
+            return Response(errors,status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message':'Available'})
 
 class ClientSignupView(APIView):
     permission_classes=[]
@@ -190,6 +197,10 @@ class ResetPasswordView(APIView):
             token_obj.delete()
             return Response( {'error': 'OTP expired'}, status=status.HTTP_400_BAD_REQUEST)
         user=token_obj.user
+        if user.check_password(new_password):
+            return Response({'error':'New password cannot be the same as the old password'}
+                            ,status=status.HTTP_400_BAD_REQUEST)
+        
         user.set_password(new_password)
         user.save()
         token_obj.delete()
@@ -341,16 +352,24 @@ class RejectUserView(APIView):
     permission_classes=[IsAdmin]
 
     def post(self,request,*args,**kwargs):
-        user_id=self.kwargs['pk']
+        application_id =self.kwargs['pk']
         try:
-            agent=AgentApplication.objects.get(id=user_id)
+            agent=AgentApplication.objects.get(id=application_id)
+
         except AgentApplication.DoesNotExist:
             return Response({
                 "details":'User not found'},
                 status=status.HTTP_404_NOT_FOUND)
+        try:
+            user=User.objects.get(email=agent.email)
+        except User.DoesNotExist:
+            return Response({'details':'User not found with this email'})
+        
         agent.status='REJECTED'
         agent.is_active=False
         agent.save(update_fields=['status','is_active'])
+        user.approval_status='REJECTED'
+        user.save(update_fields=['approval_status'])
         return Response({'details':'User rejected'},status=status.HTTP_200_OK)
 
 class AgentApplicationDetailView(APIView):
@@ -386,12 +405,14 @@ class GoogleClientAuthView(APIView):
         try:
             idinfo = google_id_token.verify_oauth2_token( token, requests.Request(), settings.GOOGLE_CLIENT_ID)
             email = idinfo.get("email")
-
+            
             if not email:
                 return Response( {"error": "Unable to fetch email from Google."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            user=User.objects.filter(email=email).first()
+            if user and user.approval_status=='REJECTED':
+                return Response({"error":'Agent application is rejected.'},status=status.HTTP_400_BAD_REQUEST)
             if not role:
-                user = User.objects.filter(email=email).first()
-
                 if not user:
                     return Response( {"error": "Account not found. Please sign up first."}, status=status.HTTP_400_BAD_REQUEST)
             else:
@@ -464,33 +485,37 @@ class ClientListView(APIView):
 
     def get(self, request):
         clients = User.objects.filter(role="CLIENT").order_by("-created_at")
+        paginator=PageNumberPagination()
+        paginator.page_size=10
+        page=paginator.paginate_queryset(clients,request)
 
         total_clients = clients.count()
         pending_clients = clients.filter(is_active=False).count()
 
         data = []
-        for client in clients:
+        for client in page:
             data.append({
                 "id": client.id,
                 "name": client.name,
                 "email": client.email,
                 "phone": client.phone,
+                "business_type": client.business_type,
                 "is_active": client.is_active,
                 "date_joined": client.created_at
             })
 
-        return Response({
+        return paginator.get_paginated_response({
             "total_clients": total_clients,
             "pending_clients": pending_clients,
             "clients": data
-        }, status=status.HTTP_200_OK)
+        })
 
 
 class AgentListView(APIView):
     permission_classes = [IsAuthenticated, IsAdmin]
 
     def get(self, request):
-        agents = User.objects.filter(role="AGENT",approval_status=ApprovalStatus.APPROVED).order_by("-created_at")
+        agents = User.objects.filter(role__in=[UserRole.AGENT,UserRole.TEAM_LEAD,UserRole.MANAGER],approval_status=ApprovalStatus.APPROVED).order_by("-created_at")
         paginator=PageNumberPagination()
         paginator.page_size=1
 
@@ -507,6 +532,7 @@ class AgentListView(APIView):
                 "id": agent.id,
                 "name": agent.name,
                 "email": agent.email,
+                "role": agent.role,
                 "phone": agent.phone,
                 "is_active": agent.is_active,
                 "date_joined": agent.created_at,

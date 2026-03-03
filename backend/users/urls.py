@@ -1,7 +1,9 @@
 from django.urls import path
 from .views import (LoginView,PendingUsersView,ApproveUserView,RejectUserView,AgentSignupView,ClientSignupView,
                     VerifyOTPView,ResendOTPView,ForgotPasswordView,ResetPasswordView,AgentApplicationDetailView,
-                    GoogleClientAuthView,UpdateClientProfileView,UpdateAgentProfileView,ClientListView,AgentListView)
+                    GoogleClientAuthView,UpdateClientProfileView,UpdateAgentProfileView,ClientListView,AgentListView,
+                    CheckUserExistsView)
+from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns=[
     path('login/',LoginView.as_view()),
@@ -20,7 +22,13 @@ urlpatterns=[
     path("admin/clients/", ClientListView.as_view(), name="admin-clients"),
     path("admin/agents/", AgentListView.as_view(), name="admin-agents"),
 
+    path("check-user/", CheckUserExistsView.as_view(), name=""),
+
     path("client/profile/update/", UpdateClientProfileView.as_view()),
     path("agent/profile/update/", UpdateAgentProfileView.as_view()),
+
+
+    path('token/refresh/', TokenRefreshView.as_view()),
+
 
 ]
