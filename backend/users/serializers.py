@@ -20,7 +20,6 @@ class LoginSerializer(serializers.Serializer):
         user = authenticate(request=request,username=email, password=data['password'])
 
         if user:
-            # Existing user logic
             if not user.is_verified:
                 raise serializers.ValidationError('Email not verified')
             if not user.is_active:
@@ -104,12 +103,8 @@ class AgentSignupSerializer(serializers.ModelSerializer):
         fields=['full_name','email','phone','skills','resume','certificates','password','confirm_password']
 
     def validate(self, data):
-        email = data.get('email')
-        if User.objects.filter(email=email).exists():
-            raise serializers.ValidationError("Email already exist")
-        existing_user = User.objects.filter(email=email).first()
-
-        if existing_user and existing_user.is_verified:
+        email = data.get('email').strip().lower()
+        if User.objects.filter(email=email,is_verified=True).exists():
             raise serializers.ValidationError("Email already exist")
         
         if data.get('password') != data.get('confirm_password'):
