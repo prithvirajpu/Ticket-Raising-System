@@ -16,7 +16,7 @@ const ClientSignup = () => {
   const[loading,setLoading]=useState(false)
   const [form, setForm] = useState({
     companyName: "",email: "",phone: "",
-    businessType: "",password: "",confirmPassword: "",});
+    business_type: "",password: "",confirmPassword: "",});
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -52,15 +52,23 @@ const handleGoogleSuccess = async (credentialResponse) => {
   }
 };
 
-const handleNext = (e) => {
+const handleNext = async(e) => {
   e.preventDefault();
   const validation = validateClientStep(1, form);
+  
   if (!validation.isValid) {
     setErrors(validation.errors);
     return;
   }
-  setErrors({});
-  setStep(2);
+  try {
+    const res=await api.post('/auth/check-user/',{email:form.email});
+    setErrors({});
+    setStep(2);
+
+  } catch (error) {
+    setErrors({'email':'Email already exists'})
+  return;
+  }
 };
 
 
@@ -79,7 +87,6 @@ const handleSubmit = async (e) => {
 
   try {
     const res = await api.post('/auth/signup/client/', form);
-
     notifySuccess("✅ OTP sent successfully! Check your email 📧");
 
     navigate('/verify-otp', {
@@ -179,16 +186,16 @@ const handleSubmit = async (e) => {
                 <label className="block text-[13px] font-semibold text-gray-600 mb-1">Business type</label>
                 <input
                       type="text"
-                      name="businessType"
-                      value={form.businessType}
+                      name="business_type"
+                      value={form.business_type}
                       className={`w-full px-3 py-2.5 border rounded-lg focus:outline-none 
-                      ${errors.businessType ? "border-red-500" : "border-gray-200"}`}
+                      ${errors.business_type ? "border-red-500" : "border-gray-200"}`}
                       onChange={handleChange}
                     />
 
-                    {errors.businessType && (
+                    {errors.business_type && (
                       <p className="text-red-500 text-xs mt-1">
-                        {errors.businessType}
+                        {errors.business_type}
                       </p>
                     )}
 

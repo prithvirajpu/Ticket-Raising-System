@@ -10,7 +10,7 @@ import { notifyError,notifySuccess,notifyWarning,notifyInfo } from "../utils/not
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState({}); // For field validation messages
+  const [errors, setErrors] = useState({}); 
   const { login } = useAuth();
   const navigate = useNavigate();
   const location=useLocation()
@@ -23,64 +23,59 @@ const Login = () => {
     }
   }, [location.state]);
 
-  const handleGoogleSuccess = async (credentialResponse) => {
+const handleGoogleSuccess = async (credentialResponse) => {
   try {
     if (!credentialResponse?.credential) {
       notifyError("Google login failed - No credential received");
       return;
     }
-    
+
     const id_token = credentialResponse.credential;
-    
-    const res = await api.post("auth/google/", { 
-      id_token,
-    });
-    
+
+    const res = await api.post("auth/google/", { id_token });
     const { access, refresh, role, profile_completed, approval_status } = res.data;
-    login(access, refresh, role);
-    
-    notifySuccess("✅ Google login successful!");
 
     if (role === "AGENT") {
       if (!profile_completed) {
         notifyWarning("📝 Profile incomplete - Please complete your details");
         navigate("/agent/complete-profile");
+        return; 
       }
-      else if (approval_status !== "APPROVED") {
+
+      if (approval_status !== "APPROVED") {
         notifyWarning("⏳ Your application is pending admin approval");
-        navigate("/");
+        return; 
       }
-      else {
-        notifySuccess("🎉 Welcome to Agent Dashboard!");
-        navigate("/agent/dashboard");
-      }
-    } 
-    // 🔥 CLIENT FLOW
-    else if (role === "CLIENT") {
+      login(access, refresh, role);
+      notifySuccess("🎉 Welcome to Agent Dashboard!");
+      navigate("/agent/dashboard");
+      return;
+    }
+
+    if (role === "CLIENT") {
       if (!profile_completed) {
         notifyWarning("📋 Client profile incomplete - Complete your profile first");
         navigate("/client/complete-profile");
-      } else {
-        notifySuccess("🎉 Welcome to Client Dashboard!");
-        navigate("/client/dashboard");
+        return;
       }
-    } 
-    // 🔥 OTHER ROLES
-    else {
-      notifyInfo(`Welcome ${role}! Redirecting...`);
-      navigate(redirectByRole(role));
+      login(access, refresh, role);
+      notifySuccess("🎉 Welcome to Client Dashboard!");
+      navigate("/client/dashboard");
+      return;
     }
+
+    login(access, refresh, role);
+    notifyInfo(`Welcome ${role}! Redirecting...`);
+    navigate(redirectByRole(role));
+
   } catch (err) {
     const errorMsg = err.response?.data?.error || 
-                    err.response?.data?.non_field_errors?.[0] ||
-                    err.response?.data?.detail ||
-                    "Google login failed. Please try again.";
-    
-    notifyError(`${errorMsg}`);
+                     err.response?.data?.non_field_errors?.[0] ||
+                     err.response?.data?.detail ||
+                     "Google login failed. Please try again.";
+    notifyError(errorMsg);
   }
 };
-
-
   // Simple email regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -118,6 +113,7 @@ const handleLogin = async (e) => {
     navigate(redirectByRole(res.data.role));
     
   } catch (err) {
+    console.log(err)
     const errorMsg = err.response?.data?.detail || 
                     err.response?.data?.non_field_errors?.[0] ||
                     err.response?.data?.email?.[0] ||

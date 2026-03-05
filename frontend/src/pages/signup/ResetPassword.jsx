@@ -7,6 +7,7 @@ const ResetPassword = () => {
     const location=useLocation()
     const navigate=useNavigate()
     const email=location.state?.email;
+    const reset_token=location.state?.reset_token;
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -37,6 +38,7 @@ const ResetPassword = () => {
         await api.post('/auth/reset-password/', {
             email,
             new_password: newPassword,
+            reset_token
         });
         notifySuccess('Password reset successful!');
         navigate('/');

@@ -52,7 +52,6 @@ const Navbar = () => {
           </nav>
         </div>
 
-        {/* Right Section: Actions and Profile */}
         <div className="flex items-center gap-6">
           <button 
             onClick={()=>setIsModalOpen(true)}

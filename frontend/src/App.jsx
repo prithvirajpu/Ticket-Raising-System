@@ -20,6 +20,8 @@ import UserDashboard from './pages/dashboards/UserDashboard'
 import AgentManagement from './pages/admin/AgentManagement';
 import ClientManagement from './pages/admin/ClientManagement';
 import PendingUsers from './pages/admin/PendingUsers';
+import { redirectByRole } from './auth/roleRedirect';
+import PublicRoute from './auth/PublicRoute';
 
 
 
@@ -42,7 +44,7 @@ const App = () => {
             <Route path='/client-signup' element={<ClientSignup/>}/>
             <Route path='/client/complete-profile' element={<CompleteProfile/>}/>
             <Route path='/agent/complete-profile' element={<AgentCompleteProfile/>}/>
-            <Route path='/' element={<Login/>} />
+            <Route path='/' element={<PublicRoute><Login/></PublicRoute>}/>
             <Route path='/unauthorized' element={<Unauthorized/>} />
             <Route path='/admin/dashboard' element={<ProtectedRoute role={['ADMIN']}>
                 <AdminDashboard />

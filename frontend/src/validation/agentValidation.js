@@ -1,4 +1,6 @@
-export const validateAgentStep = (step, form, resume = null, certificates = []) => {
+import api from "../api/axios";
+
+export const validateAgentStep = async(step, form, resume = null, certificates = []) => {
   const errors = {};
 
   if (step === 1) {
@@ -36,6 +38,23 @@ export const validateAgentStep = (step, form, resume = null, certificates = []) 
         errors.resume = "Only PDF, DOC, DOCX files are allowed";
       }
     }
+      if (!errors.email) {
+        try {
+          await api.post("/auth/check-user/", {
+            email: form.email.trim(),
+          });
+        } catch (err) {
+          if (err.response?.data) {
+            const backendErrors = err.response.data;
+
+            Object.keys(backendErrors).forEach((key) => {
+              errors[key] = Array.isArray(backendErrors[key])
+                ? backendErrors[key][0]
+                : backendErrors[key];
+            });
+          }
+        }
+      }
   }
 
   if (step === 2) {

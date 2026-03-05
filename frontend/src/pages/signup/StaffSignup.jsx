@@ -24,40 +24,50 @@ const StaffSignup = () => {
   const navigate = useNavigate();
 
 const handleGoogleSuccess = async (credentialResponse) => {
-  
   try {
     const id_token = credentialResponse.credential;
     const res = await api.post("auth/google/", {
-      id_token, 
-      role: 'AGENT'
+      id_token,
+      role: "AGENT"
     });
 
-    login(res.data.access, res.data.refresh, res.data.role);
-    if (!res.data.profile_completed) {
+    const { profile_completed, approval_status, role, access, refresh } = res.data;
+    if (access && refresh) {
+    localStorage.setItem("access", access);
+    localStorage.setItem("refresh", refresh);
+}
+
+    if (!profile_completed) {
       notifyWarning("📝 Profile incomplete - please complete your profile");
       navigate("/agent/complete-profile");
+      return;
     }
-    else if (res.data.approval_status !== "APPROVED") {
+
+    if (approval_status !== "APPROVED") {
+      // DO NOT log in yet
       notifyWarning("⏳ Application not approved yet - please wait for admin review");
-      navigate("/");
+      navigate("/"); // Redirect to login/home
+      return;
     }
-    else {
-      notifySuccess("🎉 Welcome to Agent Dashboard!");
-      navigate(redirectByRole(res.data.role));
-    }
+
+    // Only approved agents or other roles can login
+    login(access, refresh, role);
+    notifySuccess("🎉 Welcome to Agent Dashboard!");
+    navigate(redirectByRole(role));
+
   } catch (err) {
-    const errorMsg = err.response?.data?.error || 
-                    err.response?.data?.detail ||
-                    err.response?.data?.non_field_errors?.[0] ||
-                    "Google login failed. Please try again.";
-    
+    const errorMsg =
+      err.response?.data?.error ||
+      err.response?.data?.detail ||
+      err.response?.data?.non_field_errors?.[0] ||
+      "Google login failed. Please try again.";
     notifyError(errorMsg);
   }
 };
 
-
-const handleNext = () => {
-  const result = validateAgentStep(step, form, resume, certificates);
+const handleNext = async() => {
+  
+  const result = await validateAgentStep(step, form, resume, certificates);
   setErrors(result.errors);
 
   if (result.isValid) {
@@ -65,18 +75,28 @@ const handleNext = () => {
     setErrors({});
     notifySuccess('Step completed successfully!')
   } else {
+    console.log(result.errors);
     notifyError('Please fix the errors before proceeding.')
   }
 };
 
 const handleSubmit = async () => {
-  const { isValid, errors: finalErrors } = validateAgentStep(3, form, resume, certificates);
+  const { isValid, errors: finalErrors } = await validateAgentStep(
+    3,
+    form,
+    resume,
+    certificates
+  );
+
   setErrors(finalErrors);
+
   if (!isValid) {
-    notifyWarning('Please fix the errors before submitting.');
+    notifyWarning("Please fix the errors before submitting.");
     return;
   }
+
   setLoading(true);
+
   try {
     const data = new FormData();
     data.append("full_name", form.full_name);
@@ -85,23 +105,35 @@ const handleSubmit = async () => {
     data.append("skills", form.skills || "");
     data.append("password", form.password);
     data.append("confirm_password", form.confirm_password);
+
     if (resume) data.append("resume", resume);
-    if (certificates.length > 0) {
-      certificates.forEach((file) => data.append("certificates", file));
-    }
+    certificates.forEach((file) => data.append("certificates", file));
+
     const res = await api.post("/auth/signup/agent/", data);
+
     notifySuccess("Submitted! Check your email for OTP.");
-    navigate("/verify-otp", { 
-      state: { 
-        email: form.email, 
+
+    navigate("/verify-otp", {
+      state: {
+        email: form.email,
         purpose: "AGENT",
-        expiresAt: res.data.expires_at 
-      } 
+        expiresAt: res.data.expires_at,
+      },
     });
   } catch (error) {
-    console.log("Raw error object:", error?.response);
-    console.log("Raw error object:", error);
-    notifyError(error?.response?.data?.non_field_errors[0] || 'Signup failed. Please try again.');
+    const backendErrors = error?.response?.data;
+
+    if (backendErrors) {
+      // Push backend field errors into state
+      setErrors(backendErrors);
+
+      // Optional toast for general errors
+      if (backendErrors.non_field_errors) {
+        notifyError(backendErrors.non_field_errors[0]);
+      }
+    } else {
+      notifyError("Signup failed. Please try again.");
+    }
   } finally {
     setLoading(false);
   }

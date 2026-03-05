@@ -10,7 +10,7 @@ const PendingUsers = () => {
   const [users, setUsers] = useState([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [modalConfig, setModalConfig] = useState({}) // To store inline modal details
+  const [modalConfig, setModalConfig] = useState({}) 
 
   const navigate = useNavigate()
   

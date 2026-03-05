@@ -70,7 +70,6 @@ const AgentManagement = () => {
     <StatsCard label="Inactive Agents" value={inactiveAgents} />
   </div>
 
-  {/* Agent List */}
   {/* Agent Table */}
 <div className="bg-white shadow rounded-lg overflow-hidden">
   <table className="w-full border-collapse">
@@ -114,16 +113,8 @@ const AgentManagement = () => {
                 {agent.phone}
               </td>
 
-              <td className="p-3 text-sm">
-                {agent.is_active ? (
-                  <span className="text-green-600 font-semibold">
-                    Active
-                  </span>
-                ) : (
-                  <span className="text-red-600 font-semibold">
-                    Inactive
-                  </span>
-                )}
+              <td className="p-3 text-sm text-violet-950">
+                {agent.role}
               </td>
             </tr>
           )

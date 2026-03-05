@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import DashboardLayout from '../../layouts/DashboardLayout'
 import StatsCard from '../../components/StatsCard'
 import api from '../../api/axios'
+import Pagination from '../../components/Pagination'
 
 const ClientManagement = () => {
 
@@ -9,21 +10,31 @@ const ClientManagement = () => {
   const [totalClients, setTotalClients] = useState(0)
   const [pendingClients, setPendingClients] = useState(0)
 
-  useEffect(() => {
-    fetchClients()
-  }, [])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [nextPage, setNextPage] = useState(null)
+  const [previousPage, setPreviousPage] = useState(null)
 
-  const fetchClients = async () => {
+  useEffect(() => {
+    fetchClients(currentPage)
+  }, [currentPage])
+
+  const fetchClients = async (page=1) => {
     try {
-      const response = await api.get("/auth/admin/clients/", {
+      const response = await api.get(`/auth/admin/clients/?page=${page}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`
         }
       })
+      setClients(response.data.results.clients)
+      setTotalClients(response.data.results.total_clients)
+      setPendingClients(response.data.results.pending_clients)
 
-      setClients(response.data.clients)
-      setTotalClients(response.data.total_clients)
-      setPendingClients(response.data.pending_clients)
+      setNextPage(response.data.next)
+      setPreviousPage(response.data.previous)
+
+      const pageSize = 10 
+      setTotalPages(Math.ceil(response.data.count / pageSize))
 
     } catch (error) {
       console.error("Error fetching clients:", error)
@@ -48,15 +59,26 @@ const ClientManagement = () => {
               {/* <th className="text-left p-2">Name</th> */}
               <th className="text-left p-2">Email</th>
               <th className="text-left p-2">Phone</th>
+              <th className="text-left p-2">Business Type</th>
               <th className="text-left p-2">Status</th>
             </tr>
           </thead>
           <tbody>
-            {clients.map((client) => (
+            {clients.length===0?(
+              <tr>
+                <td colSpan='5' className='text-center p-4 text-gray-500'>
+                  No clients found
+                </td>
+              </tr>
+            ):( clients.map((client,index) => {
+              const pageSize=10
+              const serialNumber=(currentPage-1)* pageSize +index+1
+              return (
               <tr key={client.id} className="border-b hover:bg-gray-50">
                 {/* <td className="p-2">{client.name}</td> */}
                 <td className="p-2">{client.email}</td>
                 <td className="p-2">{client.phone}</td>
+                <td className="p-2">{client.business_type}</td>
                 <td className="p-2">
                   {client.is_active ? (
                     <span className="text-green-600 font-medium">Active</span>
@@ -65,10 +87,21 @@ const ClientManagement = () => {
                   )}
                 </td>
               </tr>
-            ))}
+            )
+            })
+            )}
           </tbody>
         </table>
       </div>
+      {/* Pagination */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        hasNext={!!nextPage}
+        hasPrevious={!!previousPage}
+      />
+
 
     </DashboardLayout>
   )

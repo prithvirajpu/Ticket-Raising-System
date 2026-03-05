@@ -2,8 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import { notifyError, notifySuccess, notifyWarning, notifyInfo } from "../../utils/notify";
+import { validateAgentProfile } from "../../validation/validateAgentProfile";
 
 const AgentCompleteProfile = () => {
+  const [errors, setErrors] = useState({});
   const [resume, setResume] = useState(null);
   const [phone, setPhone] = useState("");
   const [skills, setSkills] = useState("");
@@ -12,7 +14,12 @@ const AgentCompleteProfile = () => {
 
  const handleSubmit = async (e) => {
     e.preventDefault();
-
+    const {isValid,errors:validationErrors}=validateAgentProfile({phone,skills,resume})
+    if (!isValid){
+      setErrors(validationErrors)
+      return;
+    }
+    setErrors({});
     const formData = new FormData();
     formData.append("resume", resume);
     formData.append("phone", phone);
@@ -23,15 +30,18 @@ const AgentCompleteProfile = () => {
     });
 
     try {
+      console.log('in try')
       const response = await api.put("/auth/agent/profile/update/", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
+          "Authorization": `Bearer ${localStorage.getItem("access")}`,
         },
       });
       const { status } = response.data;
+      console.log(response)
       if (status === "PENDING") {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('access');
+        localStorage.removeItem('refresh');
         navigate("/", { 
           state: { 
             message: "Profile submitted! Waiting for admin approval." 
@@ -61,12 +71,14 @@ const AgentCompleteProfile = () => {
             <label className="block text-xs font-medium text-gray-500 mb-1.5 ml-0.5">Phone Number</label>
             <input
               type="text"
-              required
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+91 98765 43210"
               className="w-full p-3 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-gray-300"
             />
+                    {errors.phone && (
+          <p className="mt-1 text-xs text-red-600">{errors.phone}</p>
+        )}
           </div>
 
           {/* Skills */}
@@ -74,12 +86,14 @@ const AgentCompleteProfile = () => {
             <label className="block text-xs font-medium text-gray-500 mb-1.5 ml-0.5">Skills</label>
             <input
               type="text"
-              required
               value={skills}
               onChange={(e) => setSkills(e.target.value)}
               placeholder="e.g. React, Node.js, Design"
               className="w-full p-3 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-gray-300"
             />
+            {errors.skills && (
+                  <p className="mt-1 text-xs text-red-600">{errors.skills}</p>
+                )}
           </div>
 
           {/* File Upload Row */}
@@ -110,6 +124,9 @@ const AgentCompleteProfile = () => {
                   )}
                 </label>
               </div>
+              {errors.resume && (
+                <p className="mt-1 text-xs text-red-600">{errors.resume}</p>
+              )}
             </div>
 
             {/* Certificates Upload */}

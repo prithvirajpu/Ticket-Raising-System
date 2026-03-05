@@ -44,7 +44,7 @@ const VerifyOtp = () => {
       }
     };
 
-    updateTimer(); // start immediately
+    updateTimer(); 
     intervalRef.current = setInterval(updateTimer, 1000);
   };
 
@@ -78,13 +78,14 @@ const VerifyOtp = () => {
     try {
       setLoading(true);
       setError("");
-      await api.post("/auth/verify-otp/", { email, otp, purpose });
-      clearTimer();
+      const res=await api.post("/auth/verify-otp/", { email, otp, purpose });
+      clearTimer(); 
       localStorage.removeItem(storageKey);
       
       if (purpose === "RESET") {
+        const reset_token=res.data?.reset_token;
         notifySuccess("OTP verified! Proceed to reset password.");
-        navigate("/reset-password", { state: { email } });
+        navigate("/reset-password", { state: { email,reset_token } });
       } else {
         notifySuccess("Verification successful! Redirecting...");
         navigate("/");

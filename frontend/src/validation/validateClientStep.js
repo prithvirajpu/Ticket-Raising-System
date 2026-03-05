@@ -32,10 +32,10 @@ export const validateClientStep = (step, form) => {
     }
 
     // Business Type
-    if (!form.businessType?.trim()) {
-      errors.businessType = "Business type is required";
-    } else if (form.businessType.trim().length < 2) {
-      errors.businessType = "Business type must be at least 2 characters";
+    if (!form.business_type?.trim()) {
+      errors.business_type = "Business type is required";
+    } else if (form.business_type.trim().length < 2) {
+      errors.business_type = "Business type must be at least 2 characters";
     }
   }
 

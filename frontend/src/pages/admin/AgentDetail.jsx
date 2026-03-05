@@ -65,7 +65,7 @@ const AgentDetail = () => {
           <div>
             <h3 className="text-xl font-semibold text-gray-800 mb-4">Personal Information</h3>
             <div className="space-y-4">
-              {/* <p><strong className="text-gray-700">Full Name:</strong> {agent.full_name}</p> */}
+              <p><strong className="text-gray-700">Full Name:</strong> {agent.full_name}</p>
               <p><strong className="text-gray-700">Email:</strong> {agent.email}</p>
               <p><strong className="text-gray-700">Phone:</strong> {agent.phone}</p>
               {/* <p><strong className="text-gray-700">Applied At:</strong> {new Date(agent.applied_at).toLocaleDateString()}</p> */}
