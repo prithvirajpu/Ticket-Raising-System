@@ -1,9 +1,15 @@
+import secrets
 from django.db import transaction
 from django.utils import timezone
-import secrets
-from .models import User ,PasswordResetToken
+from datetime import timedelta
+from rest_framework import status
+from ..models import User ,PasswordResetToken
 from core_app.models import AgentApplication,EmailOTP
 from core_app.constants import UserRole,ApprovalStatus
+from django.contrib.auth import get_user_model
+from  core_app.utils import generate_otp,send_otp_email
+
+User=get_user_model()
 
 def verify_otp_service(email, otp, purpose):
     otp_obj = EmailOTP.objects.filter(
@@ -61,7 +67,7 @@ def _handle_signup(email, otp_obj):
 
     return {
         "message": "User email verified",
-        "status": 200
+        "status": status.HTTP_200_OK
     }
 
 def _handle_agent(email, otp_obj):
@@ -72,7 +78,7 @@ def _handle_agent(email, otp_obj):
     if application.email_verified:
         return {
             "message": "Email already verified",
-            "status": 200
+            "status": status.HTTP_200_OK
         }
 
     with transaction.atomic():
@@ -98,5 +104,20 @@ def _handle_agent(email, otp_obj):
 
     return {
         "message": "Agent email verified successfully. Account created",
-        "status": 201
+        "status": status.HTTP_201_CREATED
     }
+
+def resend_otp_service(email,purpose):
+    if not email or not purpose:
+        return {'error': 'Email is required ', 'status':status.HTTP_400_BAD_REQUEST}
+    recent_otp=EmailOTP.objects.filter(email=email,purpose=purpose,created_at__gte=timezone.now()-timedelta(minutes=1)).first()
+    
+    if recent_otp:
+        return {'error':'Please wait before requesting another OTP','status':status.HTTP_429_TOO_MANY_REQUESTS}
+    EmailOTP.objects.filter(email=email,purpose=purpose).delete()
+    new_otp = generate_otp()
+    EmailOTP.objects.create(email=email, otp=new_otp,purpose=purpose)
+    expiry_time=timezone.now()+timedelta(minutes=1)
+    send_otp_email(email, new_otp)
+    return {'message': 'OTP resent successfully',
+         "expires_at":expiry_time.isoformat(),'status':status.HTTP_200_OK}
