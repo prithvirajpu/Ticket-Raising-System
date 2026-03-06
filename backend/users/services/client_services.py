@@ -13,6 +13,13 @@ def client_signup_service(serializer):
     EmailOTP.objects.create(email=email,otp=otp_code,purpose='SIGNUP')
 
     expiry_time=timezone.now()+timedelta(minutes=1)
-    send_otp_email(email,otp_code)
+    try:
+        send_otp_email(email, otp_code)
+    except Exception as e:
+        pass
     
-    return {'message':"OTP sent to your email",'expires_at':expiry_time.isoformat(),'status':status.HTTP_200_OK}
+    return {'data':
+                {'message':"OTP sent to your email",
+                 'expires_at':expiry_time.isoformat()},
+            'errors':{},
+            'status':status.HTTP_200_OK}

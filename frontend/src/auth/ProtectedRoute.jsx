@@ -2,7 +2,8 @@ import { Navigate } from "react-router-dom"
 import {useAuth} from './AuthContext'
 
 const ProtectedRoute = ({children,role}) => {
-    const {userRole}=useAuth();
+    const {userRole,loading}=useAuth();
+    if(loading)return null;
 
     if (!userRole) return <Navigate to='/' replace/>
     if(role && !role.includes(userRole))

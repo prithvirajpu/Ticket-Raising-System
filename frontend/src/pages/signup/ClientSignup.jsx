@@ -44,7 +44,7 @@ const handleGoogleSuccess = async (credentialResponse) => {
       navigate(redirectByRole(role));
     }
   } catch (err) {
-    const errorMsg = err.response?.data?.error || 
+    const errorMsg = err.response?.data?.errors || 
                     err.response?.data?.detail ||
                     err.response?.data?.non_field_errors?.[0] ||
                     "Google login failed. Please try again.";

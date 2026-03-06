@@ -34,16 +34,6 @@ class LoginSerializer(serializers.Serializer):
         else:
             raise serializers.ValidationError('Invalid credentials')
 
-        # application = AgentApplication.objects.filter(email=data['email']).first()
-        # print(application)
-        # if application:
-        #     if application.status != "APPROVED":
-        #         raise serializers.ValidationError('Waiting for admin approval')
-        #     if not application.email_verified:
-        #         raise serializers.ValidationError('Email not verified')
-        
-        # raise serializers.ValidationError('Invalid credentials')
-
 class UserApprovalSerializer(serializers.ModelSerializer):
     class Meta:
         model=AgentApplication

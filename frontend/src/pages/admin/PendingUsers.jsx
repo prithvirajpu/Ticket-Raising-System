@@ -43,12 +43,11 @@ const PendingUsers = () => {
     setLoading(true)
     try {
       if (type === 'approve') {
-        await api.post(`/auth/admin/approve/${id}/`, { role })
-        notifySuccess("User approved successfully!")
+        res=await api.post(`/auth/admin/approve/${id}/`, { role })
       } else if (type === 'reject') {
-        await api.post(`/auth/admin/reject/${id}/`)
-        notifySuccess("User rejected successfully!")
+        res=await api.post(`/auth/admin/reject/${id}/`)
       }
+      notifySuccess(res?.data?.details || "Action completed successfullly")
       if (users.length === 1 && currentPage > 1) {
         setCurrentPage(prev => prev - 1)
         } else {
@@ -56,7 +55,10 @@ const PendingUsers = () => {
         }
     } catch (err) {
         console.log(err)
-      notifyError("Action failed. Please try again.")
+        const error=err?.response?.data?.details ||
+          err?.response?.data?.error ||
+          "Action failed. Please try again."
+      notifyError(error)
     } finally {
       setLoading(false)
       setIsModalOpen(false)

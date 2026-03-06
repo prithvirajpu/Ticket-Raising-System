@@ -30,8 +30,8 @@ const handleGoogleSuccess = async (credentialResponse) => {
       id_token,
       role: "AGENT"
     });
-
-    const { profile_completed, approval_status, role, access, refresh } = res.data;
+    const {data,errors}=res.data
+    const { profile_completed, approval_status, role, access, refresh } = data;
     if (access && refresh) {
     localStorage.setItem("access", access);
     localStorage.setItem("refresh", refresh);
@@ -56,10 +56,11 @@ const handleGoogleSuccess = async (credentialResponse) => {
     navigate(redirectByRole(role));
 
   } catch (err) {
+    const backend=err.response?.data
     const errorMsg =
-      err.response?.data?.error ||
-      err.response?.data?.detail ||
-      err.response?.data?.non_field_errors?.[0] ||
+      backend?.data?.errors ||
+      backend?.data.details ||
+      backend?.non_field_errors?.[0] ||
       "Google login failed. Please try again.";
     notifyError(errorMsg);
   }
@@ -76,7 +77,6 @@ const handleNext = async() => {
     notifySuccess('Step completed successfully!')
   } else {
     console.log(result.errors);
-    notifyError('Please fix the errors before proceeding.')
   }
 };
 

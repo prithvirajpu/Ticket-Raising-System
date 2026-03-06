@@ -38,7 +38,7 @@ const AgentManagement = () => {
       setNextPage(response.data.next)
       setPreviousPage(response.data.previous)
 
-      const pageSize = 1 // must match backend pagination size
+      const pageSize = 10 
       setTotalPages(Math.ceil(response.data.count / pageSize))
 
     } catch (error) {

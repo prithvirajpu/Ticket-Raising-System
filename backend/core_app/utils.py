@@ -1,4 +1,5 @@
 import random
+from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
@@ -52,3 +53,13 @@ def generate_jwt_token(user):
 def generate_access_token_only(user):
     refresh = RefreshToken.for_user(user)
     return str(refresh.access_token)
+
+def return_errors_if_any(result):
+    """
+    Checks the service result dict for errors.
+    If errors exist, returns a DRF Response with the error and status.
+    Otherwise, returns None (so the view can continue).
+    """
+    if result.get('errors'):
+        return Response(result['errors'], status=result.get('status', 400))
+    return None
