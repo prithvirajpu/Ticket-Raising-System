@@ -98,7 +98,7 @@ def forgot_password_service(email):
             "message": "OTP sent successfully",
             "expires_at": expiry_time.isoformat()
         },
-        "errors": None,
+        "errors": {},
         "status": status.HTTP_200_OK
     }
 

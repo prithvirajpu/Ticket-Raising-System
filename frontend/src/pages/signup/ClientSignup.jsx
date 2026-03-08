@@ -87,13 +87,13 @@ const handleSubmit = async (e) => {
 
   try {
     const res = await api.post('/auth/signup/client/', form);
-    notifySuccess("✅ OTP sent successfully! Check your email 📧");
+    notifySuccess("✅ OTP sent successfully! Check your email ");
 
     navigate('/verify-otp', {
       state: {
         email: form.email,
         purpose: 'SIGNUP',
-        expiresAt: res.data.expires_at
+        expiresAt: res.data.data.expires_at
       }
     });
 

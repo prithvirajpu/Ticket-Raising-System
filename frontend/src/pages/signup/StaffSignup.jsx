@@ -30,7 +30,7 @@ const handleGoogleSuccess = async (credentialResponse) => {
       id_token,
       role: "AGENT"
     });
-    const {data,errors}=res.data
+    const {data}=res.data
     const { profile_completed, approval_status, role, access, refresh } = data;
     if (access && refresh) {
     localStorage.setItem("access", access);
@@ -117,7 +117,7 @@ const handleSubmit = async () => {
       state: {
         email: form.email,
         purpose: "AGENT",
-        expiresAt: res.data.expires_at,
+        expiresAt: res.data.data.expires_at,
       },
     });
   } catch (error) {

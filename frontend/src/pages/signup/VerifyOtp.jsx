@@ -83,7 +83,8 @@ const VerifyOtp = () => {
       localStorage.removeItem(storageKey);
       
       if (purpose === "RESET") {
-        const reset_token=res.data?.reset_token;
+        const reset_token=res.data?.data?.reset_token;
+        console.log('reset toekn herer',reset_token)
         notifySuccess("OTP verified! Proceed to reset password.");
         navigate("/reset-password", { state: { email,reset_token } });
       } else {
@@ -103,7 +104,7 @@ const resendOtp = async () => {
       setResendLoading(true);
       setError("");
       const response = await api.post("/auth/resend-otp/", { email, purpose });
-      const newExpiry = response.data.expires_at;
+      const newExpiry = response.data.data.expires_at;
       
       localStorage.setItem(storageKey, newExpiry);
       startTimer(newExpiry);

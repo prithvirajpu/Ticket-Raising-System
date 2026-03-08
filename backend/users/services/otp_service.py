@@ -120,16 +120,17 @@ def _handle_agent(email, otp_obj):
         existing_user = User.objects.filter(email=email).first()
 
         if not existing_user:
-            User.objects.create(
+            user=User.objects.create(
                 email=application.email,
                 name=application.full_name,
-                password=application.password,
                 role=UserRole.AGENT,
                 approval_status=ApprovalStatus.PENDING,
                 is_active=True,
                 is_verified=True,
                 profile_completed=True
             )
+            user.password = application.password  
+            user.save()
 
     otp_obj.delete()
 

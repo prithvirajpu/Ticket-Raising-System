@@ -29,17 +29,18 @@ const AgentManagement = () => {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`
         }
       })
+      const res=response.data.data
 
-      setAgents(response.data.results.agents)
-      setTotalAgents(response.data.results.total_agents)
-      setActiveAgents(response.data.results.active_agents)
-      setInactiveAgents(response.data.results.inactive_agents)
+      setAgents(res.results.agents)
+      setTotalAgents(res.results.total_agents)
+      setActiveAgents(res.results.active_agents)
+      setInactiveAgents(res.results.inactive_agents)
 
-      setNextPage(response.data.next)
-      setPreviousPage(response.data.previous)
+      setNextPage(res.next)
+      setPreviousPage(res.previous)
 
       const pageSize = 10 
-      setTotalPages(Math.ceil(response.data.count / pageSize))
+      setTotalPages(Math.ceil(res.count / pageSize))
 
     } catch (error) {
       console.error("Error fetching agents:", error)

@@ -20,7 +20,7 @@ const ForgotPassword = () => {
             state: { 
                 email: email,
                 purpose: 'RESET',
-                expiresAt: res.data.expires_at } 
+                expiresAt: res.data.data.expires_at } 
         });   
     } catch (error) {
         notifyError('Failed to send OTP. Please try again.');

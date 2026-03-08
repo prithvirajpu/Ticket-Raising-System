@@ -8,10 +8,12 @@ const ResetPassword = () => {
     const navigate=useNavigate()
     const email=location.state?.email;
     const reset_token=location.state?.reset_token;
+    
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  
 
   useEffect(()=>{
     if(!email){
@@ -21,6 +23,7 @@ const ResetPassword = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('data sending',email,reset_token,newPassword)
     setError('');
 
     if (!newPassword || !confirmPassword) {
@@ -35,15 +38,21 @@ const ResetPassword = () => {
 
     try {
         setLoading(true);
-        await api.post('/auth/reset-password/', {
+        const res= await api.post('/auth/reset-password/', {
             email,
             new_password: newPassword,
             reset_token
         });
+        console.log(res.data)
         notifySuccess('Password reset successful!');
         navigate('/');
     } catch (err) {
-        notifyError(err.response?.data?.error || 'Password reset failed');
+      console.log(err.response?.data);
+      const errorMsg=err.response?.data?.errors?.details ||
+                    err.response?.data?.errors ||
+                    err.response?.data?.non_field_errors?.[0] ||
+                     'Password reset failed';
+      notifyError(errorMsg)
     } finally {
         setLoading(false);
     }

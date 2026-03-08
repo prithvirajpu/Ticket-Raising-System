@@ -54,12 +54,14 @@ def generate_access_token_only(user):
     refresh = RefreshToken.for_user(user)
     return str(refresh.access_token)
 
-def return_errors_if_any(result):
+def return_response(result):
     """
-    Checks the service result dict for errors.
-    If errors exist, returns a DRF Response with the error and status.
-    Otherwise, returns None (so the view can continue).
+    Checks the service result dict .
     """
-    if result.get('errors'):
-        return Response(result['errors'], status=result.get('status', 400))
-    return None
+    return Response(
+        {
+            "data": result.get("data",None),
+            "errors": result.get("errors",None),
+        },
+        status=result.get("status", 200)
+    )

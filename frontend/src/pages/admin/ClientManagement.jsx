@@ -26,15 +26,16 @@ const ClientManagement = () => {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`
         }
       })
-      setClients(response.data.results.clients)
-      setTotalClients(response.data.results.total_clients)
-      setPendingClients(response.data.results.pending_clients)
+      const res=response.data.data
+      setClients(res.results.clients)
+      setTotalClients(res.results.total_clients)
+      setPendingClients(res.results.pending_clients)
 
-      setNextPage(response.data.next)
-      setPreviousPage(response.data.previous)
+      setNextPage(res.next)
+      setPreviousPage(res.previous)
 
       const pageSize = 10 
-      setTotalPages(Math.ceil(response.data.count / pageSize))
+      setTotalPages(Math.ceil(res.count / pageSize))
 
     } catch (error) {
       console.error("Error fetching clients:", error)

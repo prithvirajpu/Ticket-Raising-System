@@ -13,7 +13,7 @@ const AgentDetail = () => {
     try {
       const res = await api.get(`/auth/admin/agent/${id}/`);
       console.log('result', res);
-      setAgent(res.data);
+      setAgent(res.data.data);
     } catch (err) {
       console.error(err);
       alert("Failed to load agent details");

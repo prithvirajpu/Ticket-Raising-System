@@ -166,22 +166,16 @@ def update_agent_profile_service(user, data, files):
             "status": status.HTTP_400_BAD_REQUEST
         }
 
-    # update user
     user.phone = phone
-    user.skills = skills
     user.profile_completed = True
-
-    if resume:
-        user.resume = resume
-
     user.save(update_fields=[
         "phone",
-        "skills",
-        "resume",
         "profile_completed"
     ])
-
-    # certificates
+    agent_app.skills=skills
+    if resume:
+        agent_app.resume = resume
+    agent_app.save(update_fields=["skills", "resume"])
     certificates = files.getlist("certificates")
 
     for cert in certificates:
@@ -194,6 +188,7 @@ def update_agent_profile_service(user, data, files):
         "data": {
             "message": "Profile completed successfully",
             "status": agent_app.status.upper()
+            
         },
         "errors": None,
         "status": status.HTTP_200_OK
@@ -223,9 +218,11 @@ def get_client_list_service(request):
         return {
             "paginator": paginator,
             "data": {
+                "results":{
                 "total_clients": total_clients,
                 "pending_clients": pending_clients,
                 "clients": client_data
+                }
             },
             "errors": None,
             "status": status.HTTP_200_OK
@@ -270,10 +267,12 @@ def get_agent_list_service(request):
         return {
             "paginator": paginator,
             "data": {
+                "results":{
                 "total_agents": total_agents,
                 "active_agents": active_agents,
                 "inactive_agents": inactive_agents,
                 "agents": agent_data
+                }
             },
             "errors": None,
             "status": status.HTTP_200_OK

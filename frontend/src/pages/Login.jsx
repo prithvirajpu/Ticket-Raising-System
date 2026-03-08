@@ -109,8 +109,9 @@ const handleLogin = async (e) => {
   try {
     const res = await api.post('auth/login/', { email, password });    
     notifySuccess("🎉 Login successful!");
-    login(res.data.access, res.data.refresh, res.data.role);
-    navigate(redirectByRole(res.data.role));
+    console.log(res,'login data')
+    login(res.data.data.access, res.data.data.refresh, res.data.data.role);
+    navigate(redirectByRole(res.data.data.role));
     
   } catch (err) {
     console.log(err)

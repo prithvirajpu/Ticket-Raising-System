@@ -1,0 +1,17 @@
+[33mff2a550[m[33m ([m[1;36mHEAD[m[33m, [m[1;31morigin/master[m[33m, [m[1;32mmaster[m[33m)[m service layer for authentication completed
+backend/core_app/utils.py
+backend/users/serializers.py
+backend/users/services/__init__.py
+backend/users/services/admin_service.py
+backend/users/services/agent_services.py
+backend/users/services/auth_services.py
+backend/users/services/client_services.py
+backend/users/services/otp_service.py
+backend/users/services/user_services.py
+backend/users/views.py
+frontend/src/auth/AuthContext.jsx
+frontend/src/auth/ProtectedRoute.jsx
+frontend/src/pages/admin/AgentManagement.jsx
+frontend/src/pages/admin/PendingUsers.jsx
+frontend/src/pages/signup/ClientSignup.jsx
+frontend/src/pages/signup/StaffSignup.jsx

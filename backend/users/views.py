@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import User
 from core_app.constants import UserRole 
-from core_app.utils import return_errors_if_any
+from core_app.utils import return_response
 from core_app.models import AgentApplication
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -31,7 +31,7 @@ class LoginView(APIView):
 
         user=serializer.validated_data['user']
         result=login_service(user)
-        return Response(result["data"], status=result["status"])
+        return return_response(result)
     
 class CheckUserExistsView(APIView):
     permission_classes=[]
@@ -40,7 +40,7 @@ class CheckUserExistsView(APIView):
         email=request.data.get('email')
         result=check_user_email_exists(email)
 
-        return return_errors_if_any(result) or Response(result['data'], status=result['status'])
+        return return_response(result)
     
 class ClientSignupView(APIView):
     permission_classes=[]
@@ -49,7 +49,7 @@ class ClientSignupView(APIView):
         serializer=ClientSignupSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         result=client_signup_service(serializer)
-        return return_errors_if_any(result) or Response(result['data'], status=result['status'])
+        return return_response(result)
     
 class AgentSignupView(APIView):
     permission_classes = []
@@ -57,7 +57,7 @@ class AgentSignupView(APIView):
 
     def post(self, request):
         result=agent_signup_service(request.data)
-        return return_errors_if_any(result) or Response(result['data'], status=result['status'])
+        return return_response(result)
 
 class VerifyOTPView(APIView):
     permission_classes = []
@@ -72,7 +72,7 @@ class VerifyOTPView(APIView):
 
         result = verify_otp_service(email, otp, purpose)
 
-        return return_errors_if_any(result) or Response(result['data'], status=result['status'])
+        return return_response(result)
     
 class ResetPasswordView(APIView):
     permission_classes = []
@@ -85,7 +85,7 @@ class ResetPasswordView(APIView):
         new_password = serializer.validated_data['new_password']
 
         result=reset_password_service(reset_token,new_password)
-        return return_errors_if_any(result) or Response(result['data'], status=result['status'])
+        return return_response(result)
     
 class ResendOTPView(APIView):
     permission_classes = []
@@ -95,7 +95,7 @@ class ResendOTPView(APIView):
         purpose = request.data.get('purpose')
         
         result=resend_otp_service(email,purpose)
-        return return_errors_if_any(result) or Response(result['data'], status=result['status'])
+        return return_response(result)
 
 class ForgotPasswordView(APIView):
     permission_classes = []
@@ -106,7 +106,7 @@ class ForgotPasswordView(APIView):
 
         email = serializer.validated_data['email']
         result=forgot_password_service(email)
-        return return_errors_if_any(result) or Response(result['data'], status=result['status'])
+        return return_response(result)
         
         
 class PendingUsersPagination(PageNumberPagination):
@@ -131,7 +131,7 @@ class ApproveUserView(APIView):
         user_id = kwargs.get('pk')
         role = request.data.get('role')
         result=approve_user_service(user_id,role)
-        return return_errors_if_any(result) or Response(result['data'], status=result['status'])
+        return return_response(result)
 
 class RejectUserView(APIView):
     permission_classes=[IsAdmin]
@@ -139,14 +139,14 @@ class RejectUserView(APIView):
     def post(self,request,*args,**kwargs):
         application_id =self.kwargs['pk']
         result=reject_user_service(application_id)
-        return return_errors_if_any(result) or Response(result['data'], status=result['status'])
+        return return_response(result)
 
 class AgentApplicationDetailView(APIView):
     permission_classes=[IsAdmin]
 
     def get(self,request,pk):
         result=get_agent_application_detail_service(pk)
-        return return_errors_if_any(result) or Response(result['data'], status=result['status'])
+        return return_response(result)
     
 class GoogleClientAuthView(APIView):
     permission_classes = []
@@ -155,7 +155,7 @@ class GoogleClientAuthView(APIView):
         token = request.data.get("id_token")
         role = request.data.get("role")  
         result=google_client_auth_service(token,role)
-        return return_errors_if_any(result) or Response(result['data'], status=result['status'])
+        return return_response(result)
 
 
 class UpdateClientProfileView(APIView):
@@ -163,7 +163,7 @@ class UpdateClientProfileView(APIView):
 
     def put(self,request):
         result=update_client_profile_service(request.user,request.data)
-        return return_errors_if_any(result) or Response(result['data'], status=result['status'])
+        return return_response(result)
 
     
 class UpdateAgentProfileView(APIView):
@@ -171,19 +171,19 @@ class UpdateAgentProfileView(APIView):
 
     def put(self, request):
         result=update_agent_profile_service(request.user,request.data,request.FILES)
-        return return_errors_if_any(result) or Response(result['data'], status=result['status'])
+        return return_response(result)
 
 class ClientListView(APIView):
     permission_classes = [IsAuthenticated, IsAdmin]
 
     def get(self, request):
         result=get_client_list_service(request)
-        return return_errors_if_any(result) or Response(result['data'], status=result['status'])
+        return return_response(result)
 
 class AgentListView(APIView):
     permission_classes = [IsAuthenticated, IsAdmin]
 
     def get(self, request):
         result=get_agent_list_service(request)
-        return return_errors_if_any(result) or Response(result['data'], status=result['status'])
+        return return_response(result)
     
