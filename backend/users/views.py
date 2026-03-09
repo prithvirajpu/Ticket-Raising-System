@@ -15,7 +15,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from .services import (verify_otp_service,agent_signup_service,reset_password_service,resend_otp_service,update_client_profile_service,
                        check_user_email_exists,forgot_password_service,approve_user_service,reject_user_service,update_agent_profile_service,
                        client_signup_service,get_agent_application_detail_service,google_client_auth_service,get_client_list_service,
-                       get_agent_list_service,login_service)
+                       get_agent_list_service,login_service,toggle_agent_status_service)
 from .serializers import (
     LoginSerializer,UserApprovalSerializer,ClientSignupSerializer,
     VerifyOTPSerializer,ForgotPasswordSerializer,ResetPasswordSerializer)
@@ -187,3 +187,10 @@ class AgentListView(APIView):
         result=get_agent_list_service(request)
         return return_response(result)
     
+class ToggleAgentStatusView(APIView):
+    permission_classes=[IsAdmin]
+
+    def patch(self,request,agent_id):
+        is_active=request.data.get('is_active')
+        result=toggle_agent_status_service(agent_id,is_active)
+        return return_response(result)

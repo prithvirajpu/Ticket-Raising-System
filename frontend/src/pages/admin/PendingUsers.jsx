@@ -42,6 +42,7 @@ const PendingUsers = () => {
     const { type, id, role } = modalConfig
     setLoading(true)
     try {
+      let res
       if (type === 'approve') {
         res=await api.post(`/auth/admin/approve/${id}/`, { role })
       } else if (type === 'reject') {

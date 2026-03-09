@@ -115,7 +115,8 @@ def get_agent_application_detail_service(application_id):
             'status':status.HTTP_200_OK}
 
 def update_client_profile_service(user, data):
-
+    print('USER',user)
+    print('authenticated',user.is_authenticated)
     company_name = data.get("company_name")
     business_type = data.get("business_type")
     phone = data.get("phone")
@@ -127,12 +128,12 @@ def update_client_profile_service(user, data):
             "status": status.HTTP_400_BAD_REQUEST
         }
 
-    user.company_name = company_name
+    user.name = company_name
     user.business_type = business_type
     user.phone = phone
     user.profile_completed = True
     user.save(update_fields=[
-        "company_name",
+        "name",
         "business_type",
         "phone",
         "profile_completed"
@@ -140,7 +141,7 @@ def update_client_profile_service(user, data):
 
     return {
         "data": {"message": "Profile updated successfully"},
-        "errors": None,
+        "errors": {},
         "status": status.HTTP_200_OK
     }
 
@@ -173,11 +174,12 @@ def update_agent_profile_service(user, data, files):
         "profile_completed"
     ])
     agent_app.skills=skills
+    agent_app.phone=phone
     if resume:
         agent_app.resume = resume
-    agent_app.save(update_fields=["skills", "resume"])
+    agent_app.save(update_fields=["skills", "resume","phone"])
     certificates = files.getlist("certificates")
-
+    AgentCertificate.objects.filter(agent=agent_app).delete()
     for cert in certificates:
         AgentCertificate.objects.create(
             agent=agent_app,
@@ -187,10 +189,10 @@ def update_agent_profile_service(user, data, files):
     return {
         "data": {
             "message": "Profile completed successfully",
-            "status": agent_app.status.upper()
+            "status": (agent_app.status or "PENDING").upper()
             
         },
-        "errors": None,
+        "errors": {},
         "status": status.HTTP_200_OK
     }
 
@@ -216,7 +218,12 @@ def get_client_list_service(request):
         } for client in page]
 
         return {
-            "paginator": paginator,
+            "paginator": {
+                "count": paginator.page.paginator.count,
+                "next": paginator.get_next_link(),
+                "previous": paginator.get_previous_link(),
+                "page_size": paginator.page_size,
+            },
             "data": {
                 "results":{
                 "total_clients": total_clients,
@@ -245,7 +252,7 @@ def get_agent_list_service(request):
         paginator = PageNumberPagination()
         paginator.page_size = 10
 
-        page = paginator.paginate_queryset(agents, request) or []
+        page = paginator.paginate_queryset(agents, request) 
 
         total_agents = agents.count()
         active_agents = agents.filter(is_active=True).count()
@@ -260,12 +267,18 @@ def get_agent_list_service(request):
                 "phone": agent.phone,
                 "is_active": agent.is_active,
                 "date_joined": agent.created_at,
-            }
-            for agent in page
-        ]
+            } for agent in page ]if page else []
+        count=agents.count()
+        next_link = paginator.get_next_link() if hasattr(paginator, "page") else None
+        previous_link = paginator.get_previous_link() if hasattr(paginator, "page") else None
 
         return {
-            "paginator": paginator,
+            "paginator": {
+                "count": count,
+                "next": next_link,
+                "previous": previous_link,
+                "page_size": paginator.page_size,
+                },
             "data": {
                 "results":{
                 "total_agents": total_agents,
@@ -283,4 +296,37 @@ def get_agent_list_service(request):
             "data": None,
             "errors": {"details": str(e)},
             "status": status.HTTP_500_INTERNAL_SERVER_ERROR
+        }
+    
+def toggle_agent_status_service(agent_id,is_active):
+    try:
+        agent=User.objects.get(id=agent_id)
+        agent.is_active=is_active
+        agent.save(update_fields=['is_active'])
+        if is_active is None:
+            return {
+                "data": None,
+                "errors": {"details": "is_active is required"},
+                "status": status.HTTP_400_BAD_REQUEST
+            }
+        return {
+            'data':{
+                'message':'Agent status updated successfully',
+                "agent_id":agent.id,
+                "is_active":agent.is_active
+            },
+            "errors":{},
+            "status":status.HTTP_200_OK
+        }
+    except User.DoesNotExist:
+        return {
+            'data':None,
+            'errors':{"details":'Agent not found'},
+            'status':status.HTTP_404_NOT_FOUND
+        }
+    except Exception as e:
+        return {
+            'data':None,
+            "errors":{'details':str(e)},
+            "status":status.HTTP_500_INTERNAL_SERVER_ERROR
         }

@@ -4,6 +4,7 @@ import StatsCard from '../../components/StatsCard'
 import api from '../../api/axios'
 import { Link,useNavigate  } from 'react-router-dom'
 import Pagination from '../../components/Pagination'
+import ConfirmModal from '../../components/modals/ConfirmModal'
 
 const AgentManagement = () => {
 
@@ -18,6 +19,10 @@ const AgentManagement = () => {
   const [nextPage, setNextPage] = useState(null)
   const [previousPage, setPreviousPage] = useState(null)
 
+  const [modalOpen,setModalOpen]=useState(false)
+  const [selectedAgent,setSelectedAgent]=useState(null)
+  const [loading,setLoading]=useState(false)
+
   useEffect(() => {
     fetchAgents(currentPage)
   }, [currentPage])
@@ -26,25 +31,45 @@ const AgentManagement = () => {
     try {
       const response = await api.get(`/auth/admin/agents/?page=${page}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`
+          Authorization: `Bearer ${localStorage.getItem("access")}`
         }
       })
-      const res=response.data.data
+      const res = response.data.data;
+      const paginator = response.data.paginator || {};
 
-      setAgents(res.results.agents)
-      setTotalAgents(res.results.total_agents)
-      setActiveAgents(res.results.active_agents)
-      setInactiveAgents(res.results.inactive_agents)
+      setAgents(res.results.agents);
+      setTotalAgents(res.results.total_agents);
+      setActiveAgents(res.results.active_agents);
+      setInactiveAgents(res.results.inactive_agents);
 
-      setNextPage(res.next)
-      setPreviousPage(res.previous)
-
-      const pageSize = 10 
-      setTotalPages(Math.ceil(res.count / pageSize))
+      setNextPage(paginator.next || null);
+      setPreviousPage(paginator.previous || null);
+      setTotalPages(Math.ceil(paginator.count / paginator.page_size));
 
     } catch (error) {
       console.error("Error fetching agents:", error)
     }
+  }
+
+  const handleConfirm=async()=>{
+    if (!selectedAgent)return;
+    setLoading(true);
+    console.log('is active',selectedAgent.is_active)
+    try {
+      await api.patch(`/auth/admin/agents/${selectedAgent.id}/status/`,{
+        is_active: !selectedAgent.is_active
+      })
+      fetchAgents(currentPage);
+      setModalOpen(false)
+    } catch (error) {
+      console.error("falid to update",error)
+    }finally{
+      setLoading(false);
+    }
+  }
+  const handleStatusClick=(agent)=>{
+    setSelectedAgent(agent);
+    setModalOpen(true);
   }
 
   return (
@@ -80,7 +105,9 @@ const AgentManagement = () => {
         <th className="p-3 text-left text-sm font-semibold text-gray-600">Name</th>
         <th className="p-3 text-left text-sm font-semibold text-gray-600">Email</th>
         <th className="p-3 text-left text-sm font-semibold text-gray-600">Phone</th>
+        <th className="p-3 text-left text-sm font-semibold text-gray-600">Role</th>
         <th className="p-3 text-left text-sm font-semibold text-gray-600">Status</th>
+        <th className="p-3 text-left text-sm font-semibold text-gray-600">Action</th>
       </tr>
     </thead>
 
@@ -93,7 +120,7 @@ const AgentManagement = () => {
         </tr>
       ) : (
         agents.map((agent, index) => {
-          const pageSize = 1
+          const pageSize = 10
           const serialNumber =
             (currentPage - 1) * pageSize + index + 1
 
@@ -103,7 +130,7 @@ const AgentManagement = () => {
               <td className="p-3 text-sm">{serialNumber}</td>
 
               <td className="p-3 text-sm font-medium">
-                {agent.name || agent.email.split('@')[0]}
+                {agent.full_name || agent.email.split('@')[0]}
               </td>
 
               <td className="p-3 text-sm text-gray-600">
@@ -116,6 +143,23 @@ const AgentManagement = () => {
 
               <td className="p-3 text-sm text-violet-950">
                 {agent.role}
+              </td>
+
+              <td className="p-3 text-sm">
+                {agent.is_active? (
+                  <span className="text-green-600 font-medium">Active</span>
+                ):(
+                  <span className="text-red-600 font-medium">Disabled</span>
+                )}
+              </td>
+              <td className="p-3">
+                <button onClick={()=>handleStatusClick(agent)}
+                  className={`px-3 py-1 rounded text-white text-sm ${
+                    agent.is_active
+                      ? "bg-red-500 hover:bg-red-600"
+                      : "bg-green-500 hover:bg-green-600"}`}> 
+                  {agent.is_active ?"Disable":"Enable"}
+                </button>
               </td>
             </tr>
           )
@@ -132,6 +176,17 @@ const AgentManagement = () => {
           onPageChange={setCurrentPage}
           hasNext={!!nextPage}
           hasPrevious={!!previousPage}
+        />
+
+        <ConfirmModal
+          isOpen= {modalOpen}
+          title={selectedAgent?.is_active? "Disable Agent?": "Enable Agent"}
+          message={selectedAgent?.is_active ?"This agent will no longer be able to access the platform"
+            :"This agent will regain access to the platform"}
+          confirmText={selectedAgent?.is_active? "Disable":"Enable"}
+          loadingText='Updating...'
+          onConfirm={handleConfirm}
+          onCancel={()=>setModalOpen(false)}
         />
 
 </DashboardLayout>

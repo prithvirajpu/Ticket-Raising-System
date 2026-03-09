@@ -28,14 +28,14 @@ const handleGoogleSuccess = async (credentialResponse) => {
       notifyError("Google login failed - no credential received");
       return;
     }
-    notifyInfo("🔄 Authenticating with Google...");
     const id_token = credentialResponse.credential;
     const res = await api.post("auth/google/", {
       id_token,
       role: "CLIENT",
     });
-    const { access, refresh, role, profile_completed } = res.data;
-    login(access, refresh, role);
+    console.log(res.data)
+    const { access, refresh, role, profile_completed } = res.data.data;
+    login(access, refresh, role,profile_completed);
     notifySuccess("✅ Google login successful!");
     if (!profile_completed) {
       navigate("/client/complete-profile");

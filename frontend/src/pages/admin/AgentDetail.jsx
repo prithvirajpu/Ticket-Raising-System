@@ -68,7 +68,6 @@ const AgentDetail = () => {
               <p><strong className="text-gray-700">Full Name:</strong> {agent.full_name}</p>
               <p><strong className="text-gray-700">Email:</strong> {agent.email}</p>
               <p><strong className="text-gray-700">Phone:</strong> {agent.phone}</p>
-              {/* <p><strong className="text-gray-700">Applied At:</strong> {new Date(agent.applied_at).toLocaleDateString()}</p> */}
               {agent.reviewed_at && (
                 <p><strong className="text-gray-700">Reviewed At:</strong> {new Date(agent.reviewed_at).toLocaleDateString()}</p>
               )}

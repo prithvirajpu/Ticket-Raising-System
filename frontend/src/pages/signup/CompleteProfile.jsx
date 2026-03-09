@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import { notifyError,notifySuccess,notifyWarning,notifyInfo } from "../../utils/notify";
 import { validateProfile } from "../../validation/validateProfileClient";
+import { useAuth } from "../../auth/AuthContext";
 
 const CompleteProfile = () => {
   const [errors, setErrors] = useState({});
@@ -10,6 +11,7 @@ const CompleteProfile = () => {
   const [businessType, setBusinessType] = useState("");
   const [phone, setPhone] = useState("");
   const navigate = useNavigate();
+  const {setProfileCompleted}=useAuth()
 
  const handleSubmit = async (e) => {
   e.preventDefault();
@@ -27,10 +29,13 @@ const CompleteProfile = () => {
       business_type: businessType,
       phone: phone,
     });
+    setProfileCompleted(true)
+    localStorage.setItem('profile_completed',true)
     notifySuccess("✅ Profile updated successfully!");
-    navigate("/client/dashboard"); 
+    navigate("/client/dashboard");
   } catch (err) {
-    const errorMsg = err.response?.data?.detail || 
+    const errorMsg = err.response?.data?.errors?.details || 
+     err.response?.data?.errors?.phone || 
                     err.response?.data?.non_field_errors?.[0] ||
                     err.response?.data?.company_name?.[0] ||
                     "Profile update failed";

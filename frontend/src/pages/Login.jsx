@@ -11,7 +11,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({}); 
-  const { login } = useAuth();
+  const { login,logout } = useAuth();
   const navigate = useNavigate();
   const location=useLocation()
   const hasShownMessage = useRef(false);
@@ -33,10 +33,13 @@ const handleGoogleSuccess = async (credentialResponse) => {
     const id_token = credentialResponse.credential;
 
     const res = await api.post("auth/google/", { id_token });
-    const { access, refresh, role, profile_completed, approval_status } = res.data;
-
+    const { access, refresh, role, profile_completed, approval_status } = res.data.data;
+    console.log(res.data.data)
+    console.log('status',approval_status)
     if (role === "AGENT") {
       if (!profile_completed) {
+
+        login(access, refresh, role,profile_completed);
         notifyWarning("📝 Profile incomplete - Please complete your details");
         navigate("/agent/complete-profile");
         return; 
@@ -44,34 +47,41 @@ const handleGoogleSuccess = async (credentialResponse) => {
 
       if (approval_status !== "APPROVED") {
         notifyWarning("⏳ Your application is pending admin approval");
+        console.log('here it is')
+        
+        navigate('/')
         return; 
       }
-      login(access, refresh, role);
+      login(access, refresh, role,profile_completed,approval_status);
       notifySuccess("🎉 Welcome to Agent Dashboard!");
+      console.log("LOGIN DATA:", {
+  role,
+  profile_completed,
+  approval_status
+});
       navigate("/agent/dashboard");
       return;
     }
 
     if (role === "CLIENT") {
+      login(access, refresh, role, profile_completed);
       if (!profile_completed) {
         notifyWarning("📋 Client profile incomplete - Complete your profile first");
         navigate("/client/complete-profile");
         return;
       }
-      login(access, refresh, role);
       notifySuccess("🎉 Welcome to Client Dashboard!");
-      navigate("/client/dashboard");
+      navigate("/");
       return;
     }
 
-    login(access, refresh, role);
     notifyInfo(`Welcome ${role}! Redirecting...`);
-    navigate(redirectByRole(role));
+    navigate('/');
 
   } catch (err) {
-    const errorMsg = err.response?.data?.error || 
-                     err.response?.data?.non_field_errors?.[0] ||
-                     err.response?.data?.detail ||
+    const errorMsg = err.response?.data?.errors?.details || 
+                     err.response?.data?.errors?.email ||
+                     err.response?.data?.errors?.otp ||
                      "Google login failed. Please try again.";
     notifyError(errorMsg);
   }

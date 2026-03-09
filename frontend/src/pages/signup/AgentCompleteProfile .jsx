@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import { notifyError, notifySuccess, notifyWarning, notifyInfo } from "../../utils/notify";
 import { validateAgentProfile } from "../../validation/validateAgentProfile";
+import { useAuth } from "../../auth/AuthContext";
+import Loader from "../../components/modals/Loader";
+
 
 const AgentCompleteProfile = () => {
   const [errors, setErrors] = useState({});
@@ -11,6 +14,8 @@ const AgentCompleteProfile = () => {
   const [skills, setSkills] = useState("");
   const [certificates, setCertificates] = useState([]);
   const navigate = useNavigate();
+  const { setProfileCompleted,logout } = useAuth();
+  const [loading,setLoading]=useState(false)
 
  const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,6 +25,7 @@ const AgentCompleteProfile = () => {
       return;
     }
     setErrors({});
+    setLoading(true);
     const formData = new FormData();
     formData.append("resume", resume);
     formData.append("phone", phone);
@@ -37,27 +43,33 @@ const AgentCompleteProfile = () => {
           "Authorization": `Bearer ${localStorage.getItem("access")}`,
         },
       });
-      const { status } = response.data;
-      console.log(response)
+      setProfileCompleted(true);
+      localStorage.setItem("profile_completed", "true");
+      const { status } = response.data.data;
+      console.log('this is the status',status)
       if (status === "PENDING") {
-        localStorage.removeItem('access');
-        localStorage.removeItem('refresh');
+        logout()
         navigate("/", { 
           state: { 
             message: "Profile submitted! Waiting for admin approval." 
           } 
         });
       } else {
+        setProfileCompleted(true);
+        localStorage.setItem("profile_completed", "true");
         notifySuccess("Profile updated successfully!");
         navigate("/agent/dashboard");
       }
     } catch (error) {
       notifyError("Profile update failed. Please try again.");
+    }finally{
+      setLoading(false);
     }
   };
 
   return (
    <div className="min-h-screen flex justify-center items-center bg-gray-50 p-4">
+     {loading && <Loader />}
       <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100 w-full max-w-md transition-all">
         {/* Header section */}
         <div className="text-center mb-8">

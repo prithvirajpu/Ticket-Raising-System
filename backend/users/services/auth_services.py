@@ -113,6 +113,8 @@ def google_client_auth_service(token,role=None):
     
     try:
         idinfo = google_id_token.verify_oauth2_token( token, requests.Request(), settings.GOOGLE_CLIENT_ID)
+        if idinfo["aud"] != settings.GOOGLE_CLIENT_ID:
+            raise ValueError("Invalid audience")
         email = idinfo.get("email")
         
         if not email:
@@ -143,7 +145,7 @@ def google_client_auth_service(token,role=None):
                 user, created = User.objects.get_or_create(
                     email=email,
                     defaults={"role": UserRole.CLIENT,"approval_status": ApprovalStatus.APPROVED,"profile_completed": False,"is_active": True,"is_verified": True,},)
-            elif role == "AGENT":
+            elif role == UserRole.AGENT:
                 user, created = User.objects.get_or_create( email=email, defaults={ "role": UserRole.AGENT, "approval_status": "PENDING",
                                                         "profile_completed": False, "is_active": True, "is_verified": True,},)
                 
