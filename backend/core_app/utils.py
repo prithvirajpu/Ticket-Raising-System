@@ -56,7 +56,7 @@ def generate_access_token_only(user):
 
 def return_response(result):
     """
-    Checks the service result dict .
+    Checks the service result dict .and for same pattern .
     """
     return Response(
         {

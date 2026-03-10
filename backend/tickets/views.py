@@ -2,14 +2,29 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from core_app.utils import return_response
+
 from tickets.serializer import TicketSerializer
-from tickets.services import create_ticket_service
+from tickets.services import create_ticket_service,get_ticket_list_service
 
 class CreateTicketView(APIView):
     permission_classes=[IsAuthenticated]
 
     def post(self,request):
-        ticket=create_ticket_service(request.data,request.user)
-        serializer=TicketSerializer(ticket)
+        serializer=TicketSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({
+                "data":None,
+                "errors":serializer.errors,
+                "status":400
+            })
+        result=create_ticket_service(serializer.validated_data,request.user)
 
-        return Response(serializer.data)
+        return return_response(result)
+    
+class TicketListView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def get(self,request):
+        result=get_ticket_list_service(request)
+        return return_response(result)
