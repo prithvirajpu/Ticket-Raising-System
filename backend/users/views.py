@@ -4,13 +4,8 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from core_app.permissions import IsAdmin
 from core_app.constants import ApprovalStatus
-from rest_framework.response import Response
-from rest_framework import status
-from .models import User
-from core_app.constants import UserRole 
 from core_app.utils import return_response
 from core_app.models import AgentApplication
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.parsers import MultiPartParser, FormParser
 from .services import (verify_otp_service,agent_signup_service,reset_password_service,resend_otp_service,update_client_profile_service,
                        check_user_email_exists,forgot_password_service,approve_user_service,reject_user_service,update_agent_profile_service,

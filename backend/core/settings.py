@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     
     'core_app',
     'users',
+    'tickets',
 
     'rest_framework',
     'corsheaders',
