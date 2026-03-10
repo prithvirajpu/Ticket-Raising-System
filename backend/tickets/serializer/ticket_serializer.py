@@ -5,4 +5,4 @@ class TicketSerializer(serializers.ModelSerializer):
 
     class Meta:
         model=Ticket
-        fields='__all__'
+        fields=['subject','description','issue_type','priority']
