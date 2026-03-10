@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from core_app.utils import return_response
 
 from tickets.serializer import TicketSerializer
-from tickets.services import create_ticket_service,get_ticket_list_service
+from tickets.services import create_ticket_service,get_ticket_list_service,get_ticket_detail_service
 
 class CreateTicketView(APIView):
     permission_classes=[IsAuthenticated]
@@ -27,4 +27,10 @@ class TicketListView(APIView):
 
     def get(self,request):
         result=get_ticket_list_service(request)
+        return return_response(result)
+
+class TicketDetailView(APIView):
+    permission_classes=[IsAuthenticated]
+    def get(self,request,ticket_id):
+        result=get_ticket_detail_service(ticket_id)
         return return_response(result)
