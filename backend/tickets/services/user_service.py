@@ -36,7 +36,7 @@ def create_ticket_service(data,user):
     except Exception as e:
         return {
             'data':None,
-            "errors":str(e),
+            "errors":{'details':str(e)},
             "status":status.HTTP_400_BAD_REQUEST
         }
 
@@ -45,14 +45,14 @@ def get_ticket_list_service(request):
         tickets=Ticket.objects.filter(client=request.user).order_by('-created_at')
         serializer=TicketSerializer(tickets,many=True)
         return {
-            "data":serializer.data,
+            "data":{'message':serializer.data},
             "errors":{},
             "status":status.HTTP_200_OK
         }
     except Exception as e:
         return {
             'data':None,
-            "errors":str(e),
+            "errors":{'details':str(e)},
             "status":status.HTTP_400_BAD_REQUEST
         }
     
@@ -67,14 +67,14 @@ def get_ticket_detail_service(ticket_id):
             }
         serializer=TicketSerializer(ticket)
         return {
-            "data":serializer.data,
+            "data":{'message':serializer.data},
             'errors':{},
             "status":status.HTTP_200_OK
         }
     except Exception as e:
         return{
             "data":None,
-            'errors':str(e),
+            'errors':{'details':str(e)},
             'status':status.HTTP_400_BAD_REQUEST
         }
  
