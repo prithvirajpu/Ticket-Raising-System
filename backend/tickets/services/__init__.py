@@ -1,2 +1,3 @@
 from .user_service import create_ticket_service,get_ticket_list_service,get_ticket_detail_service
-from .agent_service import accept_ticket_service,reject_ticket_service,get_agent_ticket_requests_service,get_agent_ticket_detail_service
+from .agent_service import (accept_ticket_service,reject_ticket_service,get_agent_ticket_requests_service,get_agent_ticket_detail_service,
+        get_agent_ongoing_tickets_service,resolve_ticket_service)

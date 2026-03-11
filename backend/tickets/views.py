@@ -6,7 +6,7 @@ from core_app.utils import return_response
 
 from tickets.serializer import TicketSerializer
 from tickets.services import (create_ticket_service,get_ticket_list_service,get_ticket_detail_service,accept_ticket_service,reject_ticket_service,
-                            get_agent_ticket_requests_service,get_agent_ticket_detail_service)
+                            get_agent_ticket_requests_service,get_agent_ticket_detail_service,get_agent_ongoing_tickets_service,resolve_ticket_service)
 class CreateTicketView(APIView):
     permission_classes=[IsAuthenticated]
 
@@ -62,4 +62,18 @@ class AgentTicketDetailView(APIView):
 
     def get(self,request,ticket_id):
         result=get_agent_ticket_detail_service(request.user,ticket_id)
+        return return_response(result)
+    
+class AgentOngoingTicketsView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def get(self,request):
+        result=get_agent_ongoing_tickets_service(request.user)
+        return return_response(result)
+    
+class ResolveTicketView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def post(self,request,ticket_id):
+        result=resolve_ticket_service(request.user,ticket_id)
         return return_response(result)
