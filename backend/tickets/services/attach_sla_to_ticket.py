@@ -4,6 +4,7 @@ from django.utils import timezone
 
 
 def attach_sla_to_ticket(ticket):
+
     subscription=ClientSubscription.objects.filter(client=ticket.client,status='ACTIVE').first()
     if not subscription:
         return None
@@ -15,4 +16,6 @@ def attach_sla_to_ticket(ticket):
     deadline=timezone.now()+ timedelta(
         minutes=sla_policy.resolution_time_minutes
     )
-    TicketSLATracking.objects.create(ticket=ticket,sla_policy=sla_policy,sla_deadline=deadline)
+    sla=TicketSLATracking.objects.create(ticket=ticket,sla_policy=sla_policy,sla_deadline=deadline,sla_status="ON_TRACK")
+    
+    return sla

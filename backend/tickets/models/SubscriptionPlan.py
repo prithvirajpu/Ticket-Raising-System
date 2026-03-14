@@ -19,8 +19,8 @@ class ClientSubscription(models.Model):
         ("EXPIRED", "Expired"),
         ("CANCELLED", "Cancelled")
     ]
-    client=models.ForeignKey(ClientProfile,on_delete=models.CASCADE,related_name="subscriptions")
-    plan =models.ForeignKey(SubscriptionPlan,on_delete=models.CASCADE)
+    client=models.ForeignKey('tickets.ClientProfile',on_delete=models.CASCADE,related_name="subscriptions")
+    plan =models.ForeignKey('tickets.SubscriptionPlan',on_delete=models.CASCADE)
 
     start_date=models.DateField()
     end_date=models.DateField()

@@ -9,6 +9,8 @@ class TicketAssignment(models.Model):
         ("PENDING", "Pending"),
         ("ACCEPTED", "Accepted"),
         ("REJECTED", "Rejected"),
+        ("CANCELLED", "Cancelled"),
+        ("EXPIRED", "Expired"),
     ]
     ticket=models.ForeignKey(Ticket,on_delete=models.CASCADE,related_name='assignments')
     agent=models.ForeignKey(User,on_delete=models.CASCADE)

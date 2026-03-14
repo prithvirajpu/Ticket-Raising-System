@@ -22,7 +22,7 @@ class Ticket(models.Model):
     ]
 
     ticket_code=models.CharField(max_length=30,unique=True,default=generate_ticket_code)
-    client=models.ForeignKey(User,on_delete=models.CASCADE,related_name='client_tickets')
+    client=models.ForeignKey('tickets.ClientProfile',on_delete=models.CASCADE,related_name='client_tickets')
     created_by=models.ForeignKey(User,on_delete=models.CASCADE,related_name='created_tickets')
     assigned_to=models.ForeignKey(User,on_delete=models.SET_NULL,
                                   null=True,blank=True,related_name='assigned_tickets' )

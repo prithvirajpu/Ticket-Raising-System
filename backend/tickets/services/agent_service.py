@@ -1,8 +1,10 @@
 from rest_framework import status
-from tickets.models import Ticket,TicketAssignment
+from tickets.models import Ticket,TicketAssignment,TicketSLATracking
 from django.db import transaction
+from django.utils import timezone
 from tickets.serializer import AgentTicketRequestSerializer,TicketSerializer
 from django.contrib.auth import get_user_model
+
 User=get_user_model()
 
 def accept_ticket_service(ticket_id,user):
@@ -16,10 +18,17 @@ def accept_ticket_service(ticket_id,user):
                         'errors':{'details':"Ticket already accepted by another agent"},
                         'status':status.HTTP_400_BAD_REQUEST
                     }
-                assignment = TicketAssignment.objects.select_for_update().get(
+                assignment = TicketAssignment.objects.select_for_update().filter(
                     ticket_id=ticket_id,
                     agent=user
-                )
+                ).first()
+
+                if not assignment:
+                    return {
+                        "data":None,
+                        "errors":{'details':'No ticket is assigned here'},
+                        'status':status.HTTP_400_BAD_REQUEST
+                    }
             except TicketAssignment.DoesNotExist:
                 return {
                     "data": None,
@@ -40,9 +49,14 @@ def accept_ticket_service(ticket_id,user):
             ticket = assignment.ticket
             ticket.status = "IN_PROGRESS"
             ticket.assigned_to = user
-            ticket.save()
+            ticket.save(update_fields=['status','assigned_to'])
 
-            TicketAssignment.objects.filter(ticket_id=ticket_id).exclude(agent=user).delete()
+            sla=TicketSLATracking.objects.filter(ticket=ticket).first()
+            if sla and not sla.first_response_at:
+                sla.first_response_at=timezone.now()
+                sla.save(update_fields=['first_response_at'])
+
+            TicketAssignment.objects.filter(ticket_id=ticket_id).exclude(agent=user).update(status='CANCELLED')
 
             return {
                 "data": {"message": "Ticket accepted successfully"},
@@ -79,8 +93,10 @@ def reject_ticket_service(ticket_id,user,reason):
 def get_agent_ticket_requests_service(user):
     try:
         assignments=(TicketAssignment.objects.filter(agent=user,status='PENDING')
-                    .select_related('ticket').order_by('-created_at'))
+                    .select_related('ticket','ticket__client').order_by('-created_at'))
+        print(user.id)
         serializer=AgentTicketRequestSerializer(assignments,many=True)
+        print('hello we are here',serializer.data)
         return {
             'data':{'message':serializer.data},
             "errors":{},
@@ -95,7 +111,7 @@ def get_agent_ticket_requests_service(user):
     
 def get_agent_ticket_detail_service(user,ticket_id):
 
-    assignment=TicketAssignment.objects.filter(ticket_id=ticket_id,agent=user).select_related('ticket').first()
+    assignment=TicketAssignment.objects.filter(ticket_id=ticket_id,agent=user).select_related('ticket','ticket__client').first()
     if not assignment:
         return {
             'data':None,
@@ -144,6 +160,14 @@ def resolve_ticket_service(user,ticket_id):
                 }
             ticket.status='RESOLVED'
             ticket.save(update_fields=['status'])
+
+            sla= TicketSLATracking.objects.filter(ticket=ticket).first()
+            if sla:
+                if timezone.now()<=sla.sla_deadline:
+                    sla.sla_status='MET'
+                else:
+                    sla.sla_status='BREACHED'
+                sla.save(update_fields=['sla_status'])
 
             return {
                 "data": {"message": "Ticket resolved successfully"},
