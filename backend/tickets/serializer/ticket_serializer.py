@@ -5,7 +5,7 @@ class TicketSerializer(serializers.ModelSerializer):
 
     class Meta:
         model=Ticket
-        fields=['id','subject','description','issue_type','priority']
+        fields=['id','ticket_code','subject','description','status','issue_type','priority','created_at']
 
 class AgentTicketRequestSerializer(serializers.ModelSerializer):
     ticket_code = serializers.CharField(source="ticket.ticket_code")

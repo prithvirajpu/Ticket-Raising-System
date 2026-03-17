@@ -1,5 +1,5 @@
 from rest_framework import status
-from tickets.models import Ticket,TicketAssignment,ClientSubscription
+from tickets.models import Ticket,TicketAssignment,ClientSubscription,TicketSLATracking
 from tickets.serializer import TicketSerializer
 from django.db import transaction
 from django.utils import timezone
@@ -52,20 +52,31 @@ def create_ticket_service(data,user):
         }
 
 def get_ticket_list_service(request):
-    try:
-        tickets=Ticket.objects.filter(client=request.user.client).order_by('-created_at')
-        serializer=TicketSerializer(tickets,many=True)
-        return {
-            "data":{'message':serializer.data},
-            "errors":{},
-            "status":status.HTTP_200_OK
-        }
-    except Exception as e:
-        return {
-            'data':None,
-            "errors":{'details':str(e)},
-            "status":status.HTTP_400_BAD_REQUEST
-        }
+    tickets = Ticket.objects.filter(client=request.user.client).order_by('-created_at')
+    
+    ticket_data = []
+    for ticket in tickets:
+        # Safe SLA lookup
+        sla_status = TicketSLATracking.objects.filter(ticket=ticket).values_list('sla_status', flat=True).first() or ''
+        
+        ticket_data.append({
+            'id': ticket.id,
+            'ticket_code': ticket.ticket_code,
+            'subject': ticket.subject,
+            'description': ticket.description or '',
+            'status': ticket.status,
+            'issue_type': ticket.issue_type,
+            'priority': ticket.priority,
+            'created_at': ticket.created_at,
+            'sla_status': sla_status  # '' or 'MET'
+        })
+    
+    return {
+        "data": {'message': ticket_data},
+        "errors": {},
+        "status": status.HTTP_200_OK
+    }
+
     
 def get_ticket_detail_service(ticket_id):
     try:

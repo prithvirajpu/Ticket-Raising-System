@@ -29,6 +29,8 @@ class TicketSLATracking(models.Model):
     resolved_at=models.DateTimeField(null=True,blank=True)
     sla_status=models.CharField(max_length=20,choices=SLA_TRACKS,default='ON_TRACK')
 
+    reassign_count = models.IntegerField(default=0)
+
     breach_reason=models.TextField(null=True,blank=True)
     created_at=models.DateTimeField(auto_now_add=True)
 

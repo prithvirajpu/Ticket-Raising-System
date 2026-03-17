@@ -94,9 +94,7 @@ def get_agent_ticket_requests_service(user):
     try:
         assignments=(TicketAssignment.objects.filter(agent=user,status='PENDING')
                     .select_related('ticket','ticket__client').order_by('-created_at'))
-        print(user.id)
         serializer=AgentTicketRequestSerializer(assignments,many=True)
-        print('hello we are here',serializer.data)
         return {
             'data':{'message':serializer.data},
             "errors":{},
