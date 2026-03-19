@@ -5,7 +5,7 @@ urlpatterns=[
     #users
     path('create/',CreateTicketView.as_view()),
     path('list/',TicketListView.as_view()),
-    path('detail/<int:ticket_id>/',TicketDetailView.as_view()),
+    path('details/<int:ticket_id>/',TicketDetailView.as_view()),
 
     #agents
     path('agents/requests/',AgentTicketRequestsView.as_view()),
