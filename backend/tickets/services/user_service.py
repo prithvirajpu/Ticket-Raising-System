@@ -1,5 +1,5 @@
 from rest_framework import status
-from tickets.models import Ticket,TicketAssignment,ClientSubscription,TicketSLATracking
+from tickets.models import Ticket,TicketAssignment,ClientSubscription,TicketSLATracking,TicketReview
 from tickets.serializer import TicketSerializer
 from django.db import transaction
 from django.utils import timezone
@@ -103,7 +103,7 @@ def get_ticket_detail_service(ticket_id):
 def close_ticket_service(user,ticket_id):
     try:
         with transaction.atomic():
-            ticket=Ticket.objects.filter(client=user.client,id=ticket_id).first()
+            ticket=Ticket.objects.filter(id=ticket_id).first()
 
             if not ticket:
                 return {
@@ -130,3 +130,39 @@ def close_ticket_service(user,ticket_id):
             "errors": {"details": str(e)},
             "status": status.HTTP_500_INTERNAL_SERVER_ERROR
         }
+    
+def submit_review_service(user,ticket_id,rating,review):
+    ticket=Ticket.objects.filter(id=ticket_id).first()
+    if not ticket:
+        return {
+            "data": None,
+            "errors": {"details": "Ticket not found"},
+            "status": status.HTTP_404_NOT_FOUND
+        }
+    try:
+        rating = int(rating)
+    except:
+        return {"data": None, "errors": {"details": "Rating must be a number"}, "status": 400}
+    
+    if rating < 1 or rating > 5:
+        return {"data": None, "errors": {"details": "Rating must be 1-5"}, "status": 400}
+
+    if ticket.status!='CLOSED':
+        return {
+            "data": None,
+            "errors": {"details": "Only closed tickets can be reviewed"},
+            "status": status.HTTP_400_BAD_REQUEST
+        }
+    if hasattr(ticket,"review"):
+        return {
+            "data": None,
+            "errors": {"details": "Review already submitted"},
+            "status": status.HTTP_400_BAD_REQUEST
+        }
+
+    TicketReview.objects.create(ticket=ticket,rating=rating,review=review)
+    return {
+            "data": {'message':'Review submitted successfully'},
+            "errors": {},
+            "status": status.HTTP_200_OK
+            }

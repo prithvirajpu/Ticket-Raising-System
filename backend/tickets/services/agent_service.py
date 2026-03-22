@@ -10,30 +10,22 @@ User=get_user_model()
 def accept_ticket_service(ticket_id,user):
     try:
         with transaction.atomic():
-            try:
-                ticket=Ticket.objects.select_for_update().get(id=ticket_id)
-                if ticket.assigned_to:
-                    return {
-                        "data":None,
-                        'errors':{'details':"Ticket already accepted by another agent"},
-                        'status':status.HTTP_400_BAD_REQUEST
-                    }
-                assignment = TicketAssignment.objects.select_for_update().filter(
-                    ticket_id=ticket_id,
-                    agent=user
-                ).first()
-
-                if not assignment:
-                    return {
-                        "data":None,
-                        "errors":{'details':'No ticket is assigned here'},
-                        'status':status.HTTP_400_BAD_REQUEST
-                    }
-            except TicketAssignment.DoesNotExist:
+            ticket=Ticket.objects.select_for_update().get(id=ticket_id)
+            if ticket.assigned_to:
                 return {
-                    "data": None,
-                    "errors": {"details": "No assignment request"},
-                    "status": status.HTTP_404_NOT_FOUND
+                    "data":None,
+                    'errors':{'details':"Ticket already accepted by another agent"},
+                    'status':status.HTTP_400_BAD_REQUEST
+                }
+            assignment = TicketAssignment.objects.select_for_update().get(
+                ticket_id=ticket_id,
+                agent=user
+            )
+            if not assignment:
+                return {
+                    "data":None,
+                    "errors":{'details':'No ticket is assigned here'},
+                    'status':status.HTTP_400_BAD_REQUEST
                 }
 
             if assignment.status != "PENDING":
@@ -90,13 +82,18 @@ def reject_ticket_service(ticket_id,user,reason):
             "status": status.HTTP_404_NOT_FOUND
         }
     
-def get_agent_ticket_requests_service(user):
+def get_agent_ticket_requests_service(user,sort='newest'):
     try:
         assignments=(TicketAssignment.objects.filter(agent=user,status='PENDING')
-                    .select_related('ticket','ticket__client').order_by('-created_at'))
+                    .select_related('ticket','ticket__client'))
+        if sort=='oldest': 
+            assignments=assignments.order_by('ticket__created_at')
+        else:
+            assignments=assignments.order_by('-ticket__created_at')
+
         serializer=AgentTicketRequestSerializer(assignments,many=True)
         return {
-            'data':{'message':serializer.data},
+            'data':{'message':serializer.data,'sort':sort},
             "errors":{},
             'status':status.HTTP_200_OK
         }
@@ -124,12 +121,18 @@ def get_agent_ticket_detail_service(user,ticket_id):
         'status':status.HTTP_200_OK
     }
 
-def get_agent_ongoing_tickets_service(user):
+def get_agent_ongoing_tickets_service(user,sort='newest'):
     try:
-        tickets=Ticket.objects.filter(assigned_to=user,status='IN_PROGRESS').order_by('-created_at')
+        tickets=Ticket.objects.filter(assigned_to=user,status='IN_PROGRESS')
+
+        if sort=='oldest': 
+            tickets=tickets.order_by('created_at')
+        else:
+            tickets=tickets.order_by('-created_at')
+
         serializer=TicketSerializer(tickets,many=True)
         return {
-            'data':{'message':serializer.data},
+            'data':{'message':serializer.data,'sort':sort},
             "errors":{},
             'status':status.HTTP_200_OK
         }

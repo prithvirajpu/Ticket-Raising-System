@@ -1,4 +1,3 @@
-import React from 'react'
 import DashboardLayout from '../../layouts/DashboardLayout'
 import StatsCard from '../../components/StatsCard'
 import { Ticket, Info, History, CheckCircle, Star, Settings } from 'lucide-react'

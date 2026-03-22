@@ -6,7 +6,8 @@ from core_app.utils import return_response
 
 from tickets.serializer import TicketSerializer
 from tickets.services import (create_ticket_service,get_ticket_list_service,get_ticket_detail_service,accept_ticket_service,reject_ticket_service,
-                            get_agent_ticket_requests_service,get_agent_ticket_detail_service,get_agent_ongoing_tickets_service,resolve_ticket_service)
+                            get_agent_ticket_requests_service,get_agent_ticket_detail_service,get_agent_ongoing_tickets_service,resolve_ticket_service,
+                            close_ticket_service,submit_review_service)
 class CreateTicketView(APIView):
     permission_classes=[IsAuthenticated]
 
@@ -35,6 +36,20 @@ class TicketDetailView(APIView):
         result=get_ticket_detail_service(ticket_id)
         return return_response(result)
     
+class TicketCloseView(APIView):
+    permission_classes=[IsAuthenticated]
+    def post(self,request,ticket_id):
+        res=close_ticket_service(request.user,ticket_id)
+        return return_response(res)
+    
+class SubmitReviewView(APIView):
+    permission_classes=[IsAuthenticated]
+    def post(self,request,ticket_id):
+        rating=request.data.get('rating')
+        review=request.data.get('review','')
+        res=submit_review_service(request.user,ticket_id,rating,review)
+        return return_response(res)
+    
 class AcceptTicketView(APIView):
     permission_classes=[IsAuthenticated]
 
@@ -54,7 +69,8 @@ class AgentTicketRequestsView(APIView):
     permission_classes=[IsAuthenticated]
 
     def get(self,request):
-        result=get_agent_ticket_requests_service(request.user)
+        sort=request.query_params.get('sort','newest')
+        result=get_agent_ticket_requests_service(request.user,sort)
         return return_response(result)
     
 class AgentTicketDetailView(APIView):
@@ -68,7 +84,8 @@ class AgentOngoingTicketsView(APIView):
     permission_classes=[IsAuthenticated]
 
     def get(self,request):
-        result=get_agent_ongoing_tickets_service(request.user)
+        sort=request.query_params.get('sort','newest')
+        result=get_agent_ongoing_tickets_service(request.user,sort)
         return return_response(result)
     
 class ResolveTicketView(APIView):

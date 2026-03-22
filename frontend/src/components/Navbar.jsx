@@ -1,33 +1,76 @@
 import React, { useState } from 'react'
 import { useAuth } from '../auth/AuthContext'
 import { Link, useLocation } from 'react-router-dom'
-import { LogOut, User, Ticket } from 'lucide-react' 
+import { LogOut, User, Ticket } from 'lucide-react'
 import ConfirmModal from './modals/ConfirmModal'
 
 const Navbar = () => {
   const { userRole, logout } = useAuth()
-  const [loading,setLoading]=useState(false)
-  const [isModalOpen,setIsModalOpen]=useState(false)
+  const [loading, setLoading] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const location = useLocation()
 
-  // Helper to determine dashboard link based on role
-  const getDashboardLink = () => {
-    if (userRole === "ADMIN") return "/admin/dashboard";
-    if (userRole === "AGENT") return "/agent/dashboard";
-    return "/client/dashboard";
+  // Define nav items for each role
+  const getNavItems = () => {
+    switch (userRole) {
+      case 'ADMIN':
+        return [
+          { label: 'Dashboard', path: '/admin/dashboard' },
+          { label: 'Agent Management', path: '/admin/agent-manage' },
+          { label: 'Client Management', path: '/admin/client-manage' },
+          { label: 'User Management', path: '/admin/user-manage' },
+          { label: 'About', path: '/about' },
+        ]
+
+      case 'AGENT':
+        return [
+          { label: 'Dashboard', path: '/agent/dashboard' },
+          { label: 'Manage Tickets', path: '/agents/requests/' },
+          { label: 'Assigned Tickets', path: '/agent/assigned-tickets' },
+          { label: 'About', path: '/about' },
+        ]
+
+      case 'TEAM_LEAD':
+        return [
+          { label: 'Dashboard', path: '/team-lead/dashboard' },
+          { label: 'Team Tickets', path: '/team-lead/tickets' },
+          { label: 'Reports', path: '/team-lead/reports' },
+          { label: 'About', path: '/about' },
+        ]
+
+      case 'MANAGER':
+        return [
+          { label: 'Dashboard', path: '/manager/dashboard' },
+          { label: 'Team Performance', path: '/manager/performance' },
+          { label: 'Reports', path: '/manager/reports' },
+          { label: 'Settings', path: '/manager/settings' },
+          { label: 'About', path: '/about' },
+        ]
+
+      case 'USER': // Internal user / corporate user
+        return [
+          { label: 'Dashboard', path: '/user/dashboard' },
+          { label: 'My Tickets', path: '/user/tickets' },
+          // { label: 'Assigned Tickets', path: '/user/assigned-tickets' }, // user has this
+          { label: 'About', path: '/about' },
+        ]
+
+      case 'CLIENT':
+      default:
+        return [
+          { label: 'Dashboard', path: '/client/dashboard' },
+          { label: 'My Tickets', path: '/client/tickets' },
+          { label: 'Assigned Tickets', path: '/client/assigned-tickets' }, // client has this
+          { label: 'About', path: '/about' },
+        ]
+    }
   }
 
-  const navItems = [
-    { label: 'Dashboard', path: getDashboardLink() },
-    { label: 'Agent Management', path: '/admin/agent-manage' },
-    { label: 'Client Management', path: '/admin/client-manage' },
-    { label: 'About', path: '/about' },
-  ]
+  const navItems = getNavItems()
 
   return (
     <header className="w-full bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-8 h-16 flex items-center justify-between">
-        
         {/* Left Section: Logo and Nav Links */}
         <div className="flex items-center gap-12">
           <Link to="/" className="flex items-center gap-2">
@@ -43,7 +86,9 @@ const Navbar = () => {
                 key={item.label}
                 to={item.path}
                 className={`text-sm font-semibold transition-colors ${
-                  location.pathname === item.path ? 'text-black' : 'text-gray-500 hover:text-black'
+                  location.pathname === item.path
+                    ? 'text-black'
+                    : 'text-gray-500 hover:text-black'
                 }`}
               >
                 {item.label}
@@ -52,15 +97,16 @@ const Navbar = () => {
           </nav>
         </div>
 
+        {/* Right Section: Logout + User Badge */}
         <div className="flex items-center gap-6">
-          <button 
-            onClick={()=>setIsModalOpen(true)}
+          <button
+            onClick={() => setIsModalOpen(true)}
             className="text-gray-700 hover:text-red-600 transition-colors p-1"
             title="Logout"
           >
             <LogOut className="w-5 h-5" />
           </button>
-          
+
           <div className="flex items-center gap-2 pl-2 border-l border-gray-200">
             <div className="p-1.5 bg-gray-50 rounded-full border border-gray-200">
               <User className="w-4 h-4 text-gray-600" />
@@ -70,19 +116,26 @@ const Navbar = () => {
             </span>
           </div>
         </div>
-
       </div>
-      <ConfirmModal isOpen={isModalOpen} title='Confirm Logout' message='Are you sure you want to logout?' 
-      confirmText='Logout' loadingText='Logging out...' onCancel={()=>setIsModalOpen(false)} 
-      onConfirm={async()=>{
-        setLoading(true);
-        try {
-          logout();
-        } finally {
-          setLoading(false)
-          setIsModalOpen(false);
-        }
-      }} loading={loading} />
+
+      <ConfirmModal
+        isOpen={isModalOpen}
+        title="Confirm Logout"
+        message="Are you sure you want to logout?"
+        confirmText="Logout"
+        loadingText="Logging out..."
+        onCancel={() => setIsModalOpen(false)}
+        onConfirm={async () => {
+          setLoading(true)
+          try {
+            logout()
+          } finally {
+            setLoading(false)
+            setIsModalOpen(false)
+          }
+        }}
+        loading={loading}
+      />
     </header>
   )
 }

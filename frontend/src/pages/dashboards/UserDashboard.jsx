@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../auth/AuthContext';
 import DashboardLayout from '../../layouts/DashboardLayout';
+import { Link } from 'react-router-dom';
 
 const UserDashboard = () => {
   // Mock data based on your screenshot
@@ -25,12 +26,13 @@ const UserDashboard = () => {
       title="Dashboard" 
       subtitle="Manage your assigned tickets"
       headerAction={
-          <button className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-xl font-medium hover:bg-gray-800 transition-colors">
+          <Link to='/user/create-ticket'> <button className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-xl font-medium hover:bg-gray-800 transition-colors">
             <Plus size={18} strokeWidth={3} />
             Raise New Ticket
-          </button>
+          </button></Link>
       }
-    ></DashboardLayout>
+    >
+    </DashboardLayout>
     </>
   );
 };

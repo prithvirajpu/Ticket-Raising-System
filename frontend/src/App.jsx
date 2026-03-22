@@ -22,7 +22,12 @@ import ClientManagement from './pages/admin/ClientManagement';
 import PendingUsers from './pages/admin/PendingUsers';
 import { redirectByRole } from './auth/roleRedirect';
 import PublicRoute from './auth/PublicRoute';
-
+import CreateTicket from './pages/tickets/user/CreateTicket';
+import TicketsList from './pages/tickets/user/TicketsList';
+import TicketDetail from './pages/tickets/user/TicketDetail';
+import AgentRequests from './pages/tickets/agent/AgentRequests';
+import AgentOngoing from './pages/tickets/agent/AgentOngoing';
+import AgentTicketDetail from './pages/tickets/agent/AgentTicketDetail';
 
 
 const App = () => {
@@ -76,6 +81,25 @@ const App = () => {
             <Route path='/admin/pending-req' element={<ProtectedRoute role={['ADMIN']}>
                  <PendingUsers />
             </ProtectedRoute>} />
+            <Route path='/user/create-ticket' element={<ProtectedRoute role={['USER']}>
+                <CreateTicket />
+            </ProtectedRoute>} />
+            <Route path='/user/tickets' element={<ProtectedRoute role={['USER']}>
+                <TicketsList />
+            </ProtectedRoute>} />
+            <Route path='/user/tickets/details/:id' element={<ProtectedRoute role={['USER']}>
+                <TicketDetail />
+            </ProtectedRoute>} />
+            <Route path='/agents/requests/' element={<ProtectedRoute role={['AGENT']}>
+                <AgentRequests />
+            </ProtectedRoute>} />
+            <Route path='/agent/assigned-tickets' element={<ProtectedRoute role={['AGENT']}>
+                <AgentOngoing />
+            </ProtectedRoute>} />
+            <Route path='/agent/ticket-detail/:id' element={<ProtectedRoute role={['AGENT']}>
+                <AgentTicketDetail />
+            </ProtectedRoute>} />
+            
            
         </Routes>
         </BrowserRouter>

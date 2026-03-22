@@ -116,20 +116,45 @@ const handleLogin = async (e) => {
     return;
   }
 
-  try {
+ try {
     const res = await api.post('auth/login/', { email, password });    
+    const { access, refresh, role, profile_completed, approval_status } = res.data.data;  // ✅ Fetch these
+    console.log('Login response:', res.data.data);
+
+    // AGENT role handling - match Google flow exactly
+    if (role === "AGENT") {
+      if (!profile_completed) {  // Handles undefined/false → incomplete
+        login(access, refresh, role, profile_completed);
+        notifyWarning("📝 Profile incomplete - Please complete your details");
+        navigate("/agent/complete-profile");
+        return;
+      }
+
+      if (approval_status !== "APPROVED") {
+        notifyWarning("⏳ Your application is pending admin approval");
+        navigate('/');
+        return;
+      }
+
+      // ✅ AGENT: complete + approved → dashboard
+      login(access, refresh, role, profile_completed, approval_status);
+      notifySuccess("🎉 Welcome to Agent Dashboard!");
+      navigate("/agent/dashboard");
+      return;
+    }
+
+    // Other roles - use your utility
+    login(access, refresh, role, profile_completed);  // profile_completed optional for non-agents
     notifySuccess("🎉 Login successful!");
-    console.log(res,'login data')
-    login(res.data.data.access, res.data.data.refresh, res.data.data.role);
-    navigate(redirectByRole(res.data.data.role));
-    
+    navigate(redirectByRole(role));
+
   } catch (err) {
-    console.log(err)
+    console.log(err);
     const errorMsg = err.response?.data?.detail || 
-                    err.response?.data?.non_field_errors?.[0] ||
-                    err.response?.data?.email?.[0] ||
-                    err.response?.data?.password?.[0] ||
-                    'Login failed. Please check your credentials.';   
+                     err.response?.data?.non_field_errors?.[0] ||
+                     err.response?.data?.email?.[0] ||
+                     err.response?.data?.password?.[0] ||
+                     'Login failed. Please check your credentials.';
     notifyError(errorMsg);
   }
 };

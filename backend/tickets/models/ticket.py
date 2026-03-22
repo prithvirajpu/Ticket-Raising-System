@@ -1,5 +1,6 @@
 from django.db import models 
 import uuid
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth import get_user_model
 User=get_user_model()
 
@@ -39,3 +40,14 @@ class Ticket(models.Model):
     def __str__(self):
         return self.ticket_code
     
+class TicketReview(models.Model):
+    ticket=models.OneToOneField(Ticket,on_delete=models.CASCADE)
+    rating=models.PositiveIntegerField(
+        validators=[MinValueValidator(1,message='Rating must be at least 1'),
+                    MaxValueValidator(5,message='Rating must be at most 5'),]
+    )
+    review=models.TextField(blank=True)
+    created_at=models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Review for # {self.ticket.ticket_code} - {self.rating}/5"
