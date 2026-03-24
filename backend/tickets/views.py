@@ -27,7 +27,9 @@ class TicketListView(APIView):
     permission_classes=[IsAuthenticated]
 
     def get(self,request):
-        result=get_ticket_list_service(request)
+        search=request.query_params.get('search','')
+        sort=request.query_params.get('sort','newest')
+        result=get_ticket_list_service(request,sort,search)
         return return_response(result)
 
 class TicketDetailView(APIView):
@@ -69,8 +71,9 @@ class AgentTicketRequestsView(APIView):
     permission_classes=[IsAuthenticated]
 
     def get(self,request):
+        search=request.query_params.get('search','')
         sort=request.query_params.get('sort','newest')
-        result=get_agent_ticket_requests_service(request.user,sort)
+        result=get_agent_ticket_requests_service(request.user,sort,search)
         return return_response(result)
     
 class AgentTicketDetailView(APIView):
@@ -84,8 +87,9 @@ class AgentOngoingTicketsView(APIView):
     permission_classes=[IsAuthenticated]
 
     def get(self,request):
+        search=request.query_params.get('search','')
         sort=request.query_params.get('sort','newest')
-        result=get_agent_ongoing_tickets_service(request.user,sort)
+        result=get_agent_ongoing_tickets_service(request.user,sort,search)
         return return_response(result)
     
 class ResolveTicketView(APIView):

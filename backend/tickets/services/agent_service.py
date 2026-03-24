@@ -2,6 +2,7 @@ from rest_framework import status
 from tickets.models import Ticket,TicketAssignment,TicketSLATracking
 from django.db import transaction
 from django.utils import timezone
+from django.db.models import Q
 from tickets.serializer import AgentTicketRequestSerializer,TicketSerializer
 from django.contrib.auth import get_user_model
 
@@ -82,10 +83,15 @@ def reject_ticket_service(ticket_id,user,reason):
             "status": status.HTTP_404_NOT_FOUND
         }
     
-def get_agent_ticket_requests_service(user,sort='newest'):
+def get_agent_ticket_requests_service(user,sort='newest',search=''):
     try:
         assignments=(TicketAssignment.objects.filter(agent=user,status='PENDING')
                     .select_related('ticket','ticket__client'))
+        if search:
+            assignments=assignments.filter(Q(ticket__subject__icontains=search) | 
+                                           Q(ticket__ticket_code__icontains=search) | 
+                                           Q(ticket__description__icontains=search))
+
         if sort=='oldest': 
             assignments=assignments.order_by('ticket__created_at')
         else:
@@ -121,9 +127,11 @@ def get_agent_ticket_detail_service(user,ticket_id):
         'status':status.HTTP_200_OK
     }
 
-def get_agent_ongoing_tickets_service(user,sort='newest'):
+def get_agent_ongoing_tickets_service(user,sort='newest',search=''):
     try:
         tickets=Ticket.objects.filter(assigned_to=user,status='IN_PROGRESS')
+        if search:
+            tickets=tickets.filter(Q(subject__icontains=search) | Q(ticket_code__icontains=search) | Q(description__icontains=search))
 
         if sort=='oldest': 
             tickets=tickets.order_by('created_at')

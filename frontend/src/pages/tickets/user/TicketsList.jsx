@@ -2,27 +2,54 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getTickets } from '../../../services/ticketService'
 import DashboardLayout from '../../../layouts/DashboardLayout'
-import { Plus, Search, ChevronLeft, ChevronRight, ArrowUpDown } from 'lucide-react'
+import { Plus, Search, ChevronDown, ChevronRight, ArrowUpDown } from 'lucide-react'
 
 const TicketsList = () => {
     const [tickets, setTickets] = useState([])
     const [loading, setLoading] = useState(false)
+
+    const [sort, setSort] = useState('newest');
+    const [activeSortBtn, setActiveSortBtn] = useState('newest');
+
+    const [searchTerm,setSearchTerm]=useState('')
+    const [searchTimeout, setSearchTimeout] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetchTickets()
-    }, [])
+        fetchTickets('', 'newest');  
+    }, []);
 
-    const fetchTickets = async () => {
+    useEffect(() => {
+        if (searchTerm){
+            clearTimeout(searchTimeout);
+        }
+        const timeoutId= setTimeout(()=>{
+            fetchTickets(searchTerm,sort);
+        },1000)
+        setSearchTimeout(timeoutId);
+        return ()=> clearTimeout(timeoutId);
+
+    }, [searchTerm,sort])
+
+    const handleSearchChange=(e)=>{
+        setSearchTerm(e.target.value)
+    }
+    const fetchTickets = async (search='',sortType='newest') => {
+        setLoading(true)
         try {
-            setLoading(true)
-            const data = await getTickets();
-            setTickets(data.tickets || data)
+            const data = await getTickets({search,sort:sortType});
+            setTickets(data.message || data)
+            setActiveSortBtn(sortType)
         } catch (error) {
             console.error(error)
         } finally {
             setLoading(false)
         }
+    }
+    const handleSortChange=(e)=>{
+        const newSort=e.target.value;
+        setSort(newSort);
+        setActiveSortBtn(newSort);
     }
 
     const getStatusBadge = (status) => {
@@ -66,6 +93,8 @@ const TicketsList = () => {
                             <div className="relative">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                                 <input 
+                                    value={searchTerm}
+                                    onChange={handleSearchChange}
                                     type="text" 
                                     placeholder="Search..." 
                                     className="pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-gray-400 w-64 text-sm"
@@ -73,10 +102,16 @@ const TicketsList = () => {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-2 border border-gray-300 rounded-xl px-4 py-2 cursor-pointer hover:bg-gray-50">
-                            <span className="text-sm font-semibold text-gray-700">Newest First</span>
-                            <ArrowUpDown size={16} className="text-gray-500" />
-                        </div>
+                        <div className="relative">
+                <select
+                  value={activeSortBtn}
+                  onChange={handleSortChange}
+                  className="flex items-center gap-2 border border-gray-400 px-4 py-1.5 rounded-xl text-sm font-medium bg-white appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-400"
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                </select>
+              </div>
                     </div>
 
                     {/* Ticket Cards List */}

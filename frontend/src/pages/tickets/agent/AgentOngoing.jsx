@@ -9,18 +9,35 @@ const AgentOngoing = () => {
   const [loading, setLoading] = useState(true);
   const [sort, setSort] = useState('newest');
   const [activeSortBtn, setActiveSortBtn] = useState('newest');
+  const [searchTerm,setSearchTerm]=useState('')
+  const [searchTimeout, setSearchTimeout] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchTickets(sort);
-  }, [sort]);
+    fetchTickets('','newest');
+  }, []);
+  useEffect(()=>{
+    if(searchTerm){
+      clearTimeout(searchTimeout)
+    }
+    
+    const timeout=setTimeout(()=>{
+      fetchTickets(searchTerm,sort)
+    },1000)
+    setSearchTimeout(timeout)
 
-  const fetchTickets = async (sortType = 'newest') => {
+    return ()=>clearTimeout(timeout)
+
+  },[searchTerm,sort])
+
+  const handleSearchChange=(e)=>{
+    setSearchTerm(e.target.value)
+  }
+
+  const fetchTickets = async (search='',sortType = 'newest') => {
     setLoading(true);
     try {
-      const res = await getOngoingTickets(sortType);
-       console.log('📦 API Response:', res.message);  // ADD THIS
-    console.log('📅 First ticket created_at:', res.message?.[0]?.created_at); 
+      const res = await getOngoingTickets({search,sort:sortType});
       setTickets(res.message || []); 
       setActiveSortBtn(sortType);
     } catch (error) {
@@ -49,6 +66,8 @@ const AgentOngoing = () => {
             <div className="flex items-center gap-4">
               <div className="relative">
                 <input 
+                value={searchTerm}
+                onChange={handleSearchChange}
                   type="text" 
                   placeholder="Search..." 
                   className="border border-gray-400 rounded-xl px-4 py-1.5 w-64 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
@@ -65,7 +84,6 @@ const AgentOngoing = () => {
                   <option value="newest">Newest First</option>
                   <option value="oldest">Oldest First</option>
                 </select>
-                <ChevronDown size={16} className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400" />
               </div>
             </div>
           </div>

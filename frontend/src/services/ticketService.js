@@ -1,3 +1,4 @@
+import { ServerCog } from 'lucide-react'
 import api from '../api/axios'
 
 export const createTicket= async(data)=>{
@@ -5,9 +6,13 @@ export const createTicket= async(data)=>{
     return response.data.data
 }
 
-export const getTickets=async ()=>{
-    const response=await api.get('/tickets/list/')
-    return response.data.data.message
+export const getTickets=async ({search='',sort='newest'})=>{
+    const params={sort};
+    if (search){
+        params.search=search;
+    }
+    const response=await api.get(`/tickets/list/`,{params})
+    return response.data.data
 }
 
 export const getTicketDetail= async(id)=>{
@@ -15,8 +20,12 @@ export const getTicketDetail= async(id)=>{
     return response.data.data
 }
 
-export const getAgentRequests=async (sort='newest')=>{
-    const res= await api.get(`/tickets/agents/requests/?sort=${sort}`)
+export const getAgentRequests=async ({search='',sort='newest'})=>{
+    const params={sort}
+    if (search){
+        params.search=search
+    }
+    const res= await api.get(`/tickets/agents/requests/`,{params})
     return res.data.data
 }
 
@@ -30,8 +39,12 @@ export const rejectTicket =async (id)=>{
     return res.data.data
 }
 
-export const getOngoingTickets = async (sort='newest') => {
-  const res = await api.get(`/tickets/agents/in-progress/?sort=${sort}`);
+export const getOngoingTickets = async ({search='',sort='newest'}) => {
+    const params={sort}
+    if (search){
+        params.search=search
+    }
+  const res = await api.get(`/tickets/agents/in-progress/`,{params});
   return res.data.data;
 };
 

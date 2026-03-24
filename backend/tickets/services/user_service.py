@@ -4,6 +4,7 @@ from tickets.serializer import TicketSerializer
 from django.db import transaction
 from django.utils import timezone
 from datetime import timedelta
+from django.db.models import Q
 from django.contrib.auth import get_user_model
 
 User=get_user_model()
@@ -51,8 +52,15 @@ def create_ticket_service(data,user):
             "status":status.HTTP_400_BAD_REQUEST
         }
 
-def get_ticket_list_service(request):
-    tickets = Ticket.objects.filter(client=request.user.client).order_by('-created_at')
+def get_ticket_list_service(request,sort='newest',search=''):
+    tickets = Ticket.objects.filter(client=request.user.client)
+    if search:
+        tickets=tickets.filter(Q(subject__icontains=search) | Q(ticket_code__icontains=search) | Q(description__icontains=search))
+
+    if sort=='oldest': 
+            tickets=tickets.order_by('created_at')
+    else:
+        tickets=tickets.order_by('-created_at')
     
     ticket_data = []
     for ticket in tickets:
@@ -70,9 +78,8 @@ def get_ticket_list_service(request):
             'created_at': ticket.created_at,
             'sla_status': sla_status  # '' or 'MET'
         })
-    
     return {
-        "data": {'message': ticket_data},
+        "data": {'message': ticket_data,'sort':sort},
         "errors": {},
         "status": status.HTTP_200_OK
     }

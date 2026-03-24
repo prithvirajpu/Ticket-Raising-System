@@ -9,16 +9,37 @@ const AgentRequests = () => {
   const [loading, setLoading] = useState(true);
   const [sort, setSort] = useState('newest');
   const [activeSortBtn, setActiveSortBtn] = useState('newest');
+
+  const [searchTerm,setSearchTerm]=useState('')
+  const [searchTimeout, setSearchTimeout] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchRequests(sort);
-  }, [sort]);
+    fetchRequests('','newest');
+  }, []);
 
-  const fetchRequests = async (sortType = 'newest') => {
+  useEffect(()=>{
+    if (searchTerm){
+      clearTimeout(searchTimeout)
+    }
+
+    const timeout=setTimeout(()=>{
+      fetchRequests(searchTerm,sort)
+    },1000)
+
+    setSearchTimeout(timeout)
+    return ()=>clearTimeout(timeout)
+
+  },[searchTerm,sort])
+
+  const handleTermChange=(e)=>{
+    setSearchTerm(e.target.value)
+  }
+
+  const fetchRequests = async (search='',sortType = 'newest') => {
     setLoading(true);
     try {
-      const res = await getAgentRequests(sortType);
+      const res = await getAgentRequests({search,sort:sortType});
       setTickets(res.message || []);
       setActiveSortBtn(sortType);
     } catch (error) {
@@ -65,6 +86,8 @@ const AgentRequests = () => {
               {/* Search Bar */}
               <div className="relative">
                 <input 
+                value={searchTerm}
+                onChange={handleTermChange}
                   type="text" 
                   placeholder="Search..." 
                   className="border border-gray-400 rounded-xl px-4 py-1.5 w-64 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
@@ -81,7 +104,6 @@ const AgentRequests = () => {
                   <option value="newest">Newest First</option>
                   <option value="oldest">Oldest First</option>
                 </select>
-                <ChevronDown size={16} className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400" />
               </div>
             </div>
           </div>
