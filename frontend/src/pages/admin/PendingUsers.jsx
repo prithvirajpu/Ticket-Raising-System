@@ -21,6 +21,7 @@ const PendingUsers = () => {
     const fetchPendingUsers = async (pageNumber = 1) => {
         try {
             const res = await api.get(`/auth/admin/pending-users/?page=${pageNumber}`)
+            console.log('the result',res)
 
             setUsers(res.data.results)
             setTotalPages(Math.ceil(res.data.count / 10))

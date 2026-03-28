@@ -28,6 +28,8 @@ import TicketDetail from './pages/tickets/user/TicketDetail';
 import AgentRequests from './pages/tickets/agent/AgentRequests';
 import AgentOngoing from './pages/tickets/agent/AgentOngoing';
 import AgentTicketDetail from './pages/tickets/agent/AgentTicketDetail';
+import ManagerDashboard from './pages/dashboards/ManagerDashboard';
+import ProfilePage from './pages/tickets/user/ProfilePage';
 
 
 const App = () => {
@@ -64,10 +66,13 @@ const App = () => {
                 <AgentDashboard />
             </ProtectedRoute>} />
             <Route path='/manager/dashboard' element={<ProtectedRoute role={['MANAGER']}>
-                <AgentDashboard />
+                <ManagerDashboard />
             </ProtectedRoute>} />
             <Route path='/user/dashboard' element={<ProtectedRoute role={['USER']}>
                 <UserDashboard />
+            </ProtectedRoute>} />
+            <Route path='/user/profile' element={<ProtectedRoute role={['USER']}>
+                <ProfilePage />
             </ProtectedRoute>} />
             <Route path='/admin/agent/:id' element={<ProtectedRoute role={['ADMIN']}>
                  <AgentDetail />

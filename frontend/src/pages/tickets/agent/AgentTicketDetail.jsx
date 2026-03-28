@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getTicketDetail, resolveTicket } from "../../../services/ticketService";
+import { escalateTicket, getTicketDetail, resolveTicket } from "../../../services/ticketService";
 import Loader from "../../../components/modals/Loader";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Send, Phone, User, Clock, AlertCircle, Calendar } from "lucide-react"; // Using Lucide for icons
@@ -13,6 +13,10 @@ const AgentTicketDetail = () => {
   const [resolveModalOpen,setResolveModalOpen]=useState(false);
   const [resolveLoading,setResolveLoading]=useState(false);
   const [timeLeft,setTimeLeft]=useState(null)
+
+  const [escalateLoading,setEscalateLoading]=useState(false)
+  const [escalateModalOpen, setEscalateModalOpen] = useState(false);
+
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -41,9 +45,22 @@ const AgentTicketDetail = () => {
     }
   };
 
-  const handleResolveClick =()=>{
-    setResolveModalOpen(true);
+  const handleEscalateConfirm = async()=>{
+    setEscalateLoading(true);
+    try {
+      await escalateTicket(id);
+      await fetchTicket();
+      setEscalateModalOpen(false);
+      
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setEscalateLoading(false);
+    }
   }
+  const handleCancelEscalate = () => {
+      setEscalateModalOpen(false);
+    };
 
   const handleConfirmResolve  = async () => {
     setResolveLoading(true);
@@ -80,7 +97,7 @@ const AgentTicketDetail = () => {
         
         {ticket.status !== "RESOLVED" && (
           <button
-            onClick={handleResolveClick }
+            onClick={()=> setResolveModalOpen(true) }
             className="bg-[#1DB954] hover:bg-green-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
           >
             Mark as Resolved
@@ -194,7 +211,8 @@ const AgentTicketDetail = () => {
             {/* Message Input Area */}
             <div className="p-6 border-t border-gray-100">
               <div className="flex justify-end gap-2 mb-4">
-                <button className="bg-red-600 text-white text-xs px-4 py-1 rounded-lg font-bold">Escalate</button>
+                <button onClick={()=>setEscalateModalOpen(true)} 
+                 className="bg-red-600 text-white text-xs px-4 py-1 rounded-lg font-bold">Escalate</button>
                 <button className="bg-blue-600 text-white text-xs px-4 py-1 rounded-lg font-bold">Verify</button>
               </div>
               
@@ -230,6 +248,17 @@ const AgentTicketDetail = () => {
         loading={resolveLoading}
         onConfirm={handleConfirmResolve}
         onCancel={handleCancelResolve}
+      />
+      <ConfirmModal
+        isOpen={escalateModalOpen}
+        title="Escalate Ticket"
+        message={`Are you sure you want to escalate ticket #${ticket.ticket_code || id}? This will notify your team lead.`}
+        confirmText="Yes, Escalate"
+        cancelText="Cancel"
+        loadingText="Escalating..."
+        loading={escalateLoading}
+        onConfirm={handleEscalateConfirm}
+        onCancel={handleCancelEscalate}
       />
     </>
   );

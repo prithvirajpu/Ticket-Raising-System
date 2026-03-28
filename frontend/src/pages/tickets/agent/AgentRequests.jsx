@@ -148,7 +148,7 @@ const AgentRequests = () => {
                         </button>
                         <button
                           onClick={() => handleAccept(ticket.ticket_id)}
-                          className="bg-[#c4c4c4] text-black px-8 py-1.5 rounded-xl text-sm font-bold shadow-sm hover:bg-gray-400 transition-colors"
+                          className="bg-green-400 text-black px-8 py-1.5 rounded-xl text-sm font-bold shadow-sm hover:bg-green-500 transition-colors"
                         >
                           Accept
                         </button>

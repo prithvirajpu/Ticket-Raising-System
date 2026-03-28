@@ -1,13 +1,12 @@
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
 from core_app.utils import return_response
-
 from tickets.serializer import TicketSerializer
 from tickets.services import (create_ticket_service,get_ticket_list_service,get_ticket_detail_service,accept_ticket_service,reject_ticket_service,
                             get_agent_ticket_requests_service,get_agent_ticket_detail_service,get_agent_ongoing_tickets_service,resolve_ticket_service,
-                            close_ticket_service,submit_review_service)
+                            close_ticket_service,submit_review_service,escalate_ticket_service,get_profile_service,update_profile_service)
+
 class CreateTicketView(APIView):
     permission_classes=[IsAuthenticated]
 
@@ -97,4 +96,25 @@ class ResolveTicketView(APIView):
 
     def post(self,request,ticket_id):
         result=resolve_ticket_service(request.user,ticket_id)
+        return return_response(result)
+
+class EscalatedTicketView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def post(self,request,ticket_id):
+        result= escalate_ticket_service(request,ticket_id)
+        return return_response(result)
+
+class UserProfileView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def get(self,request):
+        result=get_profile_service(request.user)
+        return return_response(result)
+
+class UpdateProfileView(APIView):
+    permission_classes= [IsAuthenticated]
+
+    def put(self,request):
+        result= update_profile_service(request.user,request.data)
         return return_response(result)

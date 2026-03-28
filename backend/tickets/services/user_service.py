@@ -11,7 +11,7 @@ User=get_user_model()
 
 def create_ticket_service(data,user):
     from tickets.services import attach_sla_to_ticket
-    agents=User.objects.filter(role="AGENT",is_active=True)
+    
     subscription=ClientSubscription.objects.filter(client=user.client,status='ACTIVE').first()
     if not subscription:
         return {
@@ -22,16 +22,34 @@ def create_ticket_service(data,user):
 
     try:
         with transaction.atomic(): 
+            team_lead=user.client.team_lead
+            print("USER:", user)
+            print("CLIENT PROFILE:", user.client)
+            print("TEAM LEAD:", user.client.team_lead)
+            if not team_lead:
+                return {
+                    "data": None,
+                    "errors": {"details": "No team lead assigned to client"},
+                    "status": status.HTTP_400_BAD_REQUEST
+                }
+            agents=User.objects.filter(role='AGENT',team_lead=team_lead,is_active=True)
+            if not agents.exists():
+                return {
+                    "data": None,
+                    "errors": {"details": "No agents under this team lead"},
+                    "status": status.HTTP_400_BAD_REQUEST
+                }
+            
             ticket=Ticket.objects.create(
-            subject=data.get('subject'),
-            description=data.get('description'),
-            issue_type=data.get('issue_type'),
-            priority=data.get('priority','MEDIUM'),
-            client=user.client,
-            created_by=user,
-            assigned_to=None,
-            status="OPEN"
-            )
+                subject=data.get('subject'),
+                description=data.get('description'),
+                issue_type=data.get('issue_type'),
+                priority=data.get('priority','MEDIUM'),
+                client=user.client,
+                created_by=user,
+                assigned_to=None,
+                status="OPEN"
+                )
             attach_sla_to_ticket(ticket)
             expiry_time=timezone.now()+timedelta(minutes=10)
             assignments=[

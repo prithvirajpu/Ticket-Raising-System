@@ -14,8 +14,11 @@ from .services import (verify_otp_service,agent_signup_service,reset_password_se
 from .serializers import (
     LoginSerializer,UserApprovalSerializer,ClientSignupSerializer,
     VerifyOTPSerializer,ForgotPasswordSerializer,ResetPasswordSerializer)
+from django.contrib.auth import get_user_model
 import logging
 logger=logging.getLogger(__name__)
+
+User=get_user_model()
 
 class LoginView(APIView):
     permission_classes=[]

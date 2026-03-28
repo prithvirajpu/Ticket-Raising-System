@@ -18,10 +18,16 @@ def accept_ticket_service(ticket_id,user):
                     'errors':{'details':"Ticket already accepted by another agent"},
                     'status':status.HTTP_400_BAD_REQUEST
                 }
-            assignment = TicketAssignment.objects.select_for_update().get(
+            if ticket.client.user.team_lead!=user.team_lead:
+                return{
+                     "data": None,
+                    "errors": {"details": "You cannot accept this ticket"},
+                    "status": status.HTTP_403_FORBIDDEN
+                }
+            assignment = TicketAssignment.objects.select_for_update().filter(
                 ticket_id=ticket_id,
                 agent=user
-            )
+            ).first()
             if not assignment:
                 return {
                     "data":None,
@@ -39,7 +45,6 @@ def accept_ticket_service(ticket_id,user):
             assignment.status = "ACCEPTED"
             assignment.save(update_fields=['status'])
 
-            ticket = assignment.ticket
             ticket.status = "IN_PROGRESS"
             ticket.assigned_to = user
             ticket.save(update_fields=['status','assigned_to'])

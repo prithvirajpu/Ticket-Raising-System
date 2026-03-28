@@ -51,7 +51,6 @@ const Navbar = () => {
         return [
           { label: 'Dashboard', path: '/user/dashboard' },
           { label: 'My Tickets', path: '/user/tickets' },
-          // { label: 'Assigned Tickets', path: '/user/assigned-tickets' }, // user has this
           { label: 'About', path: '/about' },
         ]
 
@@ -104,16 +103,17 @@ const Navbar = () => {
             className="text-gray-700 hover:text-red-600 transition-colors p-1"
             title="Logout"
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut title='logout' className="w-5 h-5" />
           </button>
 
           <div className="flex items-center gap-2 pl-2 border-l border-gray-200">
             <div className="p-1.5 bg-gray-50 rounded-full border border-gray-200">
-              <User className="w-4 h-4 text-gray-600" />
+              <Link to='/user/profile' title='Profile'><User className="w-4 h-4 text-gray-600" /></Link>
             </div>
+            <Link title='Profile' to='/user/profile'>
             <span className="text-sm font-medium text-gray-700 capitalize">
               {userRole?.toLowerCase() || 'Company'}
-            </span>
+            </span></Link>
           </div>
         </div>
       </div>

@@ -62,3 +62,17 @@ export const submitReview=async(id,data)=>{
     const res= await api.post(`/tickets/${id}/review/`,data);
     return res.data.data
 }
+export const escalateTicket=async(id,data)=>{
+    const res= await api.post(`/tickets/${id}/escalate/`);
+    return res.data.data
+}
+
+export const getProfile=async()=>{
+    const res= await api.get('/tickets/user/profile')
+    return res.data.data
+}
+
+export const updateProfile= async (data)=>{
+    const res = await api.put('/tickets/user/profile/update/',data)
+    return res.data.data
+}
