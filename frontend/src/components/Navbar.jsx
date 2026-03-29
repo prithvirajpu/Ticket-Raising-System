@@ -33,7 +33,7 @@ const Navbar = () => {
       case 'TEAM_LEAD':
         return [
           { label: 'Dashboard', path: '/team-lead/dashboard' },
-          { label: 'Team Tickets', path: '/team-lead/tickets' },
+          { label: 'Team Tickets', path: '/team-lead/assigned-tickets' },
           { label: 'Reports', path: '/team-lead/reports' },
           { label: 'About', path: '/about' },
         ]
@@ -41,7 +41,7 @@ const Navbar = () => {
       case 'MANAGER':
         return [
           { label: 'Dashboard', path: '/manager/dashboard' },
-          { label: 'Team Performance', path: '/manager/performance' },
+          { label: 'Manage Tickets', path: '/tickets/manager/tickets/' },
           { label: 'Reports', path: '/manager/reports' },
           { label: 'Settings', path: '/manager/settings' },
           { label: 'About', path: '/about' },

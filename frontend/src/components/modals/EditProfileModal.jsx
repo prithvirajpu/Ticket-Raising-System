@@ -12,7 +12,7 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSave, saving }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(editData); // Pass the new data back to the parent
+    onSave(editData); 
   };
 
   return (

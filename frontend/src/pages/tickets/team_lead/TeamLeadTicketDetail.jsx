@@ -7,8 +7,8 @@ import DashboardLayout from "../../../layouts/DashboardLayout";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
 import { getSlaTimer } from "../../../utils/slaTImer";
 
-const AgentTicketDetail = () => {
-  const [ticket, setTicket] = useState(null);
+const TeamLeadTicketDetail = () => {
+    const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
   const [resolveModalOpen,setResolveModalOpen]=useState(false);
   const [resolveLoading,setResolveLoading]=useState(false);
@@ -32,6 +32,8 @@ const AgentTicketDetail = () => {
 
   useEffect(() => {
     fetchTicket();
+    setEscalateModalOpen(false);
+    setResolveModalOpen(false);
   }, [id]);
 
   const fetchTicket = async () => {
@@ -51,7 +53,7 @@ const AgentTicketDetail = () => {
       await escalateTicket(id);
       await fetchTicket();
       setEscalateModalOpen(false);
-      navigate('/agent/assigned-tickets')
+      navigate('/team-lead/assigned-tickets')
       
     } catch (error) {
       console.log(error);
@@ -84,7 +86,7 @@ const AgentTicketDetail = () => {
   if (!ticket) return <p className="p-6">Ticket not found</p>;
 
   return (
-    <>
+     <>
     <DashboardLayout>
     <div className="min-h-screen bg-white ">
       {/* Top Navigation */}
@@ -98,6 +100,7 @@ const AgentTicketDetail = () => {
         
         {ticket.status !== "RESOLVED" && (
           <button
+            disabled={resolveLoading}
             onClick={()=> setResolveModalOpen(true) }
             className="bg-[#1DB954] hover:bg-green-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
           >
@@ -212,8 +215,11 @@ const AgentTicketDetail = () => {
             {/* Message Input Area */}
             <div className="p-6 border-t border-gray-100">
               <div className="flex justify-end gap-2 mb-4">
-                <button onClick={()=>setEscalateModalOpen(true)} 
+                {ticket.status !='RESOLVED' && (
+                  <button onClick={()=>setEscalateModalOpen(true)} 
                  className="bg-red-600 text-white text-xs px-4 py-1 rounded-lg font-bold">Escalate</button>
+                )}
+                
                 <button className="bg-blue-600 text-white text-xs px-4 py-1 rounded-lg font-bold">Verify</button>
               </div>
               
@@ -262,7 +268,7 @@ const AgentTicketDetail = () => {
         onCancel={handleCancelEscalate}
       />
     </>
-  );
-};
+  )
+}
 
-export default AgentTicketDetail;
+export default TeamLeadTicketDetail

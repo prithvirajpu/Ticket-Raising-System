@@ -62,9 +62,16 @@ export const submitReview=async(id,data)=>{
     const res= await api.post(`/tickets/${id}/review/`,data);
     return res.data.data
 }
-export const escalateTicket=async(id,data)=>{
-    const res= await api.post(`/tickets/${id}/escalate/`);
+
+export const escalateTicket=async(id)=>{
+    try {
+        const res= await api.post(`/tickets/${id}/escalate/`);
+    
     return res.data.data
+    } catch (error) {
+        const err=error.response?.data?.errors?.details ||'my error'
+        console.log(err)
+    }
 }
 
 export const getProfile=async()=>{
@@ -74,5 +81,15 @@ export const getProfile=async()=>{
 
 export const updateProfile= async (data)=>{
     const res = await api.put('/tickets/user/profile/update/',data)
+    return res.data.data
+}
+
+export const getTeamLeadTickets=async()=>{
+    const res= await api.get('/tickets/team-lead/assigned-tickets/');
+    return res.data.data
+}
+
+export const getManagerTickets=async ()=>{
+    const res= await api.get('/tickets/manager/tickets/');
     return res.data.data
 }

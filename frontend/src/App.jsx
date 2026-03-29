@@ -20,7 +20,6 @@ import UserDashboard from './pages/dashboards/UserDashboard'
 import AgentManagement from './pages/admin/AgentManagement';
 import ClientManagement from './pages/admin/ClientManagement';
 import PendingUsers from './pages/admin/PendingUsers';
-import { redirectByRole } from './auth/roleRedirect';
 import PublicRoute from './auth/PublicRoute';
 import CreateTicket from './pages/tickets/user/CreateTicket';
 import TicketsList from './pages/tickets/user/TicketsList';
@@ -30,6 +29,10 @@ import AgentOngoing from './pages/tickets/agent/AgentOngoing';
 import AgentTicketDetail from './pages/tickets/agent/AgentTicketDetail';
 import ManagerDashboard from './pages/dashboards/ManagerDashboard';
 import ProfilePage from './pages/tickets/user/ProfilePage';
+import TeamLeadTickets from './pages/tickets/team_lead/TeamLeadTickets ';
+import TeamLeadTicketDetail from './pages/tickets/team_lead/TeamLeadTicketDetail';
+import ManagerTickets from './pages/tickets/manager/ManagerTickets';
+import ManagerTicketDetail from './pages/tickets/manager/ManagerTicketDetail';
 
 
 const App = () => {
@@ -65,8 +68,20 @@ const App = () => {
             <Route path='/team-lead/dashboard' element={<ProtectedRoute role={['TEAM_LEAD']}>
                 <AgentDashboard />
             </ProtectedRoute>} />
+            <Route path='/team-lead/assigned-tickets' element={<ProtectedRoute role={['TEAM_LEAD']}>
+                <TeamLeadTickets />
+            </ProtectedRoute>} />
+            <Route path='/team-lead/tickets/:id' element={<ProtectedRoute role={['TEAM_LEAD']}>
+                <TeamLeadTicketDetail />
+            </ProtectedRoute>} />
             <Route path='/manager/dashboard' element={<ProtectedRoute role={['MANAGER']}>
                 <ManagerDashboard />
+            </ProtectedRoute>} />
+            <Route path='/tickets/manager/tickets' element={<ProtectedRoute role={['MANAGER']}>
+                <ManagerTickets />
+            </ProtectedRoute>} />
+            <Route path='/manager/tickets/:id' element={<ProtectedRoute role={['MANAGER']}>
+                <ManagerTicketDetail />
             </ProtectedRoute>} />
             <Route path='/user/dashboard' element={<ProtectedRoute role={['USER']}>
                 <UserDashboard />

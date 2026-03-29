@@ -166,7 +166,7 @@ def resolve_ticket_service(user,ticket_id):
                     "errors": {"details": "Ticket not assigned to this agent"},
                     "status": status.HTTP_403_FORBIDDEN
                 }
-            if ticket.status !='IN_PROGRESS':
+            if ticket.status not in ['IN_PROGRESS','ESCALATED']:
                 return {
                     "data": None,
                     "errors": {"details": "Ticket is not in progress"},
@@ -175,13 +175,12 @@ def resolve_ticket_service(user,ticket_id):
             ticket.status='RESOLVED'
             ticket.save(update_fields=['status'])
 
-            sla= TicketSLATracking.objects.filter(ticket=ticket).first()
+            sla = getattr(ticket, 'sla_tracking', None)
             if sla:
-                if timezone.now()<=sla.sla_deadline:
-                    sla.sla_status='MET'
-                else:
-                    sla.sla_status='BREACHED'
-                sla.save(update_fields=['sla_status'])
+                now = timezone.now()
+                sla.resolved_at = now
+                sla.sla_status = 'MET' if now <= sla.sla_deadline else 'BREACHED'
+                sla.save(update_fields=['sla_status', 'resolved_at'])
 
             return {
                 "data": {"message": "Ticket resolved successfully"},

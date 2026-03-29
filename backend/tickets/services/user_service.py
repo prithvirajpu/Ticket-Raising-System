@@ -23,9 +23,6 @@ def create_ticket_service(data,user):
     try:
         with transaction.atomic(): 
             team_lead=user.client.team_lead
-            print("USER:", user)
-            print("CLIENT PROFILE:", user.client)
-            print("TEAM LEAD:", user.client.team_lead)
             if not team_lead:
                 return {
                     "data": None,

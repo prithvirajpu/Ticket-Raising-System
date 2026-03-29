@@ -4,3 +4,5 @@ from .agent_service import (accept_ticket_service,reject_ticket_service,get_agen
 from .attach_sla_to_ticket import attach_sla_to_ticket
 from .escalation_service import escalate_ticket_service
 from .profile_service import get_profile_service,update_profile_service
+from .team_lead_service import get_team_lead_tickets_service
+from .manager_service  import get_manager_tickets_service
