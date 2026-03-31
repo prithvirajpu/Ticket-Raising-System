@@ -93,3 +93,31 @@ export const getManagerTickets=async ()=>{
     const res= await api.get('/tickets/manager/tickets/');
     return res.data.data
 }
+
+export const uploadDocument= async (formData)=>{
+    try {
+        const res = await api.post ('/tickets/client/upload/',formData,{
+            headers:{
+                'Content-Type':'multipart/form-data'
+            }
+        });
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const getClientsWithDocs=async()=>{
+    const res= await api.get('/tickets/manager/clients-docs/');
+    return res.data.data;
+}
+
+export const getClientDocs= async(clientId)=>{
+    try {
+    const res= await api.get(`/tickets/manager/clients-docs/${clientId}/`);
+    return res.data.data    
+    } catch (error) {
+        console.log(error?.response?.data?.errors?.details ||' something wrong')
+        throw error
+    }
+}

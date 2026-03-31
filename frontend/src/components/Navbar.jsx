@@ -41,9 +41,9 @@ const Navbar = () => {
       case 'MANAGER':
         return [
           { label: 'Dashboard', path: '/manager/dashboard' },
-          { label: 'Manage Tickets', path: '/tickets/manager/tickets/' },
+          { label: 'Manage Tickets', path: '/tickets/manager/tickets' },
           { label: 'Reports', path: '/manager/reports' },
-          { label: 'Settings', path: '/manager/settings' },
+          { label: 'Clients', path: '/manager/clients' },
           { label: 'About', path: '/about' },
         ]
 
@@ -59,7 +59,7 @@ const Navbar = () => {
         return [
           { label: 'Dashboard', path: '/client/dashboard' },
           { label: 'My Tickets', path: '/client/tickets' },
-          { label: 'Assigned Tickets', path: '/client/assigned-tickets' }, // client has this
+          { label: 'Upload', path: '/client/upload' }, // client has this
           { label: 'About', path: '/about' },
         ]
     }
@@ -108,9 +108,9 @@ const Navbar = () => {
 
           <div className="flex items-center gap-2 pl-2 border-l border-gray-200">
             <div className="p-1.5 bg-gray-50 rounded-full border border-gray-200">
-              <Link to='/user/profile' title='Profile'><User className="w-4 h-4 text-gray-600" /></Link>
+              <Link to='/profile' title='Profile'><User className="w-4 h-4 text-gray-600" /></Link>
             </div>
-            <Link title='Profile' to='/user/profile'>
+            <Link title='Profile' to='/profile'>
             <span className="text-sm font-medium text-gray-700 capitalize">
               {userRole?.toLowerCase() || 'Company'}
             </span></Link>

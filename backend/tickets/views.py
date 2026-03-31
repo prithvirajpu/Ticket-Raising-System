@@ -6,7 +6,8 @@ from tickets.serializer import TicketSerializer
 from tickets.services import (create_ticket_service,get_ticket_list_service,get_ticket_detail_service,accept_ticket_service,reject_ticket_service,
                             get_agent_ticket_requests_service,get_agent_ticket_detail_service,get_agent_ongoing_tickets_service,resolve_ticket_service,
                             close_ticket_service,submit_review_service,escalate_ticket_service,get_profile_service,update_profile_service,
-                            get_team_lead_tickets_service,get_manager_tickets_service)
+                            get_team_lead_tickets_service,get_manager_tickets_service,upload_client_doc_service,get_clients_with_documents,
+                            get_client_documents)
 
 class CreateTicketView(APIView):
     permission_classes=[IsAuthenticated]
@@ -132,4 +133,32 @@ class ManagerTicketsView(APIView):
 
     def get(self,request):
         result=get_manager_tickets_service(request.user)
+        return return_response(result)
+
+class UploadDocView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def post(self,request):
+        files=request.FILES
+        if not files:
+            return {
+                'data':None,
+                'errors':{'details':'No files uploaded'},
+                'status':400
+            }
+        result=upload_client_doc_service(request.user,files)
+        return return_response(result)
+    
+class ClientListWithDocsView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def get(self,request):
+        result=get_clients_with_documents()
+        return return_response(result)
+    
+class ClientDocumentsView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def get(self,request,client_id):
+        result= get_client_documents(client_id)
         return return_response(result)

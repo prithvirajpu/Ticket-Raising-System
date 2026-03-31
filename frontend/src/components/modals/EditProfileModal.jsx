@@ -25,7 +25,7 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSave, saving }) => {
             <label className="text-sm font-semibold text-gray-600">Name</label>
             <input
               name="name"
-              value={editData.name}
+              value={editData.name || editData.email.split('@')[0]}
               onChange={handleChange}
               className="w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-black outline-none"
             />

@@ -64,7 +64,7 @@ const ProfilePage = () => {
                 <div className="grid grid-cols-1 gap-4">
                     <div>
                         <p className="text-gray-400 text-xs uppercase tracking-wider">Full Name</p>
-                        <p className="font-semibold text-gray-800">{profile.name}</p>
+                        <p className="font-semibold text-gray-800">{profile.name || profile.email.split('@')[0]}</p>
                     </div>
                     <div>
                         <p className="text-gray-400 text-xs uppercase tracking-wider">Email Address</p>

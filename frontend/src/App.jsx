@@ -33,6 +33,9 @@ import TeamLeadTickets from './pages/tickets/team_lead/TeamLeadTickets ';
 import TeamLeadTicketDetail from './pages/tickets/team_lead/TeamLeadTicketDetail';
 import ManagerTickets from './pages/tickets/manager/ManagerTickets';
 import ManagerTicketDetail from './pages/tickets/manager/ManagerTicketDetail';
+import UploadFile from './pages/tickets/client/UploadFile';
+import ClientListPage from './pages/tickets/manager/ClientListPage';
+import ClientDocumentsPage from './pages/tickets/manager/ClientDocumentsPage';
 
 
 const App = () => {
@@ -56,11 +59,18 @@ const App = () => {
             <Route path='/agent/complete-profile' element={<AgentCompleteProfile/>}/>
             <Route path='/' element={<PublicRoute><Login/></PublicRoute>}/>
             <Route path='/unauthorized' element={<Unauthorized/>} />
+            <Route path='/profile' element={<ProtectedRoute role={['USER','AGENT','TEAM_LEAD','MANAGER','CLIENT']}>
+                <ProfilePage />
+            </ProtectedRoute>} />
+
             <Route path='/admin/dashboard' element={<ProtectedRoute role={['ADMIN']}>
                 <AdminDashboard />
             </ProtectedRoute>} />
             <Route path='/client/dashboard' element={<ProtectedRoute role={['CLIENT']}>
                 <ClientDashboard />
+            </ProtectedRoute>} />
+            <Route path='/client/upload' element={<ProtectedRoute role={['CLIENT']}>
+                <UploadFile />
             </ProtectedRoute>} />
             <Route path='/agent/dashboard' element={<ProtectedRoute role={['AGENT']}>
                 <AgentDashboard />
@@ -83,12 +93,16 @@ const App = () => {
             <Route path='/manager/tickets/:id' element={<ProtectedRoute role={['MANAGER']}>
                 <ManagerTicketDetail />
             </ProtectedRoute>} />
+            <Route path='/manager/clients' element={<ProtectedRoute role={['MANAGER']}>
+                <ClientListPage />
+            </ProtectedRoute>} />
+            <Route path='/manager/client-docs/:client_id' element={<ProtectedRoute role={['MANAGER']}>
+                <ClientDocumentsPage />
+            </ProtectedRoute>} />
             <Route path='/user/dashboard' element={<ProtectedRoute role={['USER']}>
                 <UserDashboard />
             </ProtectedRoute>} />
-            <Route path='/user/profile' element={<ProtectedRoute role={['USER']}>
-                <ProfilePage />
-            </ProtectedRoute>} />
+
             <Route path='/admin/agent/:id' element={<ProtectedRoute role={['ADMIN']}>
                  <AgentDetail />
             </ProtectedRoute>} />
