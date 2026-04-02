@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import (CreateTicketView,TicketListView,TicketDetailView,AcceptTicketView,RejectTicketView,AgentTicketRequestsView,AgentTicketDetailView
                 ,AgentOngoingTicketsView,ResolveTicketView,TicketCloseView,SubmitReviewView,EscalatedTicketView,UserProfileView,UpdateProfileView,
-                 TeamLeadTicketView,ManagerTicketsView,UploadDocView,ClientListWithDocsView,ClientDocumentsView )
+                 TeamLeadTicketView,ManagerTicketsView,UploadDocView,ClientListWithDocsView,ClientDocumentsView,SummarizeDocumentView,
+                   )
 urlpatterns=[
     #users
     path('create/',CreateTicketView.as_view()),
@@ -30,6 +31,7 @@ urlpatterns=[
     path('manager/tickets/', ManagerTicketsView.as_view()),
     path('manager/clients-docs/', ClientListWithDocsView.as_view()),
     path('manager/clients-docs/<int:client_id>/', ClientDocumentsView.as_view()),
+    path('manager/summarize/<int:doc_id>/',SummarizeDocumentView.as_view()),
 
     #Client
     path('client/upload/',UploadDocView.as_view()),

@@ -5,44 +5,46 @@ import cloudinary.uploader
 
 def upload_client_doc_service(user, files):
     try:
+        client_doc = ClientDocument.objects.filter(client=user).first()
+
         guidelines = files.get("guidelines_doc")
         faq = files.get("faq_doc")
         extra = files.get("extra_doc")
 
-        # Upload properly
         guidelines_upload = cloudinary.uploader.upload(
             guidelines,
-            resource_type="raw",   # 🔥 VERY IMPORTANT
-            type="upload" ,
-            upload_preset="ml_default"
-        )
+            resource_type="auto"
+        )["secure_url"] if guidelines else None
 
         faq_upload = cloudinary.uploader.upload(
             faq,
-            resource_type="raw",
-            type="upload" ,
-            upload_preset="ml_default"
-        )
+            resource_type="auto"
+        )["secure_url"] if faq else None
 
-        extra_upload = None
-        if extra:
-            extra_upload = cloudinary.uploader.upload(
-                extra,
-                resource_type="raw",
-                type="upload" ,
-                upload_preset="ml_default"
+        extra_upload = cloudinary.uploader.upload(
+            extra,
+            resource_type="auto"
+        )["secure_url"] if extra else None
+
+        if client_doc:
+            if guidelines_upload:
+                client_doc.guidelines_doc = guidelines_upload
+            if faq_upload:
+                client_doc.faq_doc = faq_upload
+            if extra_upload:
+                client_doc.extra_doc = extra_upload
+            client_doc.save()
+        else:
+            # Create a new record if none exists
+            ClientDocument.objects.create(
+                client=user,
+                guidelines_doc=guidelines_upload or "",
+                faq_doc=faq_upload or "",
+                extra_doc=extra_upload or None,
             )
 
-        # Save URL instead of file
-        ClientDocument.objects.create(
-            client=user,
-            guidelines_doc=guidelines_upload["secure_url"],
-            faq_doc=faq_upload["secure_url"],
-            extra_doc=extra_upload["secure_url"] if extra_upload else None,
-        )
-
         return {
-            'data': {'message': 'Documents uploaded successfully'},
+            'data': {'message': 'Documents uploaded/updated successfully'},
             'errors': {},
             'status': 201
         }
@@ -81,6 +83,7 @@ def get_client_documents(client_id):
         data=[]
         for doc in docs:
             data.append({
+                'id':doc.id,
                 "guidelines_doc": doc.guidelines_doc if doc.guidelines_doc else None ,
                 "faq_doc": doc.faq_doc if doc.faq_doc else None,
                 "extra_doc": doc.extra_doc if doc.extra_doc else None,

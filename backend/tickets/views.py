@@ -7,7 +7,7 @@ from tickets.services import (create_ticket_service,get_ticket_list_service,get_
                             get_agent_ticket_requests_service,get_agent_ticket_detail_service,get_agent_ongoing_tickets_service,resolve_ticket_service,
                             close_ticket_service,submit_review_service,escalate_ticket_service,get_profile_service,update_profile_service,
                             get_team_lead_tickets_service,get_manager_tickets_service,upload_client_doc_service,get_clients_with_documents,
-                            get_client_documents)
+                            get_client_documents,summarize_document_service)
 
 class CreateTicketView(APIView):
     permission_classes=[IsAuthenticated]
@@ -161,4 +161,11 @@ class ClientDocumentsView(APIView):
 
     def get(self,request,client_id):
         result= get_client_documents(client_id)
+        return return_response(result)
+
+class SummarizeDocumentView(APIView):
+    permission_classes= [IsAuthenticated]
+
+    def post (self,request,doc_id):
+        result= summarize_document_service(request.user,doc_id)
         return return_response(result)

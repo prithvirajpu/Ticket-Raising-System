@@ -42,7 +42,6 @@ const Navbar = () => {
         return [
           { label: 'Dashboard', path: '/manager/dashboard' },
           { label: 'Manage Tickets', path: '/tickets/manager/tickets' },
-          { label: 'Reports', path: '/manager/reports' },
           { label: 'Clients', path: '/manager/clients' },
           { label: 'About', path: '/about' },
         ]

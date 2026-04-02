@@ -121,3 +121,8 @@ export const getClientDocs= async(clientId)=>{
         throw error
     }
 }
+
+export const summarizeAllDocuments=async (docId)=>{
+    const res= await api.post(`/tickets/manager/summarize/${docId}/`)
+    return res.data.data
+}
