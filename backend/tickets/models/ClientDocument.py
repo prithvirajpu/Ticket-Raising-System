@@ -13,3 +13,10 @@ class ClientDocument(models.Model):
 
     def __str__(self):
         return f'{self.client} Documents'
+    
+class DocumentSummary(models.Model):
+    document=models.ForeignKey(ClientDocument,on_delete=models.CASCADE)
+    summary= models.TextField()
+    created_by= models.ForeignKey(User,on_delete=models.CASCADE)
+    assigned_to= models.ForeignKey(User,on_delete=models.SET_NULL,null=True,related_name='assigned_summaries')
+    create_at=models.DateTimeField(auto_now_add=True)

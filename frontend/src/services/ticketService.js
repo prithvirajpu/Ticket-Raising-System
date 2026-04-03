@@ -126,3 +126,8 @@ export const summarizeAllDocuments=async (docId)=>{
     const res= await api.post(`/tickets/manager/summarize/${docId}/`)
     return res.data.data
 }
+
+export const summarySubmit =async (docId,data)=>{
+    const res= await api.post(`/tickets/manager/submit-summary/${docId}/`,data)
+    return res.data.data
+}

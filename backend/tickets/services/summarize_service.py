@@ -1,5 +1,9 @@
-from tickets.models import ClientDocument
+from tickets.models import ClientDocument,DocumentSummary
 from rest_framework import status
+from django.contrib.auth import get_user_model
+User= get_user_model()
+
+from core_app.constants import UserRole
 
 import requests
 import PyPDF2
@@ -134,6 +138,48 @@ def summarize_document_service(user, doc_id):
         print(f"❌ Summarize service crashed for doc_id={doc_id}")
         print(traceback.format_exc())
         
+        return {
+            'data': {},
+            'errors': {'details': str(e)},
+            'status': status.HTTP_500_INTERNAL_SERVER_ERROR
+        }
+    
+def submit_summary_service(request, doc_id):
+    try:
+        summary_text = request.data.get('summary')
+        if not summary_text:
+            return {
+                'data': {},
+                'errors': {"details": "Summary is required"},
+                'status': status.HTTP_400_BAD_REQUEST
+            }
+
+        doc = ClientDocument.objects.get(id=doc_id)
+        client_profile = doc.client.client
+
+        # Get the team lead for this client
+        team_lead = User.objects.filter(role=UserRole.TEAM_LEAD, client=client_profile).first()
+
+        # Update if exists, otherwise create
+        summary_obj, created = DocumentSummary.objects.update_or_create(
+            document=doc,
+            defaults={
+                'summary': summary_text,
+                'created_by': request.user,
+                'assigned_to': team_lead
+            }
+        )
+
+        return {
+            'data': {'message': summary_obj.id, 'created': created},
+            'errors': {},
+            'status': status.HTTP_200_OK
+        }
+
+    except Exception as e:
+        print("❌ Submit Summary Error:")
+        import traceback
+        print(traceback.format_exc())
         return {
             'data': {},
             'errors': {'details': str(e)},
