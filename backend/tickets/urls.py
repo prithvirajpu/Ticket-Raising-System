@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (CreateTicketView,TicketListView,TicketDetailView,AcceptTicketView,RejectTicketView,AgentTicketRequestsView,AgentTicketDetailView
                 ,AgentOngoingTicketsView,ResolveTicketView,TicketCloseView,SubmitReviewView,EscalatedTicketView,UserProfileView,UpdateProfileView,
                  TeamLeadTicketView,ManagerTicketsView,UploadDocView,ClientListWithDocsView,ClientDocumentsView,SummarizeDocumentView,SubmitSummaryView,
-                   )
+                  TeamLeadSummaryView,SummaryTeamLeadView,SubmitSummaryToAgentsView )
 urlpatterns=[
     #users
     path('create/',CreateTicketView.as_view()),
@@ -26,6 +26,10 @@ urlpatterns=[
 
     #Team lead
     path('team-lead/assigned-tickets/',TeamLeadTicketView.as_view()),
+    path('team-lead/summaries/',TeamLeadSummaryView.as_view()),
+    path('team-lead/generate-agent-summary/<int:summary_id>/',SummaryTeamLeadView.as_view()),
+    path('team-lead/submit-summary/<int:summary_id>/',SubmitSummaryToAgentsView.as_view()),
+
 
     #Manager
     path('manager/tickets/', ManagerTicketsView.as_view()),

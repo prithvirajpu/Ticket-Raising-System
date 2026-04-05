@@ -163,6 +163,7 @@ def submit_summary_service(request, doc_id):
         # Update if exists, otherwise create
         summary_obj, created = DocumentSummary.objects.update_or_create(
             document=doc,
+            summary_type='manager',
             defaults={
                 'summary': summary_text,
                 'created_by': request.user,

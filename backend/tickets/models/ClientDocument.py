@@ -15,8 +15,14 @@ class ClientDocument(models.Model):
         return f'{self.client} Documents'
     
 class DocumentSummary(models.Model):
+    SUMMARY_TYPE_CHOICES = [
+        ("manager", "Manager Summary"),
+        ("agent", "Agent Summary"),
+    ]
+
     document=models.ForeignKey(ClientDocument,on_delete=models.CASCADE)
     summary= models.TextField()
+    summary_type= models.CharField(choices=SUMMARY_TYPE_CHOICES,max_length=20,default='manager')
     created_by= models.ForeignKey(User,on_delete=models.CASCADE)
     assigned_to= models.ForeignKey(User,on_delete=models.SET_NULL,null=True,related_name='assigned_summaries')
-    create_at=models.DateTimeField(auto_now_add=True)
+    created_at=models.DateTimeField(auto_now_add=True)

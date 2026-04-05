@@ -131,3 +131,18 @@ export const summarySubmit =async (docId,data)=>{
     const res= await api.post(`/tickets/manager/submit-summary/${docId}/`,data)
     return res.data.data
 }
+
+export const getTeamLeadSummaries = async() =>{
+    const res = await api.get('/tickets/team-lead/summaries/');
+    return res.data.data
+}
+
+export const generateAgentSummary= async (summary_id)=>{
+    const res= await api.post(`/tickets/team-lead/generate-agent-summary/${summary_id}/`);
+    return res.data.data
+}
+
+export const submitAgentSummary= async (summary_id,data)=>{
+    const res = await api.post(`/tickets/team-lead/submit-summary/${summary_id}/`,data);
+    return res.data.data
+}

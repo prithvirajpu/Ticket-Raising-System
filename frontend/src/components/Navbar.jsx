@@ -34,7 +34,7 @@ const Navbar = () => {
         return [
           { label: 'Dashboard', path: '/team-lead/dashboard' },
           { label: 'Team Tickets', path: '/team-lead/assigned-tickets' },
-          { label: 'Reports', path: '/team-lead/reports' },
+          { label: 'Summary', path: '/team-lead/summaries' },
           { label: 'About', path: '/about' },
         ]
 

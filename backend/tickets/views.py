@@ -7,7 +7,8 @@ from tickets.services import (create_ticket_service,get_ticket_list_service,get_
                             get_agent_ticket_requests_service,get_agent_ticket_detail_service,get_agent_ongoing_tickets_service,resolve_ticket_service,
                             close_ticket_service,submit_review_service,escalate_ticket_service,get_profile_service,update_profile_service,
                             get_team_lead_tickets_service,get_manager_tickets_service,upload_client_doc_service,get_clients_with_documents,
-                            get_client_documents,summarize_document_service,submit_summary_service)
+                            get_client_documents,summarize_document_service,submit_summary_service,get_teamlead_summaries_service,generate_agent_summary_service,
+                            submit_agent_summary_service,)
 
 class CreateTicketView(APIView):
     permission_classes=[IsAuthenticated]
@@ -175,4 +176,25 @@ class SubmitSummaryView(APIView):
 
     def post (self,request,doc_id):
         result= submit_summary_service(request,doc_id)
+        return return_response(result)
+
+class TeamLeadSummaryView(APIView):
+    permission_classes =[IsAuthenticated]
+
+    def get(self,request):
+        result= get_teamlead_summaries_service(request)
+        return return_response(result)
+    
+class SummaryTeamLeadView(APIView):
+    permission_classes= [IsAuthenticated]
+
+    def post(self,request,summary_id):
+        result= generate_agent_summary_service(request,summary_id)
+        return return_response(result)
+    
+class SubmitSummaryToAgentsView(APIView):
+    permission_classes=[IsAuthenticated]
+    
+    def post(self,request,summary_id):
+        result=submit_agent_summary_service(request,summary_id)
         return return_response(result)

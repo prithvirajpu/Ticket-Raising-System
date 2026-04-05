@@ -37,6 +37,8 @@ import UploadFile from './pages/tickets/client/UploadFile';
 import ClientListPage from './pages/tickets/manager/ClientListPage';
 import ClientDocumentsPage from './pages/tickets/manager/ClientDocumentsPage';
 import SummaryPage from './pages/tickets/manager/SummaryPage';
+import TeamLeadSummaryPage from './pages/tickets/team_lead/TeamLeadSummaryPage';
+import AgentSummaryPage from './pages/tickets/team_lead/AgentSummaryPage';
 
 
 const App = () => {
@@ -84,6 +86,12 @@ const App = () => {
             </ProtectedRoute>} />
             <Route path='/team-lead/tickets/:id' element={<ProtectedRoute role={['TEAM_LEAD']}>
                 <TeamLeadTicketDetail />
+            </ProtectedRoute>} />
+            <Route path='/team-lead/summaries' element={<ProtectedRoute role={['TEAM_LEAD']}>
+                <TeamLeadSummaryPage />
+            </ProtectedRoute>} />
+            <Route path='/agent-summary/:summary_id' element={<ProtectedRoute role={['TEAM_LEAD']}>
+                <AgentSummaryPage />
             </ProtectedRoute>} />
             <Route path='/manager/dashboard' element={<ProtectedRoute role={['MANAGER']}>
                 <ManagerDashboard />
