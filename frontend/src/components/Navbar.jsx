@@ -27,6 +27,7 @@ const Navbar = () => {
           { label: 'Dashboard', path: '/agent/dashboard' },
           { label: 'Manage Tickets', path: '/agents/requests/' },
           { label: 'Assigned Tickets', path: '/agent/assigned-tickets' },
+          { label: 'Summary', path: '/agent/summary' },
           { label: 'About', path: '/about' },
         ]
 

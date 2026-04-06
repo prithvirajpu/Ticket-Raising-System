@@ -99,13 +99,13 @@ const SummaryPage = () => {
                         }}
                         className="flex items-center gap-1.5 px-3 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg text-sm font-medium transition"
                       >
-                        <X size={16} /> Cancel
+                       Cancel
                       </button>
                       <button
                         onClick={handleSave}
                         className="flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-bold shadow-sm transition"
                       >
-                        <Check size={16} /> Save 
+                         Save 
                       </button>
                     </div>
                   )}

@@ -39,6 +39,7 @@ import ClientDocumentsPage from './pages/tickets/manager/ClientDocumentsPage';
 import SummaryPage from './pages/tickets/manager/SummaryPage';
 import TeamLeadSummaryPage from './pages/tickets/team_lead/TeamLeadSummaryPage';
 import AgentSummaryPage from './pages/tickets/team_lead/AgentSummaryPage';
+import AgentSummary from './pages/tickets/agent/AgentSummary';
 
 
 const App = () => {
@@ -144,6 +145,9 @@ const App = () => {
             </ProtectedRoute>} />
             <Route path='/agent/ticket-detail/:id' element={<ProtectedRoute role={['AGENT']}>
                 <AgentTicketDetail />
+            </ProtectedRoute>} />
+            <Route path='/agent/summary' element={<ProtectedRoute role={['AGENT']}>
+                <AgentSummary />
             </ProtectedRoute>} />
             
            

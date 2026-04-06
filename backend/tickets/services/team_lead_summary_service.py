@@ -1,4 +1,4 @@
-from tickets.models import DocumentSummary
+from tickets.models import DocumentSummary,Ticket
 from rest_framework import status
 from django.contrib.auth import get_user_model
 import os
@@ -132,3 +132,19 @@ def submit_agent_summary_service(request, summary_id):
             'errors': {'details': str(e)},
             'status': status.HTTP_500_INTERNAL_SERVER_ERROR
         }
+    
+def agent_summary_service(request):
+    user=request.user
+    summary= DocumentSummary.objects.filter(assigned_to=user).first()
+    if not summary:
+        return {
+            "data": None,
+            "errors":{'details':"No summary found"},
+            'status':status.HTTP_404_NOT_FOUND
+            }
+    return {
+        'data':{'id':summary.id,
+            'summary':summary.summary},
+        'errors':{},
+        'status':status.HTTP_200_OK
+    }

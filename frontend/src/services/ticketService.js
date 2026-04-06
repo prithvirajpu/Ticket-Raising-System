@@ -146,3 +146,41 @@ export const submitAgentSummary= async (summary_id,data)=>{
     const res = await api.post(`/tickets/team-lead/submit-summary/${summary_id}/`,data);
     return res.data.data
 }
+
+export const getAgentSummary=async ()=>{
+    try {
+        const res= await api.get(`/tickets/agent/summary/`)
+        return res.data.data
+    } catch (error) {
+        console.log(error ||'something wrong')
+    }
+}
+
+export const getDashboard=async (role)=>{
+    try {
+        const res= await api.get('/tickets/dashboard/')
+        return res.data.data
+    } catch (error) {
+        alert('something wrong in getDashboard')
+    }
+}
+
+export const startSession= async()=>{
+    try {
+        const res= await api.post('/tickets/agent/start-session/');
+    return res.data.data
+    } catch (error) {
+        alert('startsession error')
+    }
+}
+
+export const sendHeartbeat= async(sessionId)=>{
+    await api.post('/tickets/agent/heartbeat/',{
+        session_id:sessionId
+    });
+
+}
+export const endSession = async()=>{
+    await api.post('/tickets/agent/end-session/');
+
+}

@@ -1,4 +1,5 @@
 from rest_framework.views import APIView
+from core_app.permissions import IsAgent
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from core_app.utils import return_response
@@ -8,7 +9,8 @@ from tickets.services import (create_ticket_service,get_ticket_list_service,get_
                             close_ticket_service,submit_review_service,escalate_ticket_service,get_profile_service,update_profile_service,
                             get_team_lead_tickets_service,get_manager_tickets_service,upload_client_doc_service,get_clients_with_documents,
                             get_client_documents,summarize_document_service,submit_summary_service,get_teamlead_summaries_service,generate_agent_summary_service,
-                            submit_agent_summary_service,)
+                            submit_agent_summary_service,agent_summary_service,dashboard_service,start_session_service,heartbeat_service,
+                            end_session_service)
 
 class CreateTicketView(APIView):
     permission_classes=[IsAuthenticated]
@@ -197,4 +199,40 @@ class SubmitSummaryToAgentsView(APIView):
     
     def post(self,request,summary_id):
         result=submit_agent_summary_service(request,summary_id)
+        return return_response(result)
+    
+class AgentSummaryView(APIView):
+    permission_classes= [IsAuthenticated]
+
+    def get(self,request):
+        result= agent_summary_service(request)
+        return return_response(result)
+    
+class DashboardView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def get(self,request):
+        role=request.user.role
+        result=dashboard_service(request,role)
+        return return_response(result)
+    
+class StartSessionView(APIView):
+    permission_classes= [IsAgent,IsAuthenticated]
+
+    def post (self,request):
+        result= start_session_service(request)
+        return return_response(result)
+    
+class HeartbeatView(APIView):
+    permission_classes=[IsAgent,IsAuthenticated]
+    
+    def post(self,request):
+        result=heartbeat_service(request)
+        return return_response(result)
+    
+class EndSessionView(APIView):
+    permission_classes= [IsAgent,IsAuthenticated]
+
+    def post (self,request):
+        result= end_session_service(request)
         return return_response(result)

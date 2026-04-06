@@ -118,15 +118,14 @@ const AgentSummaryPage = () => {
                     <div className="flex gap-2">
                       <button
                         onClick={handleCancel}
-                        className="flex items-center gap-1.5 px-3 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg text-sm font-medium transition"
-                      >
-                        <X size={16} /> Cancel
+                        className="flex items-center gap-1.5 px-3 py-2 text-gray-700 hover:text-gray-700 hover:bg-gray-100 rounded-lg text-sm font-medium transition"
+                      > Cancel
                       </button>
                       <button
                         onClick={handleSave}
                         className="flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-bold shadow-sm transition"
                       >
-                        <Check size={16} /> Save 
+                         Save 
                       </button>
                     </div>
                   )}
@@ -200,15 +199,7 @@ const AgentSummaryPage = () => {
             <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 sticky top-6">
               <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">Summary Metadata</h4>
               <div className="space-y-5">
-                <div className="flex items-start gap-4">
-                  <div className="p-2 bg-white rounded-lg border border-gray-100 shadow-sm">
-                    <Hash size={16} className="text-blue-500" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 font-medium">Session ID</p>
-                    <p className="text-sm font-mono text-gray-700 bg-gray-100 px-1.5 rounded">{summary_id || 'N/A'}</p>
-                  </div>
-                </div>
+                
                 <div className="flex items-start gap-4">
                   <div className="p-2 bg-white rounded-lg border border-gray-100 shadow-sm">
                     <Calendar size={16} className="text-blue-500" />

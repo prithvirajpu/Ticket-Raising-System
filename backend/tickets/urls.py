@@ -2,8 +2,10 @@ from django.urls import path
 from .views import (CreateTicketView,TicketListView,TicketDetailView,AcceptTicketView,RejectTicketView,AgentTicketRequestsView,AgentTicketDetailView
                 ,AgentOngoingTicketsView,ResolveTicketView,TicketCloseView,SubmitReviewView,EscalatedTicketView,UserProfileView,UpdateProfileView,
                  TeamLeadTicketView,ManagerTicketsView,UploadDocView,ClientListWithDocsView,ClientDocumentsView,SummarizeDocumentView,SubmitSummaryView,
-                  TeamLeadSummaryView,SummaryTeamLeadView,SubmitSummaryToAgentsView )
+                  TeamLeadSummaryView,SummaryTeamLeadView,SubmitSummaryToAgentsView,AgentSummaryView,DashboardView,StartSessionView,HeartbeatView,
+                   EndSessionView )
 urlpatterns=[
+
     #users
     path('create/',CreateTicketView.as_view()),
     path('list/',TicketListView.as_view()),
@@ -18,18 +20,21 @@ urlpatterns=[
     path('agents/in-progress/',AgentOngoingTicketsView.as_view()),
     path('agents/detail/<int:ticket_id>/',AgentTicketDetailView.as_view()),
     path('<int:ticket_id>/escalate/',EscalatedTicketView.as_view()),
+    path('agent/start-session/',StartSessionView.as_view()),
+    path('agent/heartbeat/', HeartbeatView.as_view()),
+    path('agent/end-session/', EndSessionView.as_view()),
 
     path('<int:ticket_id>/accept/',AcceptTicketView.as_view()),
     path('<int:ticket_id>/reject/',RejectTicketView.as_view()),
 
     path('<int:ticket_id>/resolve/',ResolveTicketView.as_view()),
+    path('agent/summary/',AgentSummaryView.as_view()),
 
     #Team lead
     path('team-lead/assigned-tickets/',TeamLeadTicketView.as_view()),
     path('team-lead/summaries/',TeamLeadSummaryView.as_view()),
     path('team-lead/generate-agent-summary/<int:summary_id>/',SummaryTeamLeadView.as_view()),
     path('team-lead/submit-summary/<int:summary_id>/',SubmitSummaryToAgentsView.as_view()),
-
 
     #Manager
     path('manager/tickets/', ManagerTicketsView.as_view()),
@@ -41,4 +46,6 @@ urlpatterns=[
     #Client
     path('client/upload/',UploadDocView.as_view()),
 
+    #Dashboard
+    path('dashboard/',DashboardView.as_view()),
 ]
