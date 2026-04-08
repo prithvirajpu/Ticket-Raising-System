@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Loader from "../../../components/modals/Loader";
 import DashboardLayout from "../../../layouts/DashboardLayout";
-import { generateAgentSummary, submitAgentSummary } from "../../../services/ticketService";
+import { generateAgentSummary, generateFakeTickets, submitAgentSummary } from "../../../services/ticketService";
 import { 
   Check, X, Send, Edit3, ArrowLeft, Sparkles, 
   FileText, Calendar, Hash, User 
 } from "lucide-react";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
+import { notifySuccess } from "../../../utils/notify";
 
 const AgentSummaryPage = () => {
   const { summary_id } = useParams();
@@ -59,19 +60,19 @@ const AgentSummaryPage = () => {
       setSaving(true);
       const finalData= isEditing?editedData:data;
       await submitAgentSummary(summary_id, { summary: finalData });
+      await generateFakeTickets(finalData)
       setData(finalData)
       setIsEditing(false)
       setIsModalOpen(false);
-      // Optional: navigate away or show success toast
+      notifySuccess('Summary submitted and Tickets generated.')
     } catch (err) {
       console.error(err);
-      alert("Failed to submit summary");
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return <Loader />;
+  if (loading || saving) return <Loader />;
 
   return (
     <DashboardLayout title="Knowledge Base" subtitle="Agent Training Intelligence">
@@ -187,7 +188,7 @@ const AgentSummaryPage = () => {
                     }`}
                   >
                     <Send size={18} />
-                    Submit Agent Summary
+                    Submit Agent Summary & Generate tickets
                   </button>
                 </div>
               </div>
@@ -229,7 +230,7 @@ const AgentSummaryPage = () => {
       <ConfirmModal
         isOpen={isModalOpen}
         title="Submit Agent Summary?"
-        message="Are you sure you want to submit this summary? This will notify the training department for review."
+        message="Are you sure you want to submit this summary and generate fake tickets? This will notify the training department for review."
         confirmText="Yes, Submit"
         loading={saving}
         onConfirm={handleSubmit}

@@ -184,3 +184,34 @@ export const endSession = async()=>{
     await api.post('/tickets/agent/end-session/');
 
 }
+
+export const generateFakeTickets= async (summary)=>{
+    try {
+        const res= await api.post('/tickets/generate-fake-tickets/',{
+        summary:summary,
+        count:3,
+    });
+    return res.data.data
+    } catch (error) {
+        alert('generate ticket--')
+    }
+}
+
+export const getAgentFakeTickets= async()=>{
+    try {
+        const res= await api.get('/tickets/agent/fake-tickets/');
+    return res.data.data
+    } catch (error) {
+        alert('fake ticket fetch error')
+    }
+}
+
+export const getFakeTicketDetail = async(id)=>{
+    try {
+        const res= await api.get(`/tickets/agent/fake-tickets/${id}/`);
+        console.log(res.data.data.message)
+    return res.data.data
+    } catch (error) {
+        alert('fake ticket detail page error')
+    }
+}

@@ -1,10 +1,12 @@
-import React from 'react'
+import DashboardLayout from "../../layouts/DashboardLayout"
 
 const TeamLeadDashboard = () => {
   return (
-    <div>
-      
-    </div>
+    <DashboardLayout 
+    title="Team Lead Dashboard" 
+    subtitle="Manage your assigned tickets">
+
+    </DashboardLayout>
   )
 }
 

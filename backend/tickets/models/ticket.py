@@ -31,6 +31,7 @@ class Ticket(models.Model):
     issue_type=models.CharField(max_length=100)
     priority=models.CharField(max_length=10,choices=PRIORITY_CHOICES,default='MEDIUM')
     status=models.CharField(max_length=20,choices=STATUS_CHOICES,default='OPEN')
+    is_ai_generated = models.BooleanField(default=False)
 
     subject=models.CharField(max_length=255)
     description=models.TextField()

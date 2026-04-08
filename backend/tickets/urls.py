@@ -3,7 +3,7 @@ from .views import (CreateTicketView,TicketListView,TicketDetailView,AcceptTicke
                 ,AgentOngoingTicketsView,ResolveTicketView,TicketCloseView,SubmitReviewView,EscalatedTicketView,UserProfileView,UpdateProfileView,
                  TeamLeadTicketView,ManagerTicketsView,UploadDocView,ClientListWithDocsView,ClientDocumentsView,SummarizeDocumentView,SubmitSummaryView,
                   TeamLeadSummaryView,SummaryTeamLeadView,SubmitSummaryToAgentsView,AgentSummaryView,DashboardView,StartSessionView,HeartbeatView,
-                   EndSessionView )
+                   EndSessionView,GenerateFakeTicketView,AgentFakeTicketsView,AgentFakeTicketDetailView )
 urlpatterns=[
 
     #users
@@ -29,6 +29,8 @@ urlpatterns=[
 
     path('<int:ticket_id>/resolve/',ResolveTicketView.as_view()),
     path('agent/summary/',AgentSummaryView.as_view()),
+    path('agent/fake-tickets/',AgentFakeTicketsView.as_view()),
+    path('agent/fake-tickets/<int:id>/',AgentFakeTicketDetailView.as_view()),
 
     #Team lead
     path('team-lead/assigned-tickets/',TeamLeadTicketView.as_view()),
@@ -42,6 +44,7 @@ urlpatterns=[
     path('manager/clients-docs/<int:client_id>/', ClientDocumentsView.as_view()),
     path('manager/summarize/<int:doc_id>/',SummarizeDocumentView.as_view()),
     path('manager/submit-summary/<int:doc_id>/',SubmitSummaryView.as_view()),
+    path('generate-fake-tickets/',GenerateFakeTicketView.as_view()),
 
     #Client
     path('client/upload/',UploadDocView.as_view()),

@@ -10,7 +10,7 @@ from tickets.services import (create_ticket_service,get_ticket_list_service,get_
                             get_team_lead_tickets_service,get_manager_tickets_service,upload_client_doc_service,get_clients_with_documents,
                             get_client_documents,summarize_document_service,submit_summary_service,get_teamlead_summaries_service,generate_agent_summary_service,
                             submit_agent_summary_service,agent_summary_service,dashboard_service,start_session_service,heartbeat_service,
-                            end_session_service)
+                            end_session_service,generate_fake_ticket_service,fetch_fake_tickets_service,get_fake_ticket_detail_service)
 
 class CreateTicketView(APIView):
     permission_classes=[IsAuthenticated]
@@ -235,4 +235,25 @@ class EndSessionView(APIView):
 
     def post (self,request):
         result= end_session_service(request)
+        return return_response(result)
+    
+class GenerateFakeTicketView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self,request):
+        result=generate_fake_ticket_service(request)
+        return return_response(result)
+    
+class AgentFakeTicketsView(APIView):
+    permission_classes= [IsAuthenticated]
+
+    def get(self,request):
+        result=fetch_fake_tickets_service(request.user)
+        return return_response(result)
+
+class AgentFakeTicketDetailView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def get(self,request,id):
+        result=get_fake_ticket_detail_service(request.user,id)
         return return_response(result)

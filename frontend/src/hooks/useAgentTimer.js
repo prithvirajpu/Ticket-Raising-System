@@ -1,18 +1,26 @@
 // hooks/useAgentTimer.js - FIXED
 import { useEffect, useState } from "react";
 import { startSession, sendHeartbeat } from "../services/ticketService";
+import {useAuth} from '../auth/AuthContext'
 
 const useAgentTimer = () => {
   const [sessionId, setSessionId] = useState(null);
   const [isActive, setIsActive] = useState(true);
   const [seconds, setSeconds] = useState(0);
+  const { userRole } = useAuth();
+  
+  // ✅ Skip for non-agents
+  if (userRole !== 'AGENT') {
+    console.log('Timer skipped - not AGENT role');
+    return 0;
+  }
 
   // 1. Initialize session (runs once)
   useEffect(() => {
     const init = async () => {
       try {
         // Always call backend to get latest session or create new one
-        const res = await startSession();
+        const res = await startSession(userRole);
         const id = res?.message?.session_id;
         const totalSeconds = res?.message?.total_seconds || 0;
 

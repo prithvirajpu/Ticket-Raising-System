@@ -193,3 +193,4 @@ def resolve_ticket_service(user,ticket_id):
             "errors": {"details": str(e)},
             "status": status.HTTP_500_INTERNAL_SERVER_ERROR
         }
+    

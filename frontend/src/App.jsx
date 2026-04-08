@@ -40,6 +40,9 @@ import SummaryPage from './pages/tickets/manager/SummaryPage';
 import TeamLeadSummaryPage from './pages/tickets/team_lead/TeamLeadSummaryPage';
 import AgentSummaryPage from './pages/tickets/team_lead/AgentSummaryPage';
 import AgentSummary from './pages/tickets/agent/AgentSummary';
+import TeamLeadDashboard from './pages/dashboards/TeamLeadDashboard';
+import AgentFakeTicketsPage from './pages/tickets/agent/AgentFakeTicketsPage ';
+import AgentFakeTicketDetail from './pages/tickets/agent/AgentFakeTicketDetail';
 
 
 const App = () => {
@@ -80,7 +83,7 @@ const App = () => {
                 <AgentDashboard />
             </ProtectedRoute>} />
             <Route path='/team-lead/dashboard' element={<ProtectedRoute role={['TEAM_LEAD']}>
-                <AgentDashboard />
+                <TeamLeadDashboard />
             </ProtectedRoute>} />
             <Route path='/team-lead/assigned-tickets' element={<ProtectedRoute role={['TEAM_LEAD']}>
                 <TeamLeadTickets />
@@ -148,6 +151,12 @@ const App = () => {
             </ProtectedRoute>} />
             <Route path='/agent/summary' element={<ProtectedRoute role={['AGENT']}>
                 <AgentSummary />
+            </ProtectedRoute>} />
+            <Route path='/agent/practice' element={<ProtectedRoute role={['AGENT']}>
+                <AgentFakeTicketsPage />
+            </ProtectedRoute>} />
+            <Route path='/agent/fake-tickets/:id' element={<ProtectedRoute role={['AGENT']}>
+                <AgentFakeTicketDetail />
             </ProtectedRoute>} />
             
            

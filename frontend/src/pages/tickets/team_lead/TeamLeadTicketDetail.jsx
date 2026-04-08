@@ -259,7 +259,7 @@ const TeamLeadTicketDetail = () => {
       <ConfirmModal
         isOpen={escalateModalOpen}
         title="Escalate Ticket"
-        message={`Are you sure you want to escalate ticket #${ticket.ticket_code || id}? This will notify your team lead.`}
+        message={`Are you sure you want to escalate ticket #${ticket.ticket_code || id}? This will notify your Manager.`}
         confirmText="Yes, Escalate"
         cancelText="Cancel"
         loadingText="Escalating..."

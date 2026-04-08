@@ -58,6 +58,12 @@ def return_response(result):
     """
     Checks the service result dict .and for same pattern .
     """
+    if result is None:
+        result = {
+            "data": None,
+            "errors": {"details": "No data available"},
+            "status": 200  # Or 400/404 as needed
+        }
     return Response(
         {
             "data": result.get("data",None),
