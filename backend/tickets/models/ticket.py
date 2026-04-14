@@ -38,6 +38,22 @@ class Ticket(models.Model):
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)
 
+    def save(self, *args, **kwargs):
+        if self.pk:
+            old = Ticket.objects.filter(pk=self.pk).first()
+
+            if old and old.assigned_to != self.assigned_to:
+                print("\n🔥🔥 ASSIGNED_TO CHANGED")
+                print("OLD:", old.assigned_to)
+                print("NEW:", self.assigned_to)
+
+                import traceback
+                traceback.print_stack()
+
+                print("\n🔥 CALL CONTEXT TRACE END\n")
+
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.ticket_code
     

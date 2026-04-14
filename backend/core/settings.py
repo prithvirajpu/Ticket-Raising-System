@@ -28,6 +28,8 @@ INSTALLED_APPS = [
 
     'cloudinary',
     'cloudinary_storage',
+
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -198,3 +200,14 @@ STATIC_URL = 'static/'
 AUTH_USER_MODEL='users.User'
 
 GOOGLE_CLIENT_ID = os.getenv('My_GOOGLE_CLIENT_ID')
+
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+
+CELERY_BEAT_SCHEDULE = {
+    "auto-assign-every-1-minute": {
+        "task": "tickets.tasks.auto_assign_task",
+        "schedule": 60.0,
+    },
+}

@@ -1,55 +1,55 @@
-from django.db.models import Count, Q
-from django.utils import timezone
-from django.db import transaction
-from tickets.models import TicketAssignment,Ticket
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
-
 def auto_assign_service():
+    from django.utils import timezone
+    from django.db import transaction
+    from tickets.models import TicketAssignment, Ticket
+    from tickets.utils import get_next_available_agent
+    import logging
+    logger = logging.getLogger(__name__)
 
-    expired_ticket_ids = TicketAssignment.objects.filter(
+    logger.info("AUTO ASSIGN SERVICE TRIGGERED")
+    
+
+
+    expired_assignments = TicketAssignment.objects.filter(
         status="PENDING",
         expires_at__lt=timezone.now()
-    ).values_list("ticket_id", flat=True).distinct()
+    )
+    logger.info(f"Expired count: {expired_assignments.count()}")
 
-    for ticket_id in expired_ticket_ids:
+    print("EXPIRED FOUND:", expired_assignments.count())
+
+    for assignment in expired_assignments:
 
         with transaction.atomic():
 
-            TicketAssignment.objects.filter(
-                ticket_id=ticket_id,
-                status="PENDING"
-            ).update(status="EXPIRED")
+            # lock fresh row
+            assignment = TicketAssignment.objects.select_for_update().get(id=assignment.id)
+            ticket = Ticket.objects.select_for_update().get(id=assignment.ticket_id)
 
-            ticket = Ticket.objects.select_for_update().get(id=ticket_id)
-
-            if ticket.assigned_to:
+            # safety check
+            if ticket.assigned_to_id:
                 continue
 
-            agents_who_received = TicketAssignment.objects.filter(
-                ticket_id=ticket_id
-            ).values_list("agent_id", flat=True)
+            print("Processing assignment:", assignment.id)
 
-            least_busy_agent = User.objects.filter(
-                role="AGENT",
-                is_active=True
-            ).exclude(
-                id__in=agents_who_received
-            ).annotate(
-                active_tickets=Count(
-                    "assigned_tickets",
-                    filter=Q(assigned_tickets__status="IN_PROGRESS")
-                )
-            ).order_by("active_tickets").first()
+            assignment.status = "EXPIRED"
+            assignment.save(update_fields=["status"])
 
-            if not least_busy_agent:
+            agent = get_next_available_agent(ticket)
+
+            print("Selected agent:", agent)
+
+            if not agent:
                 continue
 
-            ticket.assigned_to = least_busy_agent
+            ticket.assigned_to = agent
             ticket.status = "IN_PROGRESS"
             ticket.save(update_fields=["assigned_to", "status"])
 
-            TicketAssignment.objects.filter(
-                ticket=ticket
-            ).update(status="CANCELLED")
+            TicketAssignment.objects.create(
+                ticket=ticket,
+                agent=agent,
+                status="ACCEPTED"
+            )
+
+            print("🔥 AUTO ASSIGNED:", ticket.id, "->", agent.id)

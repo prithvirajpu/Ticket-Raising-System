@@ -27,9 +27,10 @@ class AgentTicketRequestSerializer(serializers.ModelSerializer):
     ticket_id = serializers.IntegerField(source="ticket.id")
     ticket_code = serializers.CharField(source="ticket.ticket_code")
     subject = serializers.CharField(source="ticket.subject")
+    description = serializers.CharField(source="ticket.description")
     priority = serializers.CharField(source="ticket.priority")
     created_at = serializers.DateTimeField(source="ticket.created_at")
 
     class Meta:
         model=TicketAssignment
-        fields=['ticket_id',"ticket_code","subject","priority","created_at","status",]
+        fields=['ticket_id',"ticket_code","subject","description","priority","created_at","status",]

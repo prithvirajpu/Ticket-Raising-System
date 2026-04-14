@@ -11,11 +11,11 @@ def attach_sla_to_ticket(ticket):
     sla_policy=SLAPolicy.objects.filter(plan=subscription.plan,priority=ticket.priority,is_active=True).first()
 
     if not sla_policy:
-        return None
+        raise Exception('No SLA policy found for this plan and priority')
     
     deadline=timezone.now()+ timedelta(
         minutes=sla_policy.resolution_time_minutes
     )
-    sla=TicketSLATracking.objects.create(ticket=ticket,sla_policy=sla_policy,sla_deadline=deadline,sla_status="ON_TRACK")
+    sla,crated=TicketSLATracking.objects.get_or_create(ticket=ticket,sla_policy=sla_policy,sla_deadline=deadline,sla_status="ON_TRACK")
     
     return sla

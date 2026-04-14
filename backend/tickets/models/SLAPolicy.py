@@ -15,6 +15,9 @@ class SLAPolicy(models.Model):
     max_reassign_attempts=models.IntegerField(default=3)
     is_active=models.BooleanField(default=True)
 
+    def __str__(self):
+        return f"{self.plan.name} - {self.priority}"
+
 class TicketSLATracking(models.Model):
     SLA_TRACKS=[
         ("ON_TRACK", "On Track"),

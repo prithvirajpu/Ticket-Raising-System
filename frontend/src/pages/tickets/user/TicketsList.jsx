@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { getTickets } from '../../../services/ticketService'
 import DashboardLayout from '../../../layouts/DashboardLayout'
 import { Plus, Search, ChevronDown, ChevronRight, ArrowUpDown } from 'lucide-react'
+import Pagination from '../../../components/Pagination'
 
 const TicketsList = () => {
     const [tickets, setTickets] = useState([])
@@ -15,17 +16,21 @@ const TicketsList = () => {
     const [searchTimeout, setSearchTimeout] = useState(null);
     const navigate = useNavigate();
 
+    const [page, setPage] = useState(1);
+    const [pagination, setPagination] = useState({});
+
     useEffect(() => {
-        fetchTickets('', 'newest');  
-    }, []);
+        fetchTickets(searchTerm,sort,page);  
+    }, [page]);
 
     useEffect(() => {
         if (searchTerm){
             clearTimeout(searchTimeout);
         }
         const timeoutId= setTimeout(()=>{
-            fetchTickets(searchTerm,sort);
-        },1000)
+            setPage(1)
+            fetchTickets(searchTerm,sort,1);
+        },500)
         setSearchTimeout(timeoutId);
         return ()=> clearTimeout(timeoutId);
 
@@ -34,11 +39,12 @@ const TicketsList = () => {
     const handleSearchChange=(e)=>{
         setSearchTerm(e.target.value)
     }
-    const fetchTickets = async (search='',sortType='newest') => {
+    const fetchTickets = async (search='',sortType='newest',pageNum=1) => {
         setLoading(true)
         try {
-            const data = await getTickets({search,sort:sortType});
+            const data = await getTickets({search,sort:sortType,page:pageNum});
             setTickets(data.message || data)
+            setPagination(data.pagination || {})
             setActiveSortBtn(sortType)
         } catch (error) {
             console.error(error)
@@ -51,6 +57,9 @@ const TicketsList = () => {
         setSort(newSort);
         setActiveSortBtn(newSort);
     }
+    const handlePageChange = (newPage) => {
+        fetchTickets(searchTerm, sort, newPage);
+    };
 
     const getStatusBadge = (status) => {
         return (
@@ -156,6 +165,13 @@ const TicketsList = () => {
                     </div>
                 </div>
             </div>
+            <Pagination
+                currentPage={pagination.current_page || 1}
+                totalPages={pagination.total_pages || 1}
+                hasNext={pagination.has_next}
+                hasPrevious={pagination.has_previous}
+                onPageChange={handlePageChange}
+            />
         </DashboardLayout>
     )
 }

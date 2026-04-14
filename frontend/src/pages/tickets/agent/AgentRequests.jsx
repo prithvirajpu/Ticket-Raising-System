@@ -3,6 +3,7 @@ import { acceptTicket, getAgentRequests, rejectTicket } from "../../../services/
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import { useNavigate } from "react-router-dom";
 import { Search, ChevronDown } from "lucide-react";
+import ConfirmModal from "../../../components/modals/ConfirmModal";
 
 const AgentRequests = () => {
   const [tickets, setTickets] = useState([]);
@@ -12,6 +13,11 @@ const AgentRequests = () => {
 
   const [searchTerm,setSearchTerm]=useState('')
   const [searchTimeout, setSearchTimeout] = useState(null);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTicketId, setSelectedTicketId] = useState(null);
+  const [actionType, setActionType] = useState(null); 
+  const [modalLoading, setModalLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,6 +46,7 @@ const AgentRequests = () => {
     setLoading(true);
     try {
       const res = await getAgentRequests({search,sort:sortType});
+      console.log(res.message)
       setTickets(res.message || []);
       setActiveSortBtn(sortType);
     } catch (error) {
@@ -55,16 +62,45 @@ const AgentRequests = () => {
     setActiveSortBtn(newSort);
   };
 
-  const handleAccept = async (id) => {
-    await acceptTicket(id);
-    fetchRequests(sort); // Refresh with current sort
-  };
+  const handleAccept = (id) => {
+  setSelectedTicketId(id);
+  setActionType("accept");
+  setIsModalOpen(true);
+};
 
-  const handleReject = async (id) => {
-    await rejectTicket(id);
-    fetchRequests(sort); // Refresh with current sort
-  };
+const handleReject = (id) => {
+  setSelectedTicketId(id);
+  setActionType("reject");
+  setIsModalOpen(true);
+};
 
+const handleConfirmAction = async () => {
+  if (!selectedTicketId) return;
+
+  setModalLoading(true);
+
+  try {
+    if (actionType === "accept") {
+      await acceptTicket(selectedTicketId);
+    } else {
+      await rejectTicket(selectedTicketId);
+    }
+
+    fetchRequests(searchTerm, sort);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setModalLoading(false);
+    setIsModalOpen(false);
+    setSelectedTicketId(null);
+    setActionType(null);
+  }
+};
+  const handleCancel = () => {
+  setIsModalOpen(false);
+  setSelectedTicketId(null);
+  setActionType(null);
+};
   return (
     <DashboardLayout>
       <div className="bg-white min-h-screen">
@@ -165,6 +201,20 @@ const AgentRequests = () => {
           </div>
         </div>
       </div>
+      <ConfirmModal
+          isOpen={isModalOpen}
+          title={actionType === "accept" ? "Accept Ticket?" : "Reject Ticket?"}
+          message={
+            actionType === "accept"
+              ? "Do you want to accept this ticket?"
+              : "Are you sure you want to reject this ticket?"
+          }
+          confirmText={actionType === "accept" ? "Accept" : "Reject"}
+          loadingText="Processing..."
+          onConfirm={handleConfirmAction}
+          onCancel={handleCancel}
+          loading={modalLoading}
+        />
     </DashboardLayout>
   );
 };

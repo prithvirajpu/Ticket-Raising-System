@@ -5,6 +5,7 @@ from django.db import transaction
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Q
+from django.core.paginator import Paginator
 from django.contrib.auth import get_user_model
 
 User=get_user_model()
@@ -48,7 +49,7 @@ def create_ticket_service(data,user):
                 status="OPEN"
                 )
             attach_sla_to_ticket(ticket)
-            expiry_time=timezone.now()+timedelta(minutes=10)
+            expiry_time=timezone.now()+timedelta(minutes=15)
             assignments=[
                 TicketAssignment(ticket=ticket,agent=agent,status='PENDING',expires_at=expiry_time)
                 for agent in agents
@@ -67,7 +68,7 @@ def create_ticket_service(data,user):
             "status":status.HTTP_400_BAD_REQUEST
         }
 
-def get_ticket_list_service(request,sort='newest',search=''):
+def get_ticket_list_service(request,sort='newest',search='',page=1,per_page=10):
     tickets = Ticket.objects.filter(client=request.user.client)
     if search:
         tickets=tickets.filter(Q(subject__icontains=search) | Q(ticket_code__icontains=search) | Q(description__icontains=search))
@@ -76,6 +77,9 @@ def get_ticket_list_service(request,sort='newest',search=''):
             tickets=tickets.order_by('created_at')
     else:
         tickets=tickets.order_by('-created_at')
+
+    paginator= Paginator(tickets,per_page)
+    page_obj= paginator.get_page(page)
     
     ticket_data = []
     for ticket in tickets:
@@ -94,7 +98,14 @@ def get_ticket_list_service(request,sort='newest',search=''):
             'sla_status': sla_status  # '' or 'MET'
         })
     return {
-        "data": {'message': ticket_data,'sort':sort},
+        "data": {'message': ticket_data,
+                 "pagination": {
+                "current_page": page_obj.number,
+                "total_pages": paginator.num_pages,
+                "total_items": paginator.count,
+                "has_next": page_obj.has_next(),
+                "has_previous": page_obj.has_previous(),
+            },'sort':sort},
         "errors": {},
         "status": status.HTTP_200_OK
     }
