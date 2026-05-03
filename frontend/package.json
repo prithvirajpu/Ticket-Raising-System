@@ -13,6 +13,7 @@
     "@hookform/resolvers": "^5.2.2",
     "@react-oauth/google": "^0.13.4",
     "axios": "^1.13.4",
+    "framer-motion": "^12.38.0",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.563.0",
     "react": "^19.2.0",

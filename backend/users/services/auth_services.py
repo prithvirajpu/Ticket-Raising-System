@@ -21,7 +21,9 @@ def login_service(user):
         "data": {
             "access": str(refresh.access_token),
             "refresh": str(refresh),
-            "role": user.role
+            "role": user.role,
+            "profile_completed": getattr(user, 'profile_completed', False),
+            "approval_status": getattr(user, 'approval_status', 'PENDING'),
         },
         "errors": None,
         "status": status.HTTP_200_OK

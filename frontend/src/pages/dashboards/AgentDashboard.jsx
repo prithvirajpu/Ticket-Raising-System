@@ -1,42 +1,70 @@
-import React from 'react'
 import DashboardLayout from '../../layouts/DashboardLayout'
 import StatsCard from '../../components/StatsCard'
 import { Ticket, Info, History, CheckCircle, Star, Settings } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { getDashboard } from '../../services/ticketService'
+// import useAgentTimer from '../../hooks/useAgentTimer'
 
 const AgentDashboard = () => {
+  // const seconds= useAgentTimer()
+  const [data,setData]= useState({})
+  const [loading,setLoading]=useState(true);
+
+  useEffect(()=>{
+    fetchData();
+  },[])
+
+    const fetchData= async()=>{
+      try {
+        setLoading(true)
+        const res= await getDashboard();
+        setData(res.message)
+      } catch (error) {
+        console.log('dashboard fetch error',error)
+      } finally{
+        setLoading(false)
+      }
+    }
+
+  //   const formatTime = (secs) => {
+  //   const h = Math.floor(secs / 3600);
+  //   const m = Math.floor((secs % 3600) / 60);
+  //   const s = secs % 60;
+
+  //   return `${h.toString().padStart(2, '0')}h ${m
+  //     .toString()
+  //     .padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
+  // };
+
   return (
    <DashboardLayout 
-      title="Dashboard" 
+      title="Agent Dashboard" 
       subtitle="Manage your assigned tickets"
-      headerAction={
-        <div className="bg-gray-200 text-black px-4 py-2 rounded-md text-sm font-semibold">
-          02h 33m
-        </div>
-      }
+
     >
       {/* Stats Grid - 4 Columns based on image */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         <StatsCard 
           label="Assigned Tickets" 
-          value="2" 
           icon={Ticket} 
           iconColor="text-black"
+          value={data.assigned_tickets || 0}
         />
         <StatsCard 
           label="Open" 
-          value="1" 
           icon={Info} 
           iconColor="text-red-500"
+          value={data.open || 0}
         />
         <StatsCard 
           label="In Progress" 
-          value="0" 
           icon={History} 
           iconColor="text-orange-500"
+          value={data.in_progress || 0}
         />
         <StatsCard 
           label="Active Time - Month" 
-          value="40 hrs" 
+          value='150 Hrs'
           icon={CheckCircle} 
           iconColor="text-green-500"
         />

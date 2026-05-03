@@ -17,6 +17,7 @@ class User(AbstractBaseUser,PermissionsMixin):
     approval_status=models.CharField(max_length=20,
                                     choices=[(i,i) for i in vars(ApprovalStatus).values() if isinstance(i,str)],
                                     default=ApprovalStatus.PENDING)
+    client=models.ForeignKey('tickets.ClientProfile',on_delete=models.CASCADE,null=True,blank=True,related_name='users')
     is_active=models.BooleanField(default=False)
     is_staff=models.BooleanField(default=False)
     is_verified=models.BooleanField(default=False)
@@ -24,6 +25,9 @@ class User(AbstractBaseUser,PermissionsMixin):
     
     created_at=models.DateTimeField(auto_now_add=True)
     profile_completed = models.BooleanField(default=False)
+
+    team_lead=models.ForeignKey('self',on_delete=models.SET_NULL,null=True,blank=True,related_name='agents')
+    manager=models.ForeignKey('self',on_delete=models.SET_NULL,null=True,blank=True,related_name='team_leads')
 
     USERNAME_FIELD='email'
     REQUIRED_FIELDS=['name']

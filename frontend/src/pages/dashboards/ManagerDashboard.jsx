@@ -1,10 +1,11 @@
-import React from 'react'
+import DashboardLayout from '../../layouts/DashboardLayout'
 
 const ManagerDashboard = () => {
   return (
-    <div>
-      
-    </div>
+    <DashboardLayout
+    title="Your Dashboard" 
+      subtitle="Manage your Assignments"
+    />
   )
 }
 
