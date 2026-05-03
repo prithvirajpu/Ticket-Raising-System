@@ -3,6 +3,7 @@ import { getOngoingTickets } from "../../../services/ticketService";
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import { useNavigate } from "react-router-dom";
 import { Search, ChevronDown } from "lucide-react";
+import Pagination from "../../../components/Pagination";
 
 const AgentOngoing = () => {
   const [tickets, setTickets] = useState([]);
@@ -11,34 +12,37 @@ const AgentOngoing = () => {
   const [activeSortBtn, setActiveSortBtn] = useState('newest');
   const [searchTerm,setSearchTerm]=useState('')
   const [searchTimeout, setSearchTimeout] = useState(null);
+
+  const [page, setPage] = useState(1)
+  const [pagination, setPagination] = useState({})
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchTickets('','newest');
-  }, []);
-  useEffect(()=>{
-    if(searchTerm){
-      clearTimeout(searchTimeout)
-    }
-    
-    const timeout=setTimeout(()=>{
-      fetchTickets(searchTerm,sort)
-    },1000)
-    setSearchTimeout(timeout)
+useEffect(() => {
+  fetchTickets(searchTerm, sort, page);
+}, [page]);
 
-    return ()=>clearTimeout(timeout)
+useEffect(() => {
+  if (searchTimeout) clearTimeout(searchTimeout)
 
-  },[searchTerm,sort])
+  const timeout = setTimeout(() => {
+    setPage(1)
+  }, 500)
+
+  setSearchTimeout(timeout)
+  return () => clearTimeout(timeout)
+
+}, [searchTerm, sort])
 
   const handleSearchChange=(e)=>{
     setSearchTerm(e.target.value)
   }
 
-  const fetchTickets = async (search='',sortType = 'newest') => {
+  const fetchTickets = async (search='',sortType = 'newest',pageNum=1) => {
     setLoading(true);
     try {
-      const res = await getOngoingTickets({search,sort:sortType});
+      const res = await getOngoingTickets({search,sort:sortType,page:pageNum});
       setTickets(res.message || []); 
+      setPagination(res.pagination || {})
       setActiveSortBtn(sortType);
     } catch (error) {
       console.error(error);
@@ -125,6 +129,15 @@ const AgentOngoing = () => {
               ))
             )}
           </div>
+          {pagination?.total_pages > 1 && (
+            <Pagination
+              currentPage={pagination.current_page}
+              totalPages={pagination.total_pages}
+              hasNext={pagination.has_next}
+              hasPrevious={pagination.has_previous}
+              onPageChange={(newPage) => setPage(newPage)}
+            />
+          )}
         </div>
       </div>
     </DashboardLayout>

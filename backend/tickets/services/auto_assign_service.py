@@ -7,8 +7,6 @@ def auto_assign_service():
     logger = logging.getLogger(__name__)
 
     logger.info("AUTO ASSIGN SERVICE TRIGGERED")
-    
-
 
     expired_assignments = TicketAssignment.objects.filter(
         status="PENDING",
@@ -22,7 +20,6 @@ def auto_assign_service():
 
         with transaction.atomic():
 
-            # lock fresh row
             assignment = TicketAssignment.objects.select_for_update().get(id=assignment.id)
             ticket = Ticket.objects.select_for_update().get(id=assignment.ticket_id)
 

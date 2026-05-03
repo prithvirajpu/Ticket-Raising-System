@@ -9,8 +9,7 @@ from tickets.services import (create_ticket_service,get_ticket_list_service,get_
                             close_ticket_service,submit_review_service,escalate_ticket_service,get_profile_service,update_profile_service,
                             get_team_lead_tickets_service,get_manager_tickets_service,upload_client_doc_service,get_clients_with_documents,
                             get_client_documents,summarize_document_service,submit_summary_service,get_teamlead_summaries_service,generate_agent_summary_service,
-                            submit_agent_summary_service,agent_summary_service,dashboard_service,start_session_service,heartbeat_service,
-                            end_session_service,generate_fake_ticket_service,fetch_fake_tickets_service,get_fake_ticket_detail_service)
+                            submit_agent_summary_service,agent_summary_service,dashboard_service,generate_fake_ticket_service,fetch_fake_tickets_service,get_fake_ticket_detail_service)
 
 class CreateTicketView(APIView):
     permission_classes=[IsAuthenticated]
@@ -33,7 +32,8 @@ class TicketListView(APIView):
     def get(self,request):
         search=request.query_params.get('search','')
         sort=request.query_params.get('sort','newest')
-        result=get_ticket_list_service(request,sort,search)
+        page = int(request.query_params.get('page', 1))
+        result=get_ticket_list_service(request,sort,search,page)
         return return_response(result)
 
 class TicketDetailView(APIView):
@@ -77,7 +77,9 @@ class AgentTicketRequestsView(APIView):
     def get(self,request):
         search=request.query_params.get('search','')
         sort=request.query_params.get('sort','newest')
-        result=get_agent_ticket_requests_service(request.user,sort,search)
+        page=int(request.query_params.get('page',1))
+        page_size=int(request.query_params.get('page_size',5))
+        result=get_agent_ticket_requests_service(request.user,sort,search,page,page_size)
         return return_response(result)
     
 class AgentTicketDetailView(APIView):
@@ -93,7 +95,9 @@ class AgentOngoingTicketsView(APIView):
     def get(self,request):
         search=request.query_params.get('search','')
         sort=request.query_params.get('sort','newest')
-        result=get_agent_ongoing_tickets_service(request.user,sort,search)
+        page = int(request.query_params.get('page', 1))
+        page_size = int(request.query_params.get('page_size', 5))
+        result=get_agent_ongoing_tickets_service(request.user,sort,search,page, page_size)
         return return_response(result)
     
 class ResolveTicketView(APIView):
@@ -215,27 +219,7 @@ class DashboardView(APIView):
         role=request.user.role
         result=dashboard_service(request,role)
         return return_response(result)
-    
-class StartSessionView(APIView):
-    permission_classes= [IsAgent,IsAuthenticated]
 
-    def post (self,request):
-        result= start_session_service(request)
-        return return_response(result)
-    
-class HeartbeatView(APIView):
-    permission_classes=[IsAgent,IsAuthenticated]
-    
-    def post(self,request):
-        result=heartbeat_service(request)
-        return return_response(result)
-    
-class EndSessionView(APIView):
-    permission_classes= [IsAgent,IsAuthenticated]
-
-    def post (self,request):
-        result= end_session_service(request)
-        return return_response(result)
     
 class GenerateFakeTicketView(APIView):
     permission_classes = [IsAuthenticated]

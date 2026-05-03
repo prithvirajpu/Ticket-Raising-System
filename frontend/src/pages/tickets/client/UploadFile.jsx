@@ -21,22 +21,30 @@ const UploadFile = () => {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        const formData = new FormData();
-        Object.keys(files).forEach(key => {
-            if (files[key]) formData.append(key, files[key]);
-        });
+    e.preventDefault();
 
-        setLoading(true);
-        try {
-            await uploadDocument(formData);
-            notifySuccess('Documents Uploaded successfully')
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // ✅ REQUIRED VALIDATION
+    if (!files.guidelines_doc || !files.faq_doc) {
+        alert("Company Overview and FAQs are required");
+        return;
+    }
+
+    const formData = new FormData();
+    Object.keys(files).forEach(key => {
+        if (files[key]) formData.append(key, files[key]);
+    });
+
+    setLoading(true);
+    try {
+        await uploadDocument(formData);
+        notifySuccess('Documents Uploaded successfully');
+    } catch (error) {
+        console.error(error);
+    } finally {
+        setLoading(false);
+    }
+};
+const isFormValid = files.guidelines_doc && files.faq_doc;
 
     // Helper component for the Upload Card
     const UploadCard = ({ title, name, currentFile }) => (
@@ -82,7 +90,7 @@ const UploadFile = () => {
                 <div className="flex justify-center mb-16">
                     <button 
                         onClick={handleSubmit}
-                        disabled={loading}
+                        disabled={loading || !isFormValid}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-3 rounded-full font-semibold shadow-lg disabled:opacity-50 transition-all"
                     >
                         {loading ? "Processing..." : "Save Knowledge Base"}

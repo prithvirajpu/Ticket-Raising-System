@@ -3,10 +3,10 @@ import StatsCard from '../../components/StatsCard'
 import { Ticket, Info, History, CheckCircle, Star, Settings } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { getDashboard } from '../../services/ticketService'
-import useAgentTimer from '../../hooks/useAgentTimer'
+// import useAgentTimer from '../../hooks/useAgentTimer'
 
 const AgentDashboard = () => {
-  const seconds= useAgentTimer()
+  // const seconds= useAgentTimer()
   const [data,setData]= useState({})
   const [loading,setLoading]=useState(true);
 
@@ -26,33 +26,21 @@ const AgentDashboard = () => {
       }
     }
 
-    const formatTime = (secs) => {
-    const h = Math.floor(secs / 3600);
-    const m = Math.floor((secs % 3600) / 60);
-    const s = secs % 60;
+  //   const formatTime = (secs) => {
+  //   const h = Math.floor(secs / 3600);
+  //   const m = Math.floor((secs % 3600) / 60);
+  //   const s = secs % 60;
 
-    return `${h.toString().padStart(2, '0')}h ${m
-      .toString()
-      .padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
-  };
+  //   return `${h.toString().padStart(2, '0')}h ${m
+  //     .toString()
+  //     .padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
+  // };
 
   return (
    <DashboardLayout 
       title="Agent Dashboard" 
       subtitle="Manage your assigned tickets"
-      headerAction={
-        <div className="flex items-center gap-3 bg-zinc-900 px-3.5 py-2 rounded-full border border-zinc-800 shadow-2xl transition-transform active:scale-95">
-        <div className="flex items-center gap-2 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
-          <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.6)]"></div>
-          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-500">Live</span>
-        </div>
 
-
-        <span className="font-mono text-sm font-medium text-zinc-100 tabular-nums pr-2">
-          {formatTime(seconds)}
-        </span>
-      </div>
-      }
     >
       {/* Stats Grid - 4 Columns based on image */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">

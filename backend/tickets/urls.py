@@ -2,8 +2,7 @@ from django.urls import path
 from .views import (CreateTicketView,TicketListView,TicketDetailView,AcceptTicketView,RejectTicketView,AgentTicketRequestsView,AgentTicketDetailView
                 ,AgentOngoingTicketsView,ResolveTicketView,TicketCloseView,SubmitReviewView,EscalatedTicketView,UserProfileView,UpdateProfileView,
                  TeamLeadTicketView,ManagerTicketsView,UploadDocView,ClientListWithDocsView,ClientDocumentsView,SummarizeDocumentView,SubmitSummaryView,
-                  TeamLeadSummaryView,SummaryTeamLeadView,SubmitSummaryToAgentsView,AgentSummaryView,DashboardView,StartSessionView,HeartbeatView,
-                   EndSessionView,GenerateFakeTicketView,AgentFakeTicketsView,AgentFakeTicketDetailView )
+                  TeamLeadSummaryView,SummaryTeamLeadView,SubmitSummaryToAgentsView,AgentSummaryView,DashboardView,GenerateFakeTicketView,AgentFakeTicketsView,AgentFakeTicketDetailView )
 urlpatterns=[
 
     #users
@@ -20,9 +19,6 @@ urlpatterns=[
     path('agents/in-progress/',AgentOngoingTicketsView.as_view()),
     path('agents/detail/<int:ticket_id>/',AgentTicketDetailView.as_view()),
     path('<int:ticket_id>/escalate/',EscalatedTicketView.as_view()),
-    path('agent/start-session/',StartSessionView.as_view()),
-    path('agent/heartbeat/', HeartbeatView.as_view()),
-    path('agent/end-session/', EndSessionView.as_view()),
 
     path('<int:ticket_id>/accept/',AcceptTicketView.as_view()),
     path('<int:ticket_id>/reject/',RejectTicketView.as_view()),

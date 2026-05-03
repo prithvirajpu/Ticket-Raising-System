@@ -13,28 +13,28 @@ const TicketsList = () => {
     const [activeSortBtn, setActiveSortBtn] = useState('newest');
 
     const [searchTerm,setSearchTerm]=useState('')
-    const [searchTimeout, setSearchTimeout] = useState(null);
     const navigate = useNavigate();
 
     const [page, setPage] = useState(1);
     const [pagination, setPagination] = useState({});
 
-    useEffect(() => {
-        fetchTickets(searchTerm,sort,page);  
-    }, [page]);
 
-    useEffect(() => {
-        if (searchTerm){
-            clearTimeout(searchTimeout);
-        }
-        const timeoutId= setTimeout(()=>{
-            setPage(1)
-            fetchTickets(searchTerm,sort,1);
-        },500)
-        setSearchTimeout(timeoutId);
-        return ()=> clearTimeout(timeoutId);
+    
+// Reset page ONLY if not already 1
+useEffect(() => {
+    if (page !== 1) {
+        setPage(1);
+    }
+}, [searchTerm, sort]);
 
-    }, [searchTerm,sort])
+// Fetch data
+useEffect(() => {
+    const timeout = setTimeout(() => {
+        fetchTickets(searchTerm, sort, page);
+    }, 500);
+
+    return () => clearTimeout(timeout);
+}, [searchTerm, sort, page]);
 
     const handleSearchChange=(e)=>{
         setSearchTerm(e.target.value)
@@ -43,7 +43,7 @@ const TicketsList = () => {
         setLoading(true)
         try {
             const data = await getTickets({search,sort:sortType,page:pageNum});
-            setTickets(data.message || data)
+            setTickets(data.message || [])
             setPagination(data.pagination || {})
             setActiveSortBtn(sortType)
         } catch (error) {
@@ -58,7 +58,7 @@ const TicketsList = () => {
         setActiveSortBtn(newSort);
     }
     const handlePageChange = (newPage) => {
-        fetchTickets(searchTerm, sort, newPage);
+        setPage(newPage);
     };
 
     const getStatusBadge = (status) => {
@@ -165,13 +165,15 @@ const TicketsList = () => {
                     </div>
                 </div>
             </div>
-            <Pagination
-                currentPage={pagination.current_page || 1}
-                totalPages={pagination.total_pages || 1}
-                hasNext={pagination.has_next}
-                hasPrevious={pagination.has_previous}
-                onPageChange={handlePageChange}
-            />
+            {pagination?.total_pages > 1 && (
+                <Pagination
+                    currentPage={pagination.current_page || 1}
+                    totalPages={pagination.total_pages || 1}
+                    hasNext={pagination.has_next}
+                    hasPrevious={pagination.has_previous}
+                    onPageChange={handlePageChange}
+                />
+                )}
         </DashboardLayout>
     )
 }

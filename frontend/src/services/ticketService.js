@@ -1,13 +1,14 @@
 import { ServerCog } from 'lucide-react'
 import api from '../api/axios'
+import { notifyError } from '../utils/notify'
 
 export const createTicket= async(data)=>{
     const response= await api.post('/tickets/create/',data)
     return response.data.data
 }
 
-export const getTickets=async ({search='',sort='newest'})=>{
-    const params={sort};
+export const getTickets=async ({search='',sort='newest',page=1})=>{
+    const params={sort,page};
     if (search){
         params.search=search;
     }
@@ -20,8 +21,8 @@ export const getTicketDetail= async(id)=>{
     return response.data.data
 }
 
-export const getAgentRequests=async ({search='',sort='newest'})=>{
-    const params={sort}
+export const getAgentRequests=async ({search='',sort='newest',page=1})=>{
+    const params={sort,page}
     if (search){
         params.search=search
     }
@@ -39,8 +40,8 @@ export const rejectTicket =async (id)=>{
     return res.data.data
 }
 
-export const getOngoingTickets = async ({search='',sort='newest'}) => {
-    const params={sort}
+export const getOngoingTickets = async ({search='',sort='newest',page=1}) => {
+    const params={sort,page}
     if (search){
         params.search=search
     }
@@ -161,28 +162,8 @@ export const getDashboard=async (role)=>{
         const res= await api.get('/tickets/dashboard/')
         return res.data.data
     } catch (error) {
-        alert('something wrong in getDashboard')
+        notifyError('something went wrong')
     }
-}
-
-export const startSession= async()=>{
-    try {
-        const res= await api.post('/tickets/agent/start-session/');
-    return res.data.data
-    } catch (error) {
-        alert('startsession error')
-    }
-}
-
-export const sendHeartbeat= async(sessionId)=>{
-    await api.post('/tickets/agent/heartbeat/',{
-        session_id:sessionId
-    });
-
-}
-export const endSession = async()=>{
-    await api.post('/tickets/agent/end-session/');
-
 }
 
 export const generateFakeTickets= async (summary)=>{
@@ -193,7 +174,7 @@ export const generateFakeTickets= async (summary)=>{
     });
     return res.data.data
     } catch (error) {
-        alert('generate ticket--')
+        notifyError('generate ticket--')
     }
 }
 
@@ -202,7 +183,7 @@ export const getAgentFakeTickets= async()=>{
         const res= await api.get('/tickets/agent/fake-tickets/');
     return res.data.data
     } catch (error) {
-        alert('fake ticket fetch error')
+        notifyError('fake ticket fetch error')
     }
 }
 
@@ -212,6 +193,6 @@ export const getFakeTicketDetail = async(id)=>{
         console.log(res.data.data.message)
     return res.data.data
     } catch (error) {
-        alert('fake ticket detail page error')
+        notifyError('fake ticket detail page error')
     }
 }

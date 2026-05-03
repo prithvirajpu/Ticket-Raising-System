@@ -8,12 +8,14 @@ import {
   Plus, 
 } from 'lucide-react';
 import DashboardLayout from '../../layouts/DashboardLayout';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import StatsCard from '../../components/StatsCard';
 import { getDashboard } from '../../services/ticketService';
 
+
 const UserDashboard = () => {
   const [data,setData]=useState({})
+  const navigate = useNavigate();
    
   useEffect(()=>{
     fetchData();
@@ -34,13 +36,20 @@ const UserDashboard = () => {
       <DashboardLayout 
       title="Dashboard" 
       subtitle="Manage your assigned tickets"
-      headerAction={
-          <Link to='/user/create-ticket'> <button className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-xl font-medium hover:bg-gray-800 transition-colors">
-            <Plus size={18} strokeWidth={3} />
-            Raise New Ticket
-          </button></Link>
-      }
+      
     >
+      <div className="flex justify-end mb-8 -mt-16">
+          <button
+              onClick={() => navigate("/user/create-ticket")}
+              className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-xl hover:bg-gray-800 transition-all text-sm font-bold"
+          >
+              <Plus size={18} />
+              Raise New Ticket
+          </button>
+      </div>
+      
+
+      
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         <StatsCard 
           label="Total Tickets" 

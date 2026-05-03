@@ -23,18 +23,28 @@ const CreateTicket = () => {
     }
 
     const handleSubmit = async (e) => {
-        e.preventDefault()
-        try {
-            setLoading(true)
-            setError('')
-            await createTicket(formData);
-            navigate('/user/tickets')
-        } catch (error) {
-            setError(error.response?.data?.details || 'something went wrong')
-        } finally {
-            setLoading(false)
-        }
+    e.preventDefault();
+
+    if (!formData.subject.trim() || !formData.issue_type.trim() || !formData.description.trim()) {
+        setError("Please fill all required fields");
+        return;
     }
+
+    try {
+        setLoading(true);
+        setError('');
+        await createTicket(formData);
+        navigate('/user/tickets');
+    } catch (error) {
+        setError(error.response?.data?.details || 'something went wrong');
+    } finally {
+        setLoading(false);
+    }
+};
+const isFormValid =
+    formData.subject.trim() &&
+    formData.issue_type.trim() &&
+    formData.description.trim();
 
     return (
         <DashboardLayout>
@@ -136,8 +146,8 @@ const CreateTicket = () => {
                             <div className="flex items-center gap-3 pt-2">
                                 <button 
                                     type='submit' 
-                                    disabled={loading}  
-                                    className="px-6 py-2.5 bg-black text-white text-sm font-bold rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-400" 
+                                    disabled={loading || !isFormValid}  
+                                    className="px-6 py-2.5 bg-black text-white text-sm font-bold rounded-lg hover:bg-gray-800 transition-colors disabled:bg-gray-400"
                                 >
                                     {loading ? 'Submitting...' : 'Submit Ticket'}
                                 </button>

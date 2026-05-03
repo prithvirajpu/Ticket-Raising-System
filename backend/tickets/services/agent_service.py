@@ -5,56 +5,67 @@ from django.utils import timezone
 from django.db.models import Q
 from tickets.serializer import AgentTicketRequestSerializer,TicketSerializer
 from django.contrib.auth import get_user_model
+from django.core.paginator import Paginator
 
 User=get_user_model()
 
-def accept_ticket_service(ticket_id,user):
+def accept_ticket_service(ticket_id, user):
     try:
         with transaction.atomic():
-            ticket=Ticket.objects.select_for_update().get(id=ticket_id)
+
+            ticket = Ticket.objects.select_for_update().get(id=ticket_id)
+
             if ticket.assigned_to:
                 return {
-                    "data":None,
-                    'errors':{'details':"Ticket already accepted by another agent"},
-                    'status':status.HTTP_400_BAD_REQUEST
-                }
-            if ticket.client.user.team_lead!=user.team_lead:
-                return{
-                     "data": None,
-                    "errors": {"details": "You cannot accept this ticket"},
-                    "status": status.HTTP_403_FORBIDDEN
-                }
-            assignment = TicketAssignment.objects.select_for_update().filter(
-                ticket_id=ticket_id,
-                agent=user
-            ).first()
-            if not assignment:
-                return {
-                    "data":None,
-                    "errors":{'details':'No ticket is assigned here'},
-                    'status':status.HTTP_400_BAD_REQUEST
-                }
-
-            if assignment.status != "PENDING":
-                return {
                     "data": None,
-                    "errors": {"details": "Ticket already processed"},
+                    "errors": {"details": "Ticket already accepted by another agent"},
                     "status": status.HTTP_400_BAD_REQUEST
                 }
 
-            assignment.status = "ACCEPTED"
-            assignment.save(update_fields=['status'])
+            if not ticket.client or not ticket.client.user or ticket.client.user.team_lead != user.team_lead:
+                return {
+                    "data": None,
+                    "errors": {"details": "You cannot accept this ticket"},
+                    "status": status.HTTP_403_FORBIDDEN
+                }
+
+            assignments = TicketAssignment.objects.select_for_update().filter(ticket_id=ticket_id)
+
+            assignment = assignments.filter(agent=user).first()
+
+            if not assignment:
+                return {
+                    "data": None,
+                    "errors": {"details": "No ticket is assigned here"},
+                    "status": status.HTTP_400_BAD_REQUEST
+                }
+
+            from django.utils import timezone
+
+            if assignment.status != "PENDING" or (
+                assignment.expires_at and assignment.expires_at < timezone.now()
+            ):
+                return {
+                    "data": None,
+                    "errors": {"details": "Ticket expired or already processed"},
+                    "status": status.HTTP_400_BAD_REQUEST
+                }
 
             ticket.status = "IN_PROGRESS"
             ticket.assigned_to = user
-            ticket.save(update_fields=['status','assigned_to'])
+            ticket.save(update_fields=['status', 'assigned_to'])
 
-            sla=TicketSLATracking.objects.filter(ticket=ticket).first()
+            assignment.status = "ACCEPTED"
+            assignment.expires_at = None
+            assignment.save(update_fields=['status', 'expires_at'])
+
+            assignments.filter(status="PENDING").exclude(agent=user).update(status="CANCELLED")
+
+            # SLA
+            sla = TicketSLATracking.objects.filter(ticket=ticket).first()
             if sla and not sla.first_response_at:
-                sla.first_response_at=timezone.now()
+                sla.first_response_at = timezone.now()
                 sla.save(update_fields=['first_response_at'])
-
-            TicketAssignment.objects.filter(ticket_id=ticket_id).exclude(agent=user).update(status='CANCELLED')
 
             return {
                 "data": {"message": "Ticket accepted successfully"},
@@ -63,11 +74,11 @@ def accept_ticket_service(ticket_id,user):
             }
 
     except Exception as e:
-        return{
-            'data':None,
-            'errors':{'details':f'Failed to accept the ticket :{str(e)}'},
-            'status':status.HTTP_500_INTERNAL_SERVER_ERROR
-        }
+        return {
+            'data': None,
+            'errors': {'details': f'Failed to accept the ticket: {str(e)}'},
+            'status': status.HTTP_500_INTERNAL_SERVER_ERROR
+        } 
     
 def reject_ticket_service(ticket_id,user,reason):
     try:
@@ -88,7 +99,7 @@ def reject_ticket_service(ticket_id,user,reason):
             "status": status.HTTP_404_NOT_FOUND
         }
     
-def get_agent_ticket_requests_service(user,sort='newest',search=''):
+def get_agent_ticket_requests_service(user,sort='newest',search='',page=1,page_size=5):
     try:
         assignments=(TicketAssignment.objects.filter(agent=user,status='PENDING')
                     .select_related('ticket','ticket__client'))
@@ -101,14 +112,28 @@ def get_agent_ticket_requests_service(user,sort='newest',search=''):
             assignments=assignments.order_by('ticket__created_at')
         else:
             assignments=assignments.order_by('-ticket__created_at')
+        
+        paginator=Paginator(assignments,page_size)
+        page_obj=paginator.get_page(page)
 
-        serializer=AgentTicketRequestSerializer(assignments,many=True)
+        serializer=AgentTicketRequestSerializer(page_obj.object_list,many=True)
         return {
-            'data':{'message':serializer.data,'sort':sort},
-            "errors":{},
-            'status':status.HTTP_200_OK
+            'data': {
+                'message': serializer.data,
+                'pagination': {
+                    'current_page': page_obj.number,
+                    'total_pages': paginator.num_pages,
+                    'has_next': page_obj.has_next(),
+                    'has_previous': page_obj.has_previous(),
+                    'total_items': paginator.count
+                },
+                'sort': sort
+            },
+            "errors": {},
+            'status': status.HTTP_200_OK
         }
     except Exception as e:
+        print("ERROR:", str(e)) 
         return{
             "data":None,
             'errors':{'details':str(e)},
@@ -132,7 +157,7 @@ def get_agent_ticket_detail_service(user,ticket_id):
         'status':status.HTTP_200_OK
     }
 
-def get_agent_ongoing_tickets_service(user,sort='newest',search=''):
+def get_agent_ongoing_tickets_service(user,sort='newest',search='',page=1, page_size=5):
     try:
         tickets=Ticket.objects.filter(assigned_to=user,status='IN_PROGRESS')
         if search:
@@ -143,11 +168,24 @@ def get_agent_ongoing_tickets_service(user,sort='newest',search=''):
         else:
             tickets=tickets.order_by('-created_at')
 
-        serializer=TicketSerializer(tickets,many=True)
+        paginator = Paginator(tickets, page_size)
+        page_obj = paginator.get_page(page)
+
+        serializer=TicketSerializer(page_obj.object_list,many=True)
         return {
-            'data':{'message':serializer.data,'sort':sort},
-            "errors":{},
-            'status':status.HTTP_200_OK
+            'data': {
+                'message': serializer.data,
+                'pagination': {
+                    'current_page': page_obj.number,
+                    'total_pages': paginator.num_pages,
+                    'has_next': page_obj.has_next(),
+                    'has_previous': page_obj.has_previous(),
+                    'total_items': paginator.count
+                },
+                'sort': sort
+            },
+            "errors": {},
+            'status': status.HTTP_200_OK
         }
     except Exception as e:
         return {

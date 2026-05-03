@@ -68,8 +68,8 @@ def create_ticket_service(data,user):
             "status":status.HTTP_400_BAD_REQUEST
         }
 
-def get_ticket_list_service(request,sort='newest',search='',page=1,per_page=10):
-    tickets = Ticket.objects.filter(client=request.user.client)
+def get_ticket_list_service(request,sort='newest',search='',page=1,per_page=5):
+    tickets = Ticket.objects.filter(client=request.user.client).select_related()
     if search:
         tickets=tickets.filter(Q(subject__icontains=search) | Q(ticket_code__icontains=search) | Q(description__icontains=search))
 
@@ -82,8 +82,7 @@ def get_ticket_list_service(request,sort='newest',search='',page=1,per_page=10):
     page_obj= paginator.get_page(page)
     
     ticket_data = []
-    for ticket in tickets:
-        # Safe SLA lookup
+    for ticket in page_obj:
         sla_status = TicketSLATracking.objects.filter(ticket=ticket).values_list('sla_status', flat=True).first() or ''
         
         ticket_data.append({

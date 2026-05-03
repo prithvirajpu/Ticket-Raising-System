@@ -47,9 +47,6 @@ class Ticket(models.Model):
                 print("OLD:", old.assigned_to)
                 print("NEW:", self.assigned_to)
 
-                import traceback
-                traceback.print_stack()
-
                 print("\n🔥 CALL CONTEXT TRACE END\n")
 
         super().save(*args, **kwargs)

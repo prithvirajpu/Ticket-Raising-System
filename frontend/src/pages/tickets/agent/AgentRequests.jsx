@@ -4,6 +4,7 @@ import DashboardLayout from "../../../layouts/DashboardLayout";
 import { useNavigate } from "react-router-dom";
 import { Search, ChevronDown } from "lucide-react";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
+import Pagination from '../../../components/Pagination'
 
 const AgentRequests = () => {
   const [tickets, setTickets] = useState([]);
@@ -18,36 +19,39 @@ const AgentRequests = () => {
   const [selectedTicketId, setSelectedTicketId] = useState(null);
   const [actionType, setActionType] = useState(null); 
   const [modalLoading, setModalLoading] = useState(false);
+
+  const [page,setPage]=useState(1);
+  const [pagination,setPagination]=useState({});
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchRequests('','newest');
-  }, []);
 
-  useEffect(()=>{
-    if (searchTerm){
-      clearTimeout(searchTimeout)
-    }
+useEffect(() => {
+  fetchRequests(searchTerm, sort, page);
+}, [page]);
 
-    const timeout=setTimeout(()=>{
-      fetchRequests(searchTerm,sort)
-    },1000)
+useEffect(() => {
+  if (searchTimeout) clearTimeout(searchTimeout);
 
-    setSearchTimeout(timeout)
-    return ()=>clearTimeout(timeout)
+  const timeout = setTimeout(() => {
+    setPage(1); // ONLY change page
+  }, 500);
 
-  },[searchTerm,sort])
+  setSearchTimeout(timeout);
+  return () => clearTimeout(timeout);
+
+}, [searchTerm, sort]);
 
   const handleTermChange=(e)=>{
     setSearchTerm(e.target.value)
   }
 
-  const fetchRequests = async (search='',sortType = 'newest') => {
+  const fetchRequests = async (search='',sortType = 'newest',pageNum=1) => {
     setLoading(true);
     try {
-      const res = await getAgentRequests({search,sort:sortType});
+      const res = await getAgentRequests({search,sort:sortType,page:pageNum});
       console.log(res.message)
       setTickets(res.message || []);
+      setPagination(res.pagination)
       setActiveSortBtn(sortType);
     } catch (error) {
       console.error(error);
@@ -116,7 +120,7 @@ const handleConfirmAction = async () => {
           
           {/* Header & Controls */}
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-gray-800">All Tickets ({tickets.length})</h2>
+            <h2 className="text-2xl font-bold text-gray-800">All Tickets ({pagination.total_items || 0})</h2>
             
             <div className="flex items-center gap-4">
               {/* Search Bar */}
@@ -199,6 +203,16 @@ const handleConfirmAction = async () => {
               ))
             )}
           </div>
+
+          {pagination?.total_pages > 1 && (
+            <Pagination
+              currentPage={pagination.current_page}
+              totalPages={pagination.total_pages}
+              hasNext={pagination.has_next}
+              hasPrevious={pagination.has_previous}
+              onPageChange={(newPage) => setPage(newPage)}
+            />
+          )}
         </div>
       </div>
       <ConfirmModal
@@ -215,6 +229,8 @@ const handleConfirmAction = async () => {
           onCancel={handleCancel}
           loading={modalLoading}
         />
+
+
     </DashboardLayout>
   );
 };

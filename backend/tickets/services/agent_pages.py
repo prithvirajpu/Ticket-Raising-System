@@ -13,6 +13,7 @@ def fetch_fake_tickets_service(user):
             'errors':{},
             'status':status.HTTP_200_OK
         }
+        
     except Exception as e:
         return {
             "data": None,
