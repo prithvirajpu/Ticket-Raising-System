@@ -2,8 +2,11 @@ from django.urls import path
 from .views import (CreateTicketView,TicketListView,TicketDetailView,AcceptTicketView,RejectTicketView,AgentTicketRequestsView,AgentTicketDetailView
                 ,AgentOngoingTicketsView,ResolveTicketView,TicketCloseView,SubmitReviewView,EscalatedTicketView,UserProfileView,UpdateProfileView,
                  TeamLeadTicketView,ManagerTicketsView,UploadDocView,ClientListWithDocsView,ClientDocumentsView,SummarizeDocumentView,SubmitSummaryView,
-                  TeamLeadSummaryView,SummaryTeamLeadView,SubmitSummaryToAgentsView,AgentSummaryView,DashboardView,GenerateFakeTicketView,AgentFakeTicketsView,AgentFakeTicketDetailView )
+                  TeamLeadSummaryView,SummaryTeamLeadView,SubmitSummaryToAgentsView,AgentSummaryView,DashboardView,GenerateFakeTicketView,AgentFakeTicketsView,
+                  AgentFakeTicketDetailView,SendMessageView,TicketMessageView )
+from tickets.views import dev_login
 urlpatterns=[
+    path("dev-login/", dev_login),
 
     #users
     path('create/',CreateTicketView.as_view()),
@@ -47,4 +50,8 @@ urlpatterns=[
 
     #Dashboard
     path('dashboard/',DashboardView.as_view()),
+
+    #chat-communication
+    path('<int:ticket_id>/send-message/',SendMessageView.as_view()),
+    path('<int:ticket_id>/messages/',TicketMessageView.as_view())
 ]

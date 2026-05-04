@@ -11,6 +11,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({}); 
+  const [showPassword, setShowPassword] = useState(false);
   const { login,logout } = useAuth();
   const navigate = useNavigate();
   const location=useLocation()
@@ -207,7 +208,7 @@ const handleLogin = async (e) => {
               </div>
               <div className="relative">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   className={`appearance-none block w-full pl-3 pr-10 py-3 border ${
                     errors.password ? 'border-red-500' : 'border-gray-300'
                   } rounded-lg placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-black focus:border-black sm:text-sm`}
@@ -215,7 +216,17 @@ const handleLogin = async (e) => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
-                <Eye className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+                {showPassword ? (
+                  <Eye
+                    onClick={() => setShowPassword(false)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5 cursor-pointer hover:text-black"
+                  />
+                ) : (
+                  <Eye
+                    onClick={() => setShowPassword(true)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5 cursor-pointer hover:text-black"
+                  />
+                )}
               </div>
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">{errors.password}</p>

@@ -25,6 +25,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'corsheaders',
+    'channels',
 
     'cloudinary',
     'cloudinary_storage',
@@ -60,6 +61,7 @@ TEMPLATES = [
     },
 ]
 WSGI_APPLICATION = 'core.wsgi.application'
+ASGI_APPLICATION = 'core.asgi.application'
 
 DATABASES = {
     'default': {
@@ -209,5 +211,11 @@ CELERY_BEAT_SCHEDULE = {
     "auto-assign-every-1-minute": {
         "task": "tickets.tasks.auto_assign_task",
         "schedule": 60.0,
+    },
+}
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
     },
 }

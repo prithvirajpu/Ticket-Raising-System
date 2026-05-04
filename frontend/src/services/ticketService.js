@@ -196,3 +196,23 @@ export const getFakeTicketDetail = async(id)=>{
         notifyError('fake ticket detail page error')
     }
 }
+
+export const getTicketMessages= async(ticketId)=>{
+    try {
+        const res= await api.get(`/tickets/${ticketId}/messages/`)
+        return res.data
+    } catch (error) {
+        console.log("Error fetching messages:", error);
+        throw error;
+    }
+}
+
+export const sendMessage=async(ticketId,message)=>{
+    try {
+        const res= await api.post(`/tickets/${ticketId}/send-message/`,{message});
+        return res.data
+    } catch (error) {
+        console.log('error sending message: ',error);
+        throw error;       
+    }
+}

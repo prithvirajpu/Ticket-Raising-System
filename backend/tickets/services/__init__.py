@@ -14,3 +14,4 @@ from .dashboard_service import dashboard_service
 from .generate_fake_ticket_service import generate_fake_ticket_service
 from .agent_pages import fetch_fake_tickets_service,get_fake_ticket_detail_service
 from .auto_assign_service import auto_assign_service
+from .chat_service import get_messages_service,send_message_service

@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom"
 import DashboardLayout from "../../../layouts/DashboardLayout"
 import { useEffect, useState } from "react";
-import { closeTicket, getTicketDetail, submitReview } from "../../../services/ticketService";
+import { closeTicket, getTicketDetail, getTicketMessages, sendMessage, submitReview } from "../../../services/ticketService";
 import { ArrowLeft, Tag, Info, User, Clock, RefreshCcw, Send, Paperclip } from "lucide-react";
 import Loader from "../../../components/modals/Loader";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
@@ -19,6 +19,32 @@ const TicketDetail = () => {
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [reviewLoading, setReviewLoading] = useState(false);
 
+    const [messages,setMessages]=useState([])
+    const [newMessage,setNewMessage]=useState('')
+
+    const handleSendMessage=async()=>{
+        if (!newMessage.trim()) return
+        try {
+            const res= await sendMessage(id,newMessage)
+            setMessages(prev=>[...prev,res])
+            setNewMessage('')
+        } catch (error) {
+            console.log('error')
+        }
+    }
+
+    useEffect(() => {
+        const fetchMessages = async () => {
+            try {
+                const res = await getTicketMessages(id);
+                setMessages(res);  // adjust if res.data
+            } catch (err) {
+                console.log(err);
+            }
+        };
+
+        fetchMessages();
+    }, [id]);
 
     useEffect(() => {
         const fetchTicket = async () => {
@@ -181,19 +207,46 @@ const TicketDetail = () => {
                         {/* Chat Messages */}
                         <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-gray-50/30">
                             {/* Example Message: User */}
-                            <div className="flex flex-col items-end gap-2">
-                                <div className="flex items-center gap-2 text-[11px] text-gray-400 font-bold uppercase">
-                                    User_here <span className="font-normal normal-case">10:30:00 AM</span>
-                                </div>
-                                <div className="flex gap-3 items-end max-w-[80%]">
-                                    <div className="bg-[#005bb7] text-white p-4 rounded-2xl rounded-tr-none text-sm leading-relaxed shadow-sm">
-                                        {ticket.description}
-                                    </div>
-                                    <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold">
-                                        U
-                                    </div>
-                                </div>
-                            </div>
+                            {messages.map((msg, index) => {
+                                console.log(msg);
+    const isUser = msg.sender === ticket.created_by; // adjust if needed
+
+    return (
+        <div
+            key={index}
+            className={`flex flex-col ${isUser ? "items-end" : "items-start"} gap-2`}
+        >
+            <div className="flex items-center gap-2 text-[11px] text-gray-400 font-bold uppercase">
+                {msg.sender_name}
+                <span className="font-normal normal-case">
+                    {new Date(msg.created_at).toLocaleTimeString()}
+                </span>
+            </div>
+
+            <div className={`flex gap-3 items-end max-w-[80%] ${isUser ? "flex-row-reverse" : ""}`}>
+                
+                {/* Bubble */}
+                <div
+                    className={`p-4 rounded-2xl text-sm shadow-sm ${
+                        isUser
+                            ? "bg-[#005bb7] text-white rounded-tr-none"
+                            : "bg-gray-200 text-gray-900 rounded-tl-none"
+                    }`}
+                >
+                    {msg.message}
+                </div>
+
+                {/* Avatar */}
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${
+                    isUser ? "bg-emerald-500" : "bg-gray-500"
+                }`}>
+                    {msg.sender_name?.[0]}
+                </div>
+            </div>
+        </div>
+    );
+})}
+
                         </div>
 
                         {/* Chat Input */}
@@ -204,16 +257,18 @@ const TicketDetail = () => {
                                 </button>
                             </div>
                             <div className="relative flex items-center">
-                                <input 
-                                    type="text" 
-                                    placeholder="Type your message..."
-                                    className="w-full pl-6 pr-24 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-1 focus:ring-gray-300 text-sm"
-                                />
+                                <input
+                                        type="text"
+                                        value={newMessage}
+                                        onChange={(e) => setNewMessage(e.target.value)}
+                                        placeholder="Type your message..."
+                                        className="w-full pl-6 pr-24 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none"
+                                    />
                                 <div className="absolute right-3 flex items-center gap-2">
                                     <button className="p-2 text-gray-400 hover:text-gray-600">
                                         <Paperclip size={20} />
                                     </button>
-                                    <button className="p-2 text-gray-900">
+                                    <button onClick={handleSendMessage} className="p-2 text-gray-900">
                                         <Send size={20} />
                                     </button>
                                 </div>

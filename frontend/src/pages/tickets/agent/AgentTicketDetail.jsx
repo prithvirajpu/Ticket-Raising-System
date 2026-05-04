@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { escalateTicket, getTicketDetail, resolveTicket } from "../../../services/ticketService";
+import { escalateTicket, getTicketDetail, getTicketMessages, resolveTicket, sendMessage } from "../../../services/ticketService";
 import Loader from "../../../components/modals/Loader";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Send, Phone, User, Clock, AlertCircle, Calendar } from "lucide-react"; // Using Lucide for icons
@@ -17,9 +17,39 @@ const AgentTicketDetail = () => {
   const [escalateLoading,setEscalateLoading]=useState(false)
   const [escalateModalOpen, setEscalateModalOpen] = useState(false);
 
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
 
   const { id } = useParams();
   const navigate = useNavigate();
+
+  const handleSendMessage = async () => {
+  if (!newMessage.trim()) return;
+
+  try {
+    const res = await sendMessage(id, newMessage);
+
+    // instantly update UI
+    setMessages(prev => [...prev, res]);
+
+    setNewMessage('');
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+  useEffect(() => {
+  const fetchMessages = async () => {
+    try {
+      const res = await getTicketMessages(id);
+      setMessages(res);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  fetchMessages();
+}, [id]);
 
   useEffect(()=>{
     if (!ticket?.sla?.sla_deadline) return;
@@ -192,22 +222,41 @@ const AgentTicketDetail = () => {
             </div>
 
             {/* Chat Area */}
-            <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
-              <div className="self-end max-w-[80%]">
-                <div className="flex items-center justify-end gap-2 mb-2">
-                  <span className="text-xs text-gray-500 font-bold">User_here</span>
-                  <span className="text-[10px] text-gray-400 uppercase tracking-tighter">10:30:00 AM</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="bg-[#005AB5] text-white p-4 rounded-2xl rounded-tr-none shadow-sm text-sm">
-                    {ticket.description || "I am unable to login to my account. Getting an error message."}
-                  </div>
-                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                    U
-                  </div>
-                </div>
-              </div>
-            </div>
+           <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+  {messages.map((msg, index) => {
+    const isAgent = msg.sender === ticket.assigned_to;
+
+    return (
+      <div
+        key={index}
+        className={`flex flex-col ${isAgent ? "items-end" : "items-start"} gap-2`}
+      >
+        <div className="flex items-center gap-2 text-xs text-gray-500 font-bold">
+          {msg.sender_name}
+          <span className="text-[10px] text-gray-400">
+            {new Date(msg.created_at).toLocaleTimeString()}
+          </span>
+        </div>
+
+        <div className={`flex items-end gap-3 max-w-[80%] ${isAgent ? "flex-row-reverse" : ""}`}>
+          <div
+            className={`p-4 rounded-2xl text-sm shadow-sm ${
+              isAgent
+                ? "bg-blue-600 text-white rounded-tr-none"
+                : "bg-gray-200 text-black rounded-tl-none"
+            }`}
+          >
+            {msg.message}
+          </div>
+
+          <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center text-white text-xs font-bold">
+            {msg.sender_name?.[0]}
+          </div>
+        </div>
+      </div>
+    );
+  })}
+</div>
 
             {/* Message Input Area */}
             <div className="p-6 border-t border-gray-100">
@@ -219,15 +268,17 @@ const AgentTicketDetail = () => {
               
               <div className="relative flex items-center">
                 <input 
-                  type="text" 
-                  placeholder="Type your message..." 
-                  className="w-full bg-gray-100 rounded-2xl py-4 pl-6 pr-24 focus:outline-none focus:ring-1 focus:ring-gray-300"
-                />
+                      type="text"
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      placeholder="Type your message..." 
+                      className="w-full bg-gray-100 rounded-2xl py-4 pl-6 pr-24 focus:outline-none"
+                    />
                 <div className="absolute right-4 flex items-center gap-4">
                   <button className="text-green-500 hover:scale-110 transition-transform">
                     <Phone size={24} fill="currentColor" stroke="none" className="rotate-[100deg]" />
                   </button>
-                  <button className="text-black hover:translate-x-1 transition-transform">
+                  <button onClick={handleSendMessage} className="text-black hover:translate-x-1 transition-transform">
                     <Send size={24} />
                   </button>
                 </div>

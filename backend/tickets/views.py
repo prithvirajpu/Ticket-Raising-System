@@ -11,6 +11,42 @@ from tickets.services import (create_ticket_service,get_ticket_list_service,get_
                             get_client_documents,summarize_document_service,submit_summary_service,get_teamlead_summaries_service,generate_agent_summary_service,
                             submit_agent_summary_service,agent_summary_service,dashboard_service,generate_fake_ticket_service,fetch_fake_tickets_service,get_fake_ticket_detail_service)
 
+
+
+# tickets/views/dev_auth.py
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework import status
+
+from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.tokens import RefreshToken
+
+User = get_user_model()
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def dev_login(request):
+    email = request.data.get("email")
+
+    if not email:
+        return Response({"error": "Email required"}, status=400)
+
+    user = User.objects.filter(email=email).first()
+
+    if not user:
+        return Response({"error": "User not found"}, status=404)
+
+    refresh = RefreshToken.for_user(user)
+
+    return Response({
+        "access": str(refresh.access_token),
+        "refresh": str(refresh),
+        "user_id": user.id,
+        "email": user.email
+    })
+
 class CreateTicketView(APIView):
     permission_classes=[IsAuthenticated]
 
@@ -241,3 +277,29 @@ class AgentFakeTicketDetailView(APIView):
     def get(self,request,id):
         result=get_fake_ticket_detail_service(request.user,id)
         return return_response(result)
+    
+from rest_framework.generics import CreateAPIView,ListAPIView
+from tickets.serializer import TicketChatSerializer
+from tickets.services import send_message_service,get_messages_service
+class SendMessageView(CreateAPIView):
+    serializer_class= TicketChatSerializer
+    permission_classes= [IsAuthenticated]
+
+    def create(self,request,*args,**kwargs):
+        ticket_id=kwargs.get('ticket_id')
+        message=request.data.get('message')
+
+        chat= send_message_service(user=request.user,ticket_id=ticket_id,message=message)
+        serializer=self.get_serializer(chat)
+
+        return Response(serializer.data,status=201)
+
+class TicketMessageView(ListAPIView):
+    serializer_class=TicketChatSerializer
+    permission_classes=[IsAuthenticated]
+
+    def get_queryset(self):
+        ticket_id=self.kwargs.get('ticket_id')
+        return get_messages_service(user=self.request.user,ticket_id=ticket_id)
+    
+
