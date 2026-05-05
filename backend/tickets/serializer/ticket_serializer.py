@@ -3,11 +3,18 @@ from tickets.models import Ticket,TicketAssignment,TicketSLATracking
 
 class TicketSerializer(serializers.ModelSerializer):
     sla=serializers.SerializerMethodField()
+    created_by_id = serializers.IntegerField(source="created_by.id", read_only=True)
+    assigned_to_id = serializers.IntegerField(source="assigned_to.id", read_only=True)
+    current_user_id = serializers.SerializerMethodField()
 
     class Meta:
         model=Ticket
-        fields=['id','ticket_code','subject','description','status','issue_type','priority','created_at','sla']
+        fields=['id','ticket_code','subject','description','status','issue_type','priority','created_at','sla','created_by_id','assigned_to_id','current_user_id']
 
+    def get_current_user_id(self, obj):
+        request = self.context.get("request")
+        return request.user.id if request else None
+    
     def get_sla(self, obj):
         sla_tracking = TicketSLATracking.objects.filter(
             ticket_id=obj.id

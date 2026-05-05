@@ -140,7 +140,7 @@ def get_agent_ticket_requests_service(user,sort='newest',search='',page=1,page_s
             'status':status.HTTP_400_BAD_REQUEST
         }
     
-def get_agent_ticket_detail_service(user,ticket_id):
+def get_agent_ticket_detail_service(request,ticket_id):
 
     assignment=TicketAssignment.objects.filter(ticket_id=ticket_id,agent=user).select_related('ticket','ticket__client').first()
     if not assignment:
@@ -150,7 +150,7 @@ def get_agent_ticket_detail_service(user,ticket_id):
             'status':status.HTTP_403_FORBIDDEN
         }
     ticket=assignment.ticket
-    serializer=TicketSerializer(ticket)
+    serializer=TicketSerializer(ticket, context={"request": request})
     return {
         'data':{'message':serializer.data},
         "errors":{},

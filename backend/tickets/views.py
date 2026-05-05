@@ -75,7 +75,7 @@ class TicketListView(APIView):
 class TicketDetailView(APIView):
     permission_classes=[IsAuthenticated]
     def get(self,request,ticket_id):
-        result=get_ticket_detail_service(ticket_id)
+        result=get_ticket_detail_service(ticket_id,request)
         return return_response(result)
     
 class TicketCloseView(APIView):
@@ -122,7 +122,7 @@ class AgentTicketDetailView(APIView):
     permission_classes=[IsAuthenticated]
 
     def get(self,request,ticket_id):
-        result=get_agent_ticket_detail_service(request.user,ticket_id)
+        result=get_agent_ticket_detail_service(request,ticket_id)
         return return_response(result)
     
 class AgentOngoingTicketsView(APIView):
@@ -281,25 +281,23 @@ class AgentFakeTicketDetailView(APIView):
 from rest_framework.generics import CreateAPIView,ListAPIView
 from tickets.serializer import TicketChatSerializer
 from tickets.services import send_message_service,get_messages_service
-class SendMessageView(CreateAPIView):
-    serializer_class= TicketChatSerializer
-    permission_classes= [IsAuthenticated]
+class SendMessageView(APIView):
+    permission_classes = [IsAuthenticated]
 
-    def create(self,request,*args,**kwargs):
-        ticket_id=kwargs.get('ticket_id')
-        message=request.data.get('message')
+    def post(self, request, ticket_id):
+        message = request.data.get("message")
 
-        chat= send_message_service(user=request.user,ticket_id=ticket_id,message=message)
-        serializer=self.get_serializer(chat)
+        result = send_message_service(
+            user=request.user,
+            ticket_id=ticket_id,
+            message=message
+        )
 
-        return Response(serializer.data,status=201)
+        return Response(result)
 
-class TicketMessageView(ListAPIView):
-    serializer_class=TicketChatSerializer
-    permission_classes=[IsAuthenticated]
+class TicketMessageView(APIView):
+    permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        ticket_id=self.kwargs.get('ticket_id')
-        return get_messages_service(user=self.request.user,ticket_id=ticket_id)
-    
-
+    def get(self, request, ticket_id):
+        result = get_messages_service(request.user, ticket_id)
+        return Response(result)

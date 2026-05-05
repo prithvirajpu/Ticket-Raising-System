@@ -110,7 +110,7 @@ def get_ticket_list_service(request,sort='newest',search='',page=1,per_page=5):
     }
 
     
-def get_ticket_detail_service(ticket_id):
+def get_ticket_detail_service(ticket_id,request):
     try:
         ticket=Ticket.objects.filter(id=ticket_id).first()
         if not ticket:
@@ -119,9 +119,10 @@ def get_ticket_detail_service(ticket_id):
                 "errors":{'details':'Ticket not found'},
                 'status':status.HTTP_404_NOT_FOUND
             }
-        serializer=TicketSerializer(ticket)
+        serializer=TicketSerializer(ticket, context={"request": request})
+        data=serializer.data
         return {
-            "data":{'message':serializer.data},
+            "data":{'message':data},
             'errors':{},
             "status":status.HTTP_200_OK
         }

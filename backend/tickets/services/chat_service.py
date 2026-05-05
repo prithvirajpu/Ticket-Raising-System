@@ -1,6 +1,8 @@
 from tickets.models import Ticket,TicketChat,TicketChatParticipant
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.exceptions import PermissionDenied,ValidationError
+from tickets.serializer import TicketChatSerializer
+import logging
 
 def send_message_service(user,ticket_id,message):
     try:
@@ -18,7 +20,11 @@ def send_message_service(user,ticket_id,message):
         raise ValidationError('Message cannot be empty')
     
     chat= TicketChat.objects.create(ticket=ticket,sender=user,message=message)
-    return chat
+    return {
+        "data": TicketChatSerializer(chat).data,
+        "errors": None,
+        "status": 200
+    }
 
 def get_messages_service(user,ticket_id):
     try:
@@ -32,4 +38,12 @@ def get_messages_service(user,ticket_id):
         raise PermissionDenied('Not allowed')
     
     chats=TicketChat.objects.filter(ticket=ticket).order_by('created_at')
-    return chats
+    serialized = TicketChatSerializer(chats, many=True).data
+    logger = logging.getLogger(__name__)
+    logger.info("CHAT DEBUG: %s", chats.first().__dict__)
+
+    return {
+        "data": serialized,
+        "errors": None,
+        "status": 200
+    }

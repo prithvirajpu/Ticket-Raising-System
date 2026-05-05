@@ -2,9 +2,20 @@ from rest_framework import serializers
 from tickets.models import TicketChat
 
 class TicketChatSerializer(serializers.ModelSerializer):
-    sender_name=serializers.CharField(source='sender.username',read_only=True)
+    sender_id = serializers.IntegerField(source="sender.id", read_only=True)
+    sender_name = serializers.CharField(source="sender.email", read_only=True)
 
     class Meta:
-        model=TicketChat
-        fields=['id','ticket','sender','sender_name','message','message_type','created_at']
-        read_only_fields=['sender','created_at']
+        model = TicketChat
+        fields = [
+            "id",
+            "ticket",
+            "message",
+            "message_type",
+            "is_deleted",
+            "created_at",
+            "sender_id",
+            "sender_name",
+        ]
+    def get_sender_name(self, obj):
+        return getattr(obj.sender, "email", None) or getattr(obj.sender, "username", "")

@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
-import { escalateTicket, getTicketDetail, getTicketMessages, resolveTicket, sendMessage } from "../../../services/ticketService";
+import { escalateTicket, getTicketDetail, resolveTicket } from "../../../services/ticketService";
 import Loader from "../../../components/modals/Loader";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Send, Phone, User, Clock, AlertCircle, Calendar } from "lucide-react"; // Using Lucide for icons
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
 import { getSlaTimer } from "../../../utils/slaTImer";
+import useChat from "../../../hooks/useChat";
 
 const AgentTicketDetail = () => {
+  const { id } = useParams();
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
   const [resolveModalOpen,setResolveModalOpen]=useState(false);
@@ -16,40 +18,12 @@ const AgentTicketDetail = () => {
 
   const [escalateLoading,setEscalateLoading]=useState(false)
   const [escalateModalOpen, setEscalateModalOpen] = useState(false);
+  const { messages, newMessage, setNewMessage,
+         handleSendMessage, messageEndRef } = useChat(id,ticket?.current_user_id);
+  const currentUserId = Number(ticket?.current_user_id);
+  console.log('current user id ',currentUserId)
 
-  const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState('');
-
-  const { id } = useParams();
   const navigate = useNavigate();
-
-  const handleSendMessage = async () => {
-  if (!newMessage.trim()) return;
-
-  try {
-    const res = await sendMessage(id, newMessage);
-
-    // instantly update UI
-    setMessages(prev => [...prev, res]);
-
-    setNewMessage('');
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-  useEffect(() => {
-  const fetchMessages = async () => {
-    try {
-      const res = await getTicketMessages(id);
-      setMessages(res);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  fetchMessages();
-}, [id]);
 
   useEffect(()=>{
     if (!ticket?.sla?.sla_deadline) return;
@@ -224,12 +198,13 @@ const AgentTicketDetail = () => {
             {/* Chat Area */}
            <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
   {messages.map((msg, index) => {
-    const isAgent = msg.sender === ticket.assigned_to;
+    const senderId = Number(msg.sender_id ?? msg.sender);
+  const isMe = senderId === currentUserId;
 
     return (
       <div
         key={index}
-        className={`flex flex-col ${isAgent ? "items-end" : "items-start"} gap-2`}
+        className={`flex flex-col ${isMe ? "items-end" : "items-start"} gap-2`}
       >
         <div className="flex items-center gap-2 text-xs text-gray-500 font-bold">
           {msg.sender_name}
@@ -238,10 +213,10 @@ const AgentTicketDetail = () => {
           </span>
         </div>
 
-        <div className={`flex items-end gap-3 max-w-[80%] ${isAgent ? "flex-row-reverse" : ""}`}>
+        <div className={`flex items-end gap-3 max-w-[80%] ${isMe ? "flex-row-reverse" : ""}`}>
           <div
             className={`p-4 rounded-2xl text-sm shadow-sm ${
-              isAgent
+              isMe
                 ? "bg-blue-600 text-white rounded-tr-none"
                 : "bg-gray-200 text-black rounded-tl-none"
             }`}
@@ -256,6 +231,7 @@ const AgentTicketDetail = () => {
       </div>
     );
   })}
+  <div ref={messageEndRef} />
 </div>
 
             {/* Message Input Area */}

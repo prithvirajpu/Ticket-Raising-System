@@ -6,6 +6,7 @@ import { ArrowLeft, Tag, Info, User, Clock, RefreshCcw, Send, Paperclip } from "
 import Loader from "../../../components/modals/Loader";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
 import ReviewModal from "../../../components/modals/ReviewModal";
+import useChat from "../../../hooks/useChat";
 
 const TicketDetail = () => {
     const { id } = useParams();
@@ -19,38 +20,24 @@ const TicketDetail = () => {
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [reviewLoading, setReviewLoading] = useState(false);
 
-    const [messages,setMessages]=useState([])
-    const [newMessage,setNewMessage]=useState('')
-
-    const handleSendMessage=async()=>{
-        if (!newMessage.trim()) return
-        try {
-            const res= await sendMessage(id,newMessage)
-            setMessages(prev=>[...prev,res])
-            setNewMessage('')
-        } catch (error) {
-            console.log('error')
-        }
-    }
-
+    const { messages, newMessage, setNewMessage,
+         handleSendMessage, messageEndRef } = useChat(id);
+    
+    const currentUserId = Number(ticket?.current_user_id);
+    console.log('user id here',currentUserId)
+    // if (!ticket?.current_user_id) return <Loader />;.
     useEffect(() => {
-        const fetchMessages = async () => {
-            try {
-                const res = await getTicketMessages(id);
-                setMessages(res);  // adjust if res.data
-            } catch (err) {
-                console.log(err);
-            }
-        };
-
-        fetchMessages();
-    }, [id]);
+  console.log("FULL TICKET:", ticket);
+}, [ticket]);
+console.log("current_user_id:", ticket?.current_user_id);
 
     useEffect(() => {
         const fetchTicket = async () => {
             try {
                 setLoading(true)
                 const data = await getTicketDetail(id);
+                console.log('the result is here')
+            console.log('ticket details',data.message)
                 setTicket(data.message)
             } catch (error) {
                 console.log(error);
@@ -90,6 +77,18 @@ const TicketDetail = () => {
             setReviewLoading(false);
         }
     }
+    const formatTime = (t) => {
+    if (!t) return "";
+
+    const d = new Date(t);
+
+    if (isNaN(d.getTime())) return "";
+
+    return d.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+};
 
     if (loading) return <Loader />;
     if (!ticket) return <div className="p-10 text-center font-sans">Ticket not found</div>
@@ -199,36 +198,33 @@ const TicketDetail = () => {
                                 <h2 className="text-xl font-bold text-gray-800">Conversation</h2>
                                 <p className="text-sm text-gray-400">Chat with the support team</p>
                             </div>
-                            <div className="px-3 py-1 bg-black text-white text-xs font-bold rounded-md tracking-widest">
-                                05:23
-                            </div>
+                        
                         </div>
 
                         {/* Chat Messages */}
                         <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-gray-50/30">
                             {/* Example Message: User */}
                             {messages.map((msg, index) => {
-                                console.log(msg);
-    const isUser = msg.sender === ticket.created_by; // adjust if needed
+    const isMe = Number(msg.sender_id) === Number(currentUserId);
 
     return (
-        <div
+        <div 
             key={index}
-            className={`flex flex-col ${isUser ? "items-end" : "items-start"} gap-2`}
+            className={`flex flex-col ${isMe ? "items-end" : "items-start"} gap-2`}
         >
             <div className="flex items-center gap-2 text-[11px] text-gray-400 font-bold uppercase">
                 {msg.sender_name}
                 <span className="font-normal normal-case">
-                    {new Date(msg.created_at).toLocaleTimeString()}
+                    {formatTime(msg.created_at)}
                 </span>
             </div>
 
-            <div className={`flex gap-3 items-end max-w-[80%] ${isUser ? "flex-row-reverse" : ""}`}>
+            <div className={`flex gap-3 items-end max-w-[80%] ${isMe ? "flex-row-reverse" : ""}`}>
                 
                 {/* Bubble */}
                 <div
                     className={`p-4 rounded-2xl text-sm shadow-sm ${
-                        isUser
+                        isMe
                             ? "bg-[#005bb7] text-white rounded-tr-none"
                             : "bg-gray-200 text-gray-900 rounded-tl-none"
                     }`}
@@ -238,7 +234,7 @@ const TicketDetail = () => {
 
                 {/* Avatar */}
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${
-                    isUser ? "bg-emerald-500" : "bg-gray-500"
+                    isMe ? "bg-emerald-500" : "bg-gray-500"
                 }`}>
                     {msg.sender_name?.[0]}
                 </div>
@@ -246,16 +242,12 @@ const TicketDetail = () => {
         </div>
     );
 })}
-
+<div ref={messageEndRef} />
                         </div>
 
                         {/* Chat Input */}
                         <div className="p-6 border-t border-gray-100 bg-white">
-                            <div className="flex justify-end mb-4">
-                                <button className="px-4 py-1.5 bg-[#84940c] text-white text-xs font-bold rounded-lg hover:opacity-90">
-                                    Connect Agent
-                                </button>
-                            </div>
+                            
                             <div className="relative flex items-center">
                                 <input
                                         type="text"

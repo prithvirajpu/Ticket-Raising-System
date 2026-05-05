@@ -7,6 +7,9 @@ from asgiref.sync import sync_to_async
 
 User = get_user_model()
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 class JWTAuthMiddleware:
     def __init__(self, inner):
@@ -18,8 +21,10 @@ class JWTAuthMiddleware:
 
         token = query_params.get("token")
         token = token[0] if token else None
+        logger.info("WS TOKEN: %s", token)
 
         scope["user"] = await self.get_user(token)
+        logger.info("WS USER: %s", scope["user"])
 
         return await self.inner(scope, receive, send)
 
