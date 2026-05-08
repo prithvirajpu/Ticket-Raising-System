@@ -9,7 +9,8 @@ from tickets.services import (create_ticket_service,get_ticket_list_service,get_
                             close_ticket_service,submit_review_service,escalate_ticket_service,get_profile_service,update_profile_service,
                             get_team_lead_tickets_service,get_manager_tickets_service,upload_client_doc_service,get_clients_with_documents,
                             get_client_documents,summarize_document_service,submit_summary_service,get_teamlead_summaries_service,generate_agent_summary_service,
-                            submit_agent_summary_service,agent_summary_service,dashboard_service,generate_fake_ticket_service,fetch_fake_tickets_service,get_fake_ticket_detail_service)
+                            submit_agent_summary_service,agent_summary_service,dashboard_service,generate_fake_ticket_service,fetch_fake_tickets_service,
+                            get_fake_ticket_detail_service,reopen_ticket_service)
 
 
 
@@ -256,7 +257,6 @@ class DashboardView(APIView):
         result=dashboard_service(request,role)
         return return_response(result)
 
-    
 class GenerateFakeTicketView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -301,3 +301,10 @@ class TicketMessageView(APIView):
     def get(self, request, ticket_id):
         result = get_messages_service(request.user, ticket_id)
         return Response(result)
+
+class ReopenTicketView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def patch(self,request,ticket_id):
+        result=reopen_ticket_service(request.user,ticket_id)
+        return return_response(result)

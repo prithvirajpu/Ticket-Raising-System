@@ -20,6 +20,7 @@ class Ticket(models.Model):
         ("ESCALATED","Escalated"),
         ("RESOLVED","Resolved"),
         ("CLOSED","Closed"),
+        ("REOPENED","Reopened"),
     ]
 
     ticket_code=models.CharField(max_length=30,unique=True,default=generate_ticket_code)

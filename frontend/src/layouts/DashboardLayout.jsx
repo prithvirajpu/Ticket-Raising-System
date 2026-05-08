@@ -3,17 +3,6 @@ import Navbar from '../components/Navbar'
 // import useAgentTimer from '../hooks/useAgentTimer'
 
 const DashboardLayout = ({ title, subtitle, headerAction, children }) => {
-  // const seconds = useAgentTimer() // global timer
-
-  // Format seconds to hh:mm:ss
-  // const formatTime = (secs) => {
-  //   const h = Math.floor(secs / 3600)
-  //   const m = Math.floor((secs % 3600) / 60)
-  //   const s = secs % 60
-  //   return `${h.toString().padStart(2, '0')}h ${m
-  //     .toString()
-  //     .padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`
-  // }
 
   return (
     <div className="min-h-screen bg-white">

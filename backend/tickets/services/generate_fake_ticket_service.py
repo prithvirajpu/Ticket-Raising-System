@@ -20,7 +20,6 @@ CRITICAL: Respond with ONLY valid JSON array. NO prose, NO markdown, NO explanat
   {{"title": "Payment Issue", "description": "Cannot process...", "priority": "HIGH", "category": "Payment"}},
   {{"title": "Login Error", "description": "Cannot login...", "priority": "MEDIUM", "category": "Auth"}}
 ]"""}]
-        # ❌ Removed response_format - Claude ignores it
     }
     
     headers = {

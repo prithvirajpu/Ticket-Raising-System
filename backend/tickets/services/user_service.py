@@ -49,7 +49,7 @@ def create_ticket_service(data,user):
                 status="OPEN"
                 )
             attach_sla_to_ticket(ticket)
-            expiry_time=timezone.now()+timedelta(minutes=15)
+            expiry_time=timezone.now()+timedelta(minutes=10)
             assignments=[
                 TicketAssignment(ticket=ticket,agent=agent,status='PENDING',expires_at=expiry_time)
                 for agent in agents

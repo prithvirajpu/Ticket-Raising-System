@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom"
 import DashboardLayout from "../../../layouts/DashboardLayout"
 import { useEffect, useState } from "react";
-import { closeTicket, getTicketDetail, getTicketMessages, sendMessage, submitReview } from "../../../services/ticketService";
+import { reopenTicket,closeTicket, getTicketDetail, getTicketMessages, sendMessage, submitReview } from "../../../services/ticketService";
 import { ArrowLeft, Tag, Info, User, Clock, RefreshCcw, Send, Paperclip } from "lucide-react";
 import Loader from "../../../components/modals/Loader";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
@@ -20,16 +20,30 @@ const TicketDetail = () => {
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [reviewLoading, setReviewLoading] = useState(false);
 
+    const [reopenModalOpen, setReopenModalOpen] = useState(false);
+    const [reopenLoading, setReopenLoading] = useState(false);
+
     const { messages, newMessage, setNewMessage,
          handleSendMessage, messageEndRef } = useChat(id);
     
     const currentUserId = Number(ticket?.current_user_id);
-    console.log('user id here',currentUserId)
     // if (!ticket?.current_user_id) return <Loader />;.
     useEffect(() => {
-  console.log("FULL TICKET:", ticket);
-}, [ticket]);
-console.log("current_user_id:", ticket?.current_user_id);
+        console.log("FULL TICKET:", ticket);
+        }, [ticket]);
+    const handleConfirmReopen=async()=>{
+        setReopenLoading(true)
+        try {
+            await reopenTicket(id)
+            const updated= await getTicketDetail(id);
+            setTicket(updated.message)
+            setReopenModalOpen(false)
+        } catch (error) {
+            console.log(error)
+        }finally{
+            setReopenLoading(false)
+        }
+    }
 
     useEffect(() => {
         const fetchTicket = async () => {
@@ -105,9 +119,14 @@ console.log("current_user_id:", ticket?.current_user_id);
                         <h1 className="text-2xl font-bold text-gray-900">Ticket #{ticket.ticket_code || id.slice(0, 5)}</h1>
                     </div>
                     <div className="flex gap-3">
-                        <button className="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 transition-colors">
-                            Contact TL
-                        </button>
+                        {ticket.status === "RESOLVED" && (
+  <button
+    onClick={() => setReopenModalOpen(true)}
+    className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+  >
+    Reopen Ticket
+  </button>
+)}
                         
                         {ticket.status==='RESOLVED' ?(
                             <button onClick={()=>setShowCloseModal(true)} className="px-4 py-2 bg-red-600 text-white text-sm font-bold rounded-lg hover:bg-red-700 transition-colors">
@@ -213,7 +232,7 @@ console.log("current_user_id:", ticket?.current_user_id);
             className={`flex flex-col ${isMe ? "items-end" : "items-start"} gap-2`}
         >
             <div className="flex items-center gap-2 text-[11px] text-gray-400 font-bold uppercase">
-                {msg.sender_name}
+                {msg.sender_name.split('@')[0]}
                 <span className="font-normal normal-case">
                     {formatTime(msg.created_at)}
                 </span>
@@ -286,6 +305,17 @@ console.log("current_user_id:", ticket?.current_user_id);
                 onClose={() => setShowReviewModal(false)}
                 onSubmit={handleSubmitReview}
                 loading={reviewLoading}
+            />
+            <ConfirmModal
+            isOpen={reopenModalOpen}
+            title="Reopen Ticket?"
+            message={`Are you sure you want to reopen ticket #${ticket.ticket_code || id.slice(0, 5)}?`}
+            confirmText="Reopen Ticket"
+            cancelText="Cancel"
+            loadingText="Reopening..."
+            loading={reopenLoading}
+            onConfirm={handleConfirmReopen}
+            onCancel={() => setReopenModalOpen(false)}
             />
         </DashboardLayout>
     )

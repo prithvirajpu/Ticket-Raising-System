@@ -1,5 +1,5 @@
 from rest_framework import status
-from tickets.models import Ticket,TicketAssignment,TicketSLATracking
+from tickets.models import Ticket,TicketAssignment,TicketSLATracking,TicketChatParticipant
 from django.db import transaction
 from django.utils import timezone
 from django.db.models import Q
@@ -54,6 +54,17 @@ def accept_ticket_service(ticket_id, user):
             ticket.status = "IN_PROGRESS"
             ticket.assigned_to = user
             ticket.save(update_fields=['status', 'assigned_to'])
+            TicketChatParticipant.objects.get_or_create(
+                        ticket=ticket,
+                        user=ticket.created_by,
+                        defaults={"role": "USER"}
+                    )
+
+            TicketChatParticipant.objects.get_or_create(
+                        ticket=ticket,
+                        user=user,
+                        defaults={"role": "AGENT"}
+                    )
 
             assignment.status = "ACCEPTED"
             assignment.expires_at = None
@@ -232,3 +243,32 @@ def resolve_ticket_service(user,ticket_id):
             "status": status.HTTP_500_INTERNAL_SERVER_ERROR
         }
     
+def reopen_ticket_service(user,ticket_id):
+    try:
+        with transaction.atomic():
+            ticket=Ticket.objects.filter(id=ticket_id,created_by=user).first()
+            if not ticket:
+                return {
+                    'data':None,
+                    "errors":{'details':'Ticket not found'},
+                    'status':status.HTTP_404_NOT_FOUND
+                }
+            if ticket.status !='RESOLVED':
+                return{
+                    'data':None,
+                    "errors":{'details':'Only resolved tickets can be reopened'},
+                    'status':status.HTTP_400_BAD_REQUEST
+                }
+            ticket.status='IN_PROGRESS'
+            ticket.save(update_fields=['status'])
+            return{
+                'errors':{},
+                "data":{'message':'Ticket reopened successfully'},
+                'status':status.HTTP_200_OK
+            }
+    except Exception as e:
+        return {
+            'data':None,
+            "errors":{'details':str(e)},
+            'status':status.HTTP_500_INTERNAL_SERVER_ERROR
+        }

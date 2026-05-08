@@ -3,7 +3,7 @@ from .views import (CreateTicketView,TicketListView,TicketDetailView,AcceptTicke
                 ,AgentOngoingTicketsView,ResolveTicketView,TicketCloseView,SubmitReviewView,EscalatedTicketView,UserProfileView,UpdateProfileView,
                  TeamLeadTicketView,ManagerTicketsView,UploadDocView,ClientListWithDocsView,ClientDocumentsView,SummarizeDocumentView,SubmitSummaryView,
                   TeamLeadSummaryView,SummaryTeamLeadView,SubmitSummaryToAgentsView,AgentSummaryView,DashboardView,GenerateFakeTicketView,AgentFakeTicketsView,
-                  AgentFakeTicketDetailView,SendMessageView,TicketMessageView )
+                  AgentFakeTicketDetailView,SendMessageView,TicketMessageView,ReopenTicketView )
 from tickets.views import dev_login
 urlpatterns=[
     path("dev-login/", dev_login),
@@ -16,6 +16,7 @@ urlpatterns=[
     path('<int:ticket_id>/review/',SubmitReviewView.as_view()),
     path('user/profile/',UserProfileView.as_view()),
     path('user/profile/update/',UpdateProfileView.as_view()),
+    path('<int:ticket_id>/reopen/',ReopenTicketView.as_view()),
 
     #agents
     path('agents/requests/',AgentTicketRequestsView.as_view()),

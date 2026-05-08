@@ -216,3 +216,14 @@ export const sendMessage=async(ticketId,message)=>{
         throw error;       
     }
 }
+
+export const reopenTicket= async(ticketId)=>{
+   try {
+     const res= await api.patch(`/tickets/${ticketId}/reopen/`)
+    return res.data.data
+   } catch (error) {
+    console.log('something wrong with REOPEN')
+    console.log(error.response?.data)
+    console.log(error)
+   }
+}

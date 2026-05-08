@@ -42,6 +42,28 @@ def auto_assign_service():
             ticket.assigned_to = agent
             ticket.status = "IN_PROGRESS"
             ticket.save(update_fields=["assigned_to", "status"])
+            TicketAssignment.objects.filter(
+                    ticket=ticket,
+                    agent=agent,
+                    status="PENDING"
+                ).update(status="ACCEPTED")
+            TicketAssignment.objects.filter(
+                    ticket=ticket,
+                    status="PENDING"
+                ).exclude(agent=agent).update(status="CANCELLED")
+            from tickets.models import TicketChatParticipant
+
+            TicketChatParticipant.objects.get_or_create(
+                        ticket=ticket,
+                        user=ticket.created_by,
+                        defaults={"role": "USER"}
+                    )
+
+            TicketChatParticipant.objects.get_or_create(
+                        ticket=ticket,
+                        user=agent,
+                        defaults={"role": "AGENT"}
+                    )
 
             TicketAssignment.objects.create(
                 ticket=ticket,
@@ -49,4 +71,3 @@ def auto_assign_service():
                 status="ACCEPTED"
             )
 
-            print("🔥 AUTO ASSIGNED:", ticket.id, "->", agent.id)
