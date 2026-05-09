@@ -1,5 +1,5 @@
 from rest_framework import status
-from tickets.models import Ticket,TicketAssignment,TicketSLATracking,TicketChatParticipant
+from tickets.models import Ticket,TicketAssignment,TicketSLATracking,TicketChatParticipant,TicketActivity
 from django.db import transaction
 from django.utils import timezone
 from django.db.models import Q
@@ -69,6 +69,7 @@ def accept_ticket_service(ticket_id, user):
             assignment.status = "ACCEPTED"
             assignment.expires_at = None
             assignment.save(update_fields=['status', 'expires_at'])
+            TicketActivity.objects.create(ticket=ticket,action='ACCEPTED',performed_by=user,description='Agent accepted the ticket')
 
             assignments.filter(status="PENDING").exclude(agent=user).update(status="CANCELLED")
 
@@ -223,6 +224,12 @@ def resolve_ticket_service(user,ticket_id):
                 }
             ticket.status='RESOLVED'
             ticket.save(update_fields=['status'])
+            TicketActivity.objects.create(
+                ticket=ticket,
+                action="RESOLVED",
+                performed_by=user,
+                description="Ticket marked as resolved"
+            )
 
             sla = getattr(ticket, 'sla_tracking', None)
             if sla:
@@ -261,6 +268,12 @@ def reopen_ticket_service(user,ticket_id):
                 }
             ticket.status='IN_PROGRESS'
             ticket.save(update_fields=['status'])
+            TicketActivity.objects.create(
+                ticket=ticket,
+                action="REOPENED",
+                performed_by=user,
+                description="Customer reopened the ticket"
+            )
             return{
                 'errors':{},
                 "data":{'message':'Ticket reopened successfully'},

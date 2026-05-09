@@ -227,3 +227,14 @@ export const reopenTicket= async(ticketId)=>{
     console.log(error)
    }
 }
+
+export const getTicketTimeline= async(ticketId)=>{
+   try {
+     const res= await api.get(`/tickets/${ticketId}/timeline/`)
+    return res.data.data
+   } catch (error) {
+    console.log('something wrong with timeline')
+    console.log(error.response?.data)
+    console.log(error)
+   }
+}

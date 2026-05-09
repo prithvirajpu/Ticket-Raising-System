@@ -10,7 +10,7 @@ from tickets.services import (create_ticket_service,get_ticket_list_service,get_
                             get_team_lead_tickets_service,get_manager_tickets_service,upload_client_doc_service,get_clients_with_documents,
                             get_client_documents,summarize_document_service,submit_summary_service,get_teamlead_summaries_service,generate_agent_summary_service,
                             submit_agent_summary_service,agent_summary_service,dashboard_service,generate_fake_ticket_service,fetch_fake_tickets_service,
-                            get_fake_ticket_detail_service,reopen_ticket_service)
+                            get_fake_ticket_detail_service,reopen_ticket_service,timeline_service)
 
 
 
@@ -307,4 +307,11 @@ class ReopenTicketView(APIView):
 
     def patch(self,request,ticket_id):
         result=reopen_ticket_service(request.user,ticket_id)
+        return return_response(result)
+    
+class TicketTimelineView(APIView):
+    permission_classes =[IsAuthenticated]
+
+    def get(self,request,ticket_id):
+        result=timeline_service(ticket_id)
         return return_response(result)

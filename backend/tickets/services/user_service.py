@@ -1,6 +1,6 @@
 from rest_framework import status
-from tickets.models import Ticket,TicketAssignment,ClientSubscription,TicketSLATracking,TicketReview
-from tickets.serializer import TicketSerializer
+from tickets.models import Ticket,TicketAssignment,ClientSubscription,TicketSLATracking,TicketReview,TicketActivity
+from tickets.serializer import TicketSerializer,TicketActivitySerializer
 from django.db import transaction
 from django.utils import timezone
 from datetime import timedelta
@@ -48,6 +48,7 @@ def create_ticket_service(data,user):
                 assigned_to=None,
                 status="OPEN"
                 )
+            TicketActivity.objects.create(ticket=ticket,action='CREATED',performed_by=user,description='Ticket created by customer')
             attach_sla_to_ticket(ticket)
             expiry_time=timezone.now()+timedelta(minutes=10)
             assignments=[
@@ -152,6 +153,12 @@ def close_ticket_service(user,ticket_id):
                 }
             ticket.status='CLOSED'
             ticket.save(update_fields=['status'])
+            TicketActivity.objects.create(
+                ticket=ticket,
+                action="CLOSED",
+                performed_by=user,
+                description="Customer closed the ticket"
+            )
             return {
                     "data": {'message':'Ticket closed successfully'},
                     "errors": {},
@@ -199,3 +206,12 @@ def submit_review_service(user,ticket_id,rating,review):
             "errors": {},
             "status": status.HTTP_200_OK
             }
+
+def timeline_service(ticket_id):
+    activities= TicketActivity.objects.filter(ticket_id=ticket_id).order_by('created_at')
+    serializer= TicketActivitySerializer(activities,many=True)
+    return {
+        'data':{'message':serializer.data},
+        'errors':None,
+        'status':status.HTTP_200_OK
+    }

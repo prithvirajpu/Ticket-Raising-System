@@ -5,3 +5,4 @@ from .SLAPolicy import SLAPolicy,TicketSLATracking
 from .profiles import ClientProfile
 from .ClientDocument import ClientDocument,DocumentSummary
 from .chat_models import TicketChat,TicketChatParticipant
+from .ticket_activity import TicketActivity

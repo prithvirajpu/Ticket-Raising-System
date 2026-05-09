@@ -1,4 +1,4 @@
-from tickets.models import Ticket
+from tickets.models import Ticket,TicketActivity
 from rest_framework import status
 
 def escalate_ticket_service(user, ticket_id):
@@ -51,6 +51,12 @@ def escalate_ticket_service(user, ticket_id):
     ticket.status = "ESCALATED"
     ticket.assigned_to = next_assignee
     ticket.save(update_fields=["status", "assigned_to"])
+    TicketActivity.objects.create(
+        ticket=ticket,
+        action="ESCALATED",
+        performed_by=user,
+        description="Ticket escalated to higher authority"
+    )
 
     return {
         "data": {"message": f"Escalated to {next_assignee.role}"},

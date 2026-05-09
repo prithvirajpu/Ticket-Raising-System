@@ -160,17 +160,6 @@ const ManagerTicketDetail = () => {
                 {ticket.created_at ? new Date(ticket.created_at).toLocaleString() : "1/3/2026, 10:30:00 AM"}
               </p>
             </div>
-
-            {/* Last Updated Section */}
-            <div className="pt-4 border-t">
-              <div className="flex items-center gap-2 text-gray-400 text-sm mb-2">
-                <Clock size={16} />
-                Last updated
-              </div>
-              <p className="text-sm font-medium">
-                {ticket.updated_at ? new Date(ticket.updated_at).toLocaleString() : "1/3/2026, 10:30:00 AM"}
-              </p>
-            </div>
           </div>
         </div>
 

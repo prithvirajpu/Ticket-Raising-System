@@ -1,7 +1,7 @@
 def auto_assign_service():
     from django.utils import timezone
     from django.db import transaction
-    from tickets.models import TicketAssignment, Ticket
+    from tickets.models import TicketAssignment, Ticket,TicketActivity
     from tickets.utils import get_next_available_agent
     import logging
     logger = logging.getLogger(__name__)
@@ -70,4 +70,9 @@ def auto_assign_service():
                 agent=agent,
                 status="ACCEPTED"
             )
-
+            TicketActivity.objects.create(
+                ticket=ticket,
+                action="AUTO_ASSIGNED",
+                performed_by=agent,
+                description=f"Ticket auto assigned to agent"
+            )
