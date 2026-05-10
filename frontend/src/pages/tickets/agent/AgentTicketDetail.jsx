@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { escalateTicket, getTicketDetail, resolveTicket } from "../../../services/ticketService";
+import { escalateTicket, getAgentTicketDetail, resolveTicket } from "../../../services/ticketService";
 import Loader from "../../../components/modals/Loader";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Send, Phone, User, Clock, AlertCircle, Calendar } from "lucide-react"; // Using Lucide for icons
@@ -40,7 +40,7 @@ const AgentTicketDetail = () => {
 
   const fetchTicket = async () => {
     try {
-      const data = await getTicketDetail(id);
+      const data = await getAgentTicketDetail(id);
       setTicket(data.message);
     } catch (error) {
       console.error(error);
@@ -56,6 +56,7 @@ const AgentTicketDetail = () => {
       await fetchTicket();
       setEscalateModalOpen(false);
       navigate('/agent/assigned-tickets')
+      notifySuccess('Ticket escalated to the Team Lead')
       
     } catch (error) {
       console.log(error);
@@ -73,6 +74,7 @@ const AgentTicketDetail = () => {
       await resolveTicket(id);
       await fetchTicket();
       setResolveModalOpen(false)
+      notifySuccess('Ticket successfully Resolved')
     } catch (error) {
       console.error(error);
     }finally{

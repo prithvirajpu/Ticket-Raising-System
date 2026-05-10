@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { escalateTicket, getTicketDetail, resolveTicket } from "../../../services/ticketService";
+import { escalateTicket, getUserTicketDetail, resolveTicket } from "../../../services/ticketService";
 import Loader from "../../../components/modals/Loader";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Send, Phone, User, Clock, AlertCircle, Calendar } from "lucide-react"; // Using Lucide for icons
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
 import { getSlaTimer } from "../../../utils/slaTImer";
+import { notifySuccess } from "../../../utils/notify";
 
 const TeamLeadTicketDetail = () => {
     const [ticket, setTicket] = useState(null);
@@ -38,7 +39,7 @@ const TeamLeadTicketDetail = () => {
 
   const fetchTicket = async () => {
     try {
-      const data = await getTicketDetail(id);
+      const data = await getUserTicketDetail(id);
       setTicket(data.message);
     } catch (error) {
       console.error(error);
@@ -54,6 +55,7 @@ const TeamLeadTicketDetail = () => {
       await fetchTicket();
       setEscalateModalOpen(false);
       navigate('/team-lead/assigned-tickets')
+      notifySuccess('Ticket escalated to the Manager')
       
     } catch (error) {
       console.log(error);
@@ -70,6 +72,7 @@ const TeamLeadTicketDetail = () => {
     try {
       await resolveTicket(id);
       await fetchTicket();
+      notifySuccess('Ticket marked as Resolved')
       setResolveModalOpen(false)
     } catch (error) {
       console.error(error);

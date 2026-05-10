@@ -5,7 +5,7 @@ import {
   getTicketTimeline,
   reopenTicket,
   closeTicket,
-  getTicketDetail,
+  getUserTicketDetail,
   getTicketMessages,
   sendMessage,
   submitReview,
@@ -60,7 +60,7 @@ const TicketDetail = () => {
     setReopenLoading(true);
     try {
       await reopenTicket(id);
-      const updated = await getTicketDetail(id);
+      const updated = await getUserTicketDetail(id);
       const timelineData = await getTicketTimeline(id);
       setTimeline(timelineData.message);
       setTicket(updated.message);
@@ -76,7 +76,7 @@ const TicketDetail = () => {
     const fetchTicket = async () => {
       try {
         setLoading(true);
-        const data = await getTicketDetail(id);
+        const data = await getUserTicketDetail(id);
         setTicket(data.message);
         const timelineData = await getTicketTimeline(id);
         setTimeline(timelineData.message);
@@ -94,7 +94,7 @@ const TicketDetail = () => {
     try {
       const res = await closeTicket(id);
       console.log(res);
-      const data = await getTicketDetail(id);
+      const data = await getUserTicketDetail(id);
       setTicket(data.message);
     } catch (error) {
       console.log(error);
@@ -111,7 +111,7 @@ const TicketDetail = () => {
       await submitReview(id, data);
       setShowReviewModal(false);
       notifySuccess('Review sumbitted successfully')
-      const updated = await getTicketDetail(id);
+      const updated = await getUserTicketDetail(id);
       setTicket(updated.message);
     } catch (error) {
       console.log(error);

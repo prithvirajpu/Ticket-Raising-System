@@ -11,7 +11,7 @@ const AgentDetail = () => {
 
   const fetchAgent = async () => {
     try {
-      const res = await api.get(`/auth/admin/agent/${id}/`);
+      const res = await api.get(`/admins/agent/${id}/`);
       setAgent(res.data.data);
     } catch (err) {
       console.error(err);

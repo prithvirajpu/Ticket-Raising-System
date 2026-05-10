@@ -3,8 +3,13 @@ import api from '../api/axios'
 import { notifyError } from '../utils/notify'
 
 export const createTicket= async(data)=>{
-    const response= await api.post('/tickets/create/',data)
+    try {
+        const response= await api.post('/users/tickets/create/',data)
     return response.data.data
+    } catch (error) {
+        console.log("CREATE TICKET FAILED ❌")
+        throw error
+    }
 }
 
 export const getTickets=async ({search='',sort='newest',page=1})=>{
@@ -12,12 +17,17 @@ export const getTickets=async ({search='',sort='newest',page=1})=>{
     if (search){
         params.search=search;
     }
-    const response=await api.get(`/tickets/list/`,{params})
+    const response=await api.get(`/users/tickets/list/`,{params})
     return response.data.data
 }
 
-export const getTicketDetail= async(id)=>{
-    const response=await api.get(`/tickets/details/${id}/`);
+export const getUserTicketDetail= async(id)=>{
+    const response=await api.get(`/users/details/${id}/`);
+    return response.data.data
+}
+
+export const getAgentTicketDetail= async(id)=>{
+    const response=await api.get(`/agents/details/${id}/`);
     return response.data.data
 }
 
@@ -26,17 +36,22 @@ export const getAgentRequests=async ({search='',sort='newest',page=1})=>{
     if (search){
         params.search=search
     }
-    const res= await api.get(`/tickets/agents/requests/`,{params})
+    const res= await api.get(`/agents/requests/`,{params})
     return res.data.data
 }
 
-export const acceptTicket =async (id)=>{
-    const res= await api.post(`/tickets/${id}/accept/`)
-    return res.data.data
-}
+export const acceptTicket = async (id) => {
+    try {
+        const res = await api.post(`/agents/${id}/accept/`);
+        return res.data.data;
+    } catch (error) {
+        console.log("❌ TICKET ACCEPT API CALL FAILED =====================");
+        throw error; 
+    }
+};
 
 export const rejectTicket =async (id)=>{
-    const res= await api.post(`/tickets/${id}/reject/`)
+    const res= await api.post(`/agents/${id}/reject/`)
     return res.data.data
 }
 
@@ -45,7 +60,7 @@ export const getOngoingTickets = async ({search='',sort='newest',page=1}) => {
     if (search){
         params.search=search
     }
-  const res = await api.get(`/tickets/agents/in-progress/`,{params});
+  const res = await api.get(`/agents/in-progress/`,{params});
   return res.data.data;
 };
 
@@ -55,19 +70,18 @@ export const resolveTicket = async (id) => {
 };
 
 export const closeTicket= async (id) =>{
-    const res = await api.post(`/tickets/${id}/close/`)
+    const res = await api.post(`/users/tickets/${id}/close/`)
     return res.data.data
 }
 
 export const submitReview=async(id,data)=>{
-    const res= await api.post(`/tickets/${id}/review/`,data);
+    const res= await api.post(`/users/tickets/${id}/review/`,data);
     return res.data.data
 }
 
 export const escalateTicket=async(id)=>{
     try {
         const res= await api.post(`/tickets/${id}/escalate/`);
-    
     return res.data.data
     } catch (error) {
         const err=error.response?.data?.errors?.details ||'my error'
@@ -76,28 +90,28 @@ export const escalateTicket=async(id)=>{
 }
 
 export const getProfile=async()=>{
-    const res= await api.get('/tickets/user/profile')
+    const res= await api.get('/users/profile')
     return res.data.data
 }
 
 export const updateProfile= async (data)=>{
-    const res = await api.put('/tickets/user/profile/update/',data)
+    const res = await api.put('/users/profile/update/',data)
     return res.data.data
 }
 
 export const getTeamLeadTickets=async()=>{
-    const res= await api.get('/tickets/team-lead/assigned-tickets/');
-    return res.data.data
+    const res= await api.get('/team-leads/assigned-tickets/');
+    return res.data.data 
 }
 
 export const getManagerTickets=async ()=>{
-    const res= await api.get('/tickets/manager/tickets/');
+    const res= await api.get('/managers/tickets/');
     return res.data.data
 }
 
 export const uploadDocument= async (formData)=>{
     try {
-        const res = await api.post ('/tickets/client/upload/',formData,{
+        const res = await api.post ('/clients/upload/',formData,{
             headers:{
                 'Content-Type':'multipart/form-data'
             }
@@ -109,13 +123,13 @@ export const uploadDocument= async (formData)=>{
 }
 
 export const getClientsWithDocs=async()=>{
-    const res= await api.get('/tickets/manager/clients-docs/');
+    const res= await api.get('/managers/clients-docs/');
     return res.data.data;
 }
 
 export const getClientDocs= async(clientId)=>{
     try {
-    const res= await api.get(`/tickets/manager/clients-docs/${clientId}/`);
+    const res= await api.get(`/managers/clients-docs/${clientId}/`);
     return res.data.data    
     } catch (error) {
         console.log(error?.response?.data?.errors?.details ||' something wrong')
@@ -124,33 +138,33 @@ export const getClientDocs= async(clientId)=>{
 }
 
 export const summarizeAllDocuments=async (docId)=>{
-    const res= await api.post(`/tickets/manager/summarize/${docId}/`)
+    const res= await api.post(`/managers/summarize/${docId}/`)
     return res.data.data
 }
 
 export const summarySubmit =async (docId,data)=>{
-    const res= await api.post(`/tickets/manager/submit-summary/${docId}/`,data)
+    const res= await api.post(`/managers/submit-summary/${docId}/`,data)
     return res.data.data
 }
 
 export const getTeamLeadSummaries = async() =>{
-    const res = await api.get('/tickets/team-lead/summaries/');
+    const res = await api.get('/team-leads/summaries/');
     return res.data.data
 }
 
 export const generateAgentSummary= async (summary_id)=>{
-    const res= await api.post(`/tickets/team-lead/generate-agent-summary/${summary_id}/`);
+    const res= await api.post(`/team-leads/generate-agent-summary/${summary_id}/`);
     return res.data.data
 }
 
 export const submitAgentSummary= async (summary_id,data)=>{
-    const res = await api.post(`/tickets/team-lead/submit-summary/${summary_id}/`,data);
+    const res = await api.post(`/team-leads/submit-summary/${summary_id}/`,data);
     return res.data.data
 }
 
 export const getAgentSummary=async ()=>{
     try {
-        const res= await api.get(`/tickets/agent/summary/`)
+        const res= await api.get('/agents/summary/')
         return res.data.data
     } catch (error) {
         console.log(error ||'something wrong')
@@ -168,7 +182,7 @@ export const getDashboard=async (role)=>{
 
 export const generateFakeTickets= async (summary)=>{
     try {
-        const res= await api.post('/tickets/generate-fake-tickets/',{
+        const res= await api.post('/team-leads/generate-fake-tickets/',{
         summary:summary,
         count:3,
     });
@@ -180,7 +194,7 @@ export const generateFakeTickets= async (summary)=>{
 
 export const getAgentFakeTickets= async()=>{
     try {
-        const res= await api.get('/tickets/agent/fake-tickets/');
+        const res= await api.get('/agents/fake-tickets/');
     return res.data.data
     } catch (error) {
         notifyError('fake ticket fetch error')
@@ -189,7 +203,7 @@ export const getAgentFakeTickets= async()=>{
 
 export const getFakeTicketDetail = async(id)=>{
     try {
-        const res= await api.get(`/tickets/agent/fake-tickets/${id}/`);
+        const res= await api.get(`/agents/fake-tickets/${id}/`);
         console.log(res.data.data.message)
     return res.data.data
     } catch (error) {
@@ -219,7 +233,7 @@ export const sendMessage=async(ticketId,message)=>{
 
 export const reopenTicket= async(ticketId)=>{
    try {
-     const res= await api.patch(`/tickets/${ticketId}/reopen/`)
+     const res= await api.patch(`/users/${ticketId}/reopen/`)
     return res.data.data
    } catch (error) {
     console.log('something wrong with REOPEN')
@@ -230,7 +244,7 @@ export const reopenTicket= async(ticketId)=>{
 
 export const getTicketTimeline= async(ticketId)=>{
    try {
-     const res= await api.get(`/tickets/${ticketId}/timeline/`)
+     const res= await api.get(`/users/${ticketId}/timeline/`)
     return res.data.data
    } catch (error) {
     console.log('something wrong with timeline')

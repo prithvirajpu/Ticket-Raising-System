@@ -9,7 +9,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG')=='True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS','').split(',')
-AUTH_USER_MODEL = "users.User"
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -19,9 +18,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    'core_app',
-    'users',
-    'tickets',
+    'apps.core_app',
+    'apps.accounts',
+    'apps.users',
+    'apps.admins',
+    'apps.agents',
+    'apps.clients',
+    'apps.teamleads',
+    'apps.managers',
+    'apps.tickets',
+    
 
     'rest_framework',
     'corsheaders',
@@ -199,7 +205,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
-AUTH_USER_MODEL='users.User'
+AUTH_USER_MODEL = 'accounts.User'
 
 GOOGLE_CLIENT_ID = os.getenv('My_GOOGLE_CLIENT_ID')
 
@@ -209,7 +215,7 @@ CELERY_TASK_SERIALIZER = 'json'
 
 CELERY_BEAT_SCHEDULE = {
     "auto-assign-every-1-minute": {
-        "task": "tickets.tasks.auto_assign_task",
+        "task": "apps.tickets.tasks.auto_assign_task",
         "schedule": 60.0,
     },
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { escalateTicket, getTicketDetail, resolveTicket } from "../../../services/ticketService";
+import {  getUserTicketDetail, resolveTicket } from "../../../services/ticketService";
 import Loader from "../../../components/modals/Loader";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Send, Phone, User, Clock, AlertCircle, Calendar } from "lucide-react"; // Using Lucide for icons
@@ -13,10 +13,6 @@ const ManagerTicketDetail = () => {
   const [resolveModalOpen,setResolveModalOpen]=useState(false);
   const [resolveLoading,setResolveLoading]=useState(false);
   const [timeLeft,setTimeLeft]=useState(null)
-
-  const [escalateLoading,setEscalateLoading]=useState(false)
-  const [escalateModalOpen, setEscalateModalOpen] = useState(false);
-
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -32,13 +28,12 @@ const ManagerTicketDetail = () => {
 
   useEffect(() => {
     fetchTicket();
-    setEscalateModalOpen(false);
     setResolveModalOpen(false);
   }, [id]);
 
   const fetchTicket = async () => {
     try {
-      const data = await getTicketDetail(id);
+      const data = await getUserTicketDetail(id);
       setTicket(data.message);
     } catch (error) {
       console.error(error);
@@ -47,29 +42,13 @@ const ManagerTicketDetail = () => {
     }
   };
 
-  const handleEscalateConfirm = async()=>{
-    setEscalateLoading(true);
-    try {
-      await escalateTicket(id);
-      await fetchTicket();
-      setEscalateModalOpen(false);
-      navigate('/team-lead/assigned-tickets')
-      
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setEscalateLoading(false);
-    }
-  }
-  const handleCancelEscalate = () => {
-      setEscalateModalOpen(false);
-    };
 
   const handleConfirmResolve  = async () => {
     setResolveLoading(true);
     try {
       await resolveTicket(id);
       await fetchTicket();
+      notifySuccess('Ticket successfully Resolved')
       setResolveModalOpen(false)
     } catch (error) {
       console.error(error);
@@ -97,7 +76,7 @@ const ManagerTicketDetail = () => {
           <h1 className="text-xl font-bold">Ticket #{ticket.ticket_code || id}</h1>
         </div>
         
-        {ticket.status !== "RESOLVED" && (
+        {ticket.status !== "RESOLVED" && ticket.status !=='CLOSED' && (
           <button
             disabled={resolveLoading}
             onClick={()=> setResolveModalOpen(true) }
@@ -238,17 +217,6 @@ const ManagerTicketDetail = () => {
         loading={resolveLoading}
         onConfirm={handleConfirmResolve}
         onCancel={handleCancelResolve}
-      />
-      <ConfirmModal
-        isOpen={escalateModalOpen}
-        title="Escalate Ticket"
-        message={`Are you sure you want to escalate ticket #${ticket.ticket_code || id}? This will notify your team lead.`}
-        confirmText="Yes, Escalate"
-        cancelText="Cancel"
-        loadingText="Escalating..."
-        loading={escalateLoading}
-        onConfirm={handleEscalateConfirm}
-        onCancel={handleCancelEscalate}
       />
     </>
   )

@@ -108,12 +108,6 @@ const handleConfirmAction = async () => {
   return (
     <DashboardLayout>
       <div className="bg-white min-h-screen">
-        {/* Work Status Toggle Placeholder */}
-        <div className="flex justify-end mb-4 pr-44">
-          <button className="border border-gray-400 px-6 py-2 rounded-xl text-lg hover:bg-gray-50 transition-colors">
-            Work status
-          </button>
-        </div>
 
         {/* Main Content Container */}
         <div className="max-w-4xl mx-auto border border-gray-200 rounded-[2rem] p-10 shadow-sm min-h-[600px] flex flex-col">

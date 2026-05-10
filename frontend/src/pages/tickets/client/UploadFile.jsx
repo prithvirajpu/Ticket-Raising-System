@@ -38,12 +38,18 @@ const UploadFile = () => {
     try {
         await uploadDocument(formData);
         notifySuccess('Documents Uploaded successfully');
+        setFiles({
+        guidelines_doc: null,
+        faq_doc: null,
+        extra_doc: null
+    });
     } catch (error) {
         console.error(error);
     } finally {
         setLoading(false);
     }
 };
+
 const isFormValid = files.guidelines_doc && files.faq_doc;
 
     // Helper component for the Upload Card

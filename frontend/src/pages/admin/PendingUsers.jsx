@@ -20,7 +20,7 @@ const PendingUsers = () => {
     const [previousPage, setPreviousPage] = useState(null)
     const fetchPendingUsers = async (pageNumber = 1) => {
         try {
-            const res = await api.get(`/auth/admin/pending-users/?page=${pageNumber}`)
+            const res = await api.get(`/admins/pending-users/?page=${pageNumber}`)
             console.log('the result',res)
 
             setUsers(res.data.results)
@@ -45,9 +45,9 @@ const PendingUsers = () => {
     try {
       let res
       if (type === 'approve') {
-        res=await api.post(`/auth/admin/approve/${id}/`, { role })
+        res=await api.post(`/admins/approve/${id}/`, { role })
       } else if (type === 'reject') {
-        res=await api.post(`/auth/admin/reject/${id}/`)
+        res=await api.post(`/admins/reject/${id}/`)
       }
       notifySuccess(res?.data?.details || "Action completed successfullly")
       if (users.length === 1 && currentPage > 1) {

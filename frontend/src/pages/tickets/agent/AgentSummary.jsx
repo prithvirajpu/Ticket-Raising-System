@@ -23,7 +23,7 @@ const AgentSummary = () => {
         try {
             setLoading(true);
             const res = await getAgentSummary();
-            setSummary(res.summary || "")
+            setSummary(res?.summary || "")
         } catch (error) {
             console.error('Error fetching summary:', error);
         } finally {
