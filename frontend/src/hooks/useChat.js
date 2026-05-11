@@ -38,6 +38,13 @@ const useChat = (ticketId, currentUserId) => {
     };
 }, [ticketId]);
 
+   // Enter key to send message
+   const handleKeyDown=(e)=>{
+    if (e.key==='Enter' &&!e.shiftKey){
+        e.preventDefault();
+        handleSendMessage()
+    }
+   }
     // scroll helper
     const scrollToBottom = () => {
         messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -94,7 +101,8 @@ const useChat = (ticketId, currentUserId) => {
         newMessage,
         setNewMessage,
         handleSendMessage,
-        messageEndRef
+        messageEndRef,
+        handleKeyDown
     };
 };
 

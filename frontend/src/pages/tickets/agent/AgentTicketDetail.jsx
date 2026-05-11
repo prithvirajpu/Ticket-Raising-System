@@ -19,9 +19,8 @@ const AgentTicketDetail = () => {
   const [escalateLoading,setEscalateLoading]=useState(false)
   const [escalateModalOpen, setEscalateModalOpen] = useState(false);
   const { messages, newMessage, setNewMessage,
-         handleSendMessage, messageEndRef } = useChat(id,ticket?.current_user_id);
+         handleSendMessage, messageEndRef, handleKeyDown } = useChat(id,ticket?.current_user_id);
   const currentUserId = Number(ticket?.current_user_id);
-  console.log('current user id ',currentUserId)
 
   const navigate = useNavigate();
 
@@ -104,6 +103,7 @@ const AgentTicketDetail = () => {
         
         {ticket.status !== "RESOLVED" && (
           <button
+          disabled={resolveLoading}
             onClick={()=> setResolveModalOpen(true) }
             className="bg-[#1DB954] hover:bg-green-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
           >
@@ -199,7 +199,7 @@ const AgentTicketDetail = () => {
         className={`flex flex-col ${isMe ? "items-end" : "items-start"} gap-2`}
       >
         <div className="flex items-center gap-2 text-xs text-gray-500 font-bold">
-          {msg.sender_name}
+          {/* {msg.sender_name} */}
           <span className="text-[10px] text-gray-400">
             {new Date(msg.created_at).toLocaleTimeString()}
           </span>
@@ -235,10 +235,11 @@ const AgentTicketDetail = () => {
               </div>
               
               <div className="relative flex items-center">
-                <input 
+                <textarea 
                       type="text"
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyDown={handleKeyDown}
                       placeholder="Type your message..." 
                       className="w-full bg-gray-100 rounded-2xl py-4 pl-6 pr-24 focus:outline-none"
                     />

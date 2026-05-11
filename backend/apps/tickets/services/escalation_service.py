@@ -52,6 +52,11 @@ def escalate_ticket_service(user, ticket_id):
 
     ticket.status = "ESCALATED"
     ticket.assigned_to = next_assignee
+    from apps.tickets.models import TicketChatParticipant
+    TicketChatParticipant.objects.get_or_create(
+            ticket=ticket,
+            user=next_assignee
+        )
     ticket.save(update_fields=["status", "assigned_to"])
     TicketActivity.objects.create(
         ticket=ticket,

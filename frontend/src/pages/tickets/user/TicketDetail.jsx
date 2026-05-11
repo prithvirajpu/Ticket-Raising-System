@@ -269,7 +269,7 @@ const TicketDetail = () => {
                       } gap-2`}
                     >
                       <div className="flex items-center gap-2 text-[11px] text-gray-400 font-bold uppercase">
-                        {msg.sender_name.split("@")[0]}
+                        {/* {msg.sender_name.split("@")[0]} */}
 
                         <span className="font-normal normal-case">
                           {formatTime(msg.created_at)}
@@ -311,7 +311,7 @@ const TicketDetail = () => {
               {/* Input */}
               <div className="p-6 border-t border-gray-100 bg-white">
                 <div className="relative flex items-center">
-                  <input
+                  <textPath
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
