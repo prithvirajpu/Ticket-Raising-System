@@ -40,7 +40,12 @@ def get_messages_service(user,ticket_id):
     chats=TicketChat.objects.filter(ticket=ticket).order_by('created_at')
     serialized = TicketChatSerializer(chats, many=True).data
     logger = logging.getLogger(__name__)
-    logger.info("CHAT DEBUG: %s", chats.first().__dict__)
+    first_chat = chats.first()
+
+    if first_chat:
+        logger.info("CHAT DEBUG: %s", first_chat.__dict__)
+    else:
+        logger.info("No chats found")
 
     return {
         "data": serialized,

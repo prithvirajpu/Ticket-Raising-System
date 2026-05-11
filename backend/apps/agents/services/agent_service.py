@@ -89,12 +89,20 @@ def reject_ticket_service(ticket_id,user,reason):
     try:
         with transaction.atomic():
             assignment=TicketAssignment.objects.select_for_update().get(ticket_id=ticket_id,agent=user,status='PENDING')
-        
+            pending_count= TicketAssignment.objects.filter(ticket_id=ticket_id,status='PENDING').count()
+            
+            if pending_count<=1:
+                return {
+                    'data':None,
+                    'errors':{'details':'Last assigned agent cannot reject the ticket'},
+                    'status':status.HTTP_400_BAD_REQUEST
+                }
             assignment.status='REJECTED'
             assignment.rejection_reason=reason
             assignment.save()
         return {
             'data':{"message":'Ticket rejected'},
+            'errors':None,
             'status':status.HTTP_200_OK
         }
     except TicketAssignment.DoesNotExist:

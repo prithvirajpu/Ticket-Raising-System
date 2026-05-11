@@ -6,8 +6,8 @@ from django.urls import path,re_path
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django_asgi_app = get_asgi_application()
 
-from backend.apps.tickets.consumers import ChatConsumer
-from backend.apps.tickets.middleware import JWTAuthMiddleware
+from apps.tickets.consumers import ChatConsumer
+from apps.tickets.middleware import JWTAuthMiddleware
 
 
 application = ProtocolTypeRouter({

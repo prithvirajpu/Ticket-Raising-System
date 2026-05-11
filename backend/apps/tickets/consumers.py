@@ -1,7 +1,7 @@
 import json
 from django.utils.timezone import now
 from channels.generic.websocket import AsyncWebsocketConsumer
-from backend.apps.tickets.services import send_message_service
+from apps.tickets.services import send_message_service
 from channels.db import database_sync_to_async
 import logging
 

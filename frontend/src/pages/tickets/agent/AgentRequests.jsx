@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Search, ChevronDown } from "lucide-react";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
 import Pagination from '../../../components/Pagination'
+import { notifyError } from "../../../utils/notify";
 
 const AgentRequests = () => {
   const [tickets, setTickets] = useState([]);
@@ -54,7 +55,7 @@ useEffect(() => {
       setPagination(res.pagination)
       setActiveSortBtn(sortType);
     } catch (error) {
-      console.error(error);
+      console.log(error)
     } finally {
       setLoading(false);
     }
@@ -92,7 +93,8 @@ const handleConfirmAction = async () => {
 
     fetchRequests(searchTerm, sort);
   } catch (err) {
-    console.error(err);
+      const errMsg= err.response?.data?.errors?.details ||'something went wrong'
+      notifyError(errMsg)
   } finally {
     setModalLoading(false);
     setIsModalOpen(false);

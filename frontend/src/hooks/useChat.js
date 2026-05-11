@@ -56,7 +56,7 @@ const useChat = (ticketId, currentUserId) => {
         const normalized = res.map((m) => ({
             id: m.id,
             message: m.message,
-            sender_id: Number(m.sender_id),   // 🔥 IMPORTANT FIX
+            sender_id: Number(m.sender_id),   
             sender_name: m.sender_name,
             created_at: m.created_at,
         }));
@@ -77,18 +77,16 @@ const useChat = (ticketId, currentUserId) => {
             sender_id: currentUserId,
             created_at: new Date().toISOString(),
         };
-
-        // 1. optimistic UI (immediate show)
-        // setMessages(prev => [
-        //     ...prev,
-        //     payload
-        // ]);
-
-        // 2. send via websocket only
-        socketRef.current.send(JSON.stringify(payload));
-
-        setNewMessage("");
-        scrollToBottom();
+    if (
+            socketRef.current &&
+            socketRef.current.readyState === WebSocket.OPEN
+        ) {
+            socketRef.current.send(JSON.stringify(payload));
+            setNewMessage("");
+            scrollToBottom();
+        } else {
+            console.error("WebSocket is not connected");
+        }
     };
 
     return {
