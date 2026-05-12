@@ -4,6 +4,7 @@ import { FileText, ArrowLeft, Calendar, User, Hash, Sparkles, Edit3, X, Check, S
 import { useState } from 'react';
 import { summarySubmit } from '../../../services/ticketService';
 import ConfirmModal from '../../../components/modals/ConfirmModal'; // Ensure this path is correct
+import { notifySuccess } from '../../../utils/notify';
 
 const SummaryPage = () => {
   const location = useLocation();
@@ -24,7 +25,9 @@ const SummaryPage = () => {
     try {
       setLoading(true);
       await summarySubmit(docId, { summary: savedSummary });
-      setIsModalOpen(false); // Close modal on success
+      setIsModalOpen(false); 
+      navigate(`/manager/client-docs/${client_id}`)
+      notifySuccess('Summary Successfully submitted ')
     } catch (err) {
       console.error(err);
       alert("Failed to submit");
@@ -33,7 +36,7 @@ const SummaryPage = () => {
     }
   };
 
-  if (!summary) {
+  if (!savedSummary) {
     return (
       <DashboardLayout title="Document Summary">
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">

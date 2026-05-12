@@ -1,25 +1,27 @@
 import { useEffect, useState } from "react";
-import { escalateTicket, getTicketDetail, resolveTicket } from "../../../services/ticketService";
+import {  getUserTicketDetail, resolveTicket } from "../../../services/ticketService";
 import Loader from "../../../components/modals/Loader";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, Phone, User, Clock, AlertCircle, Calendar } from "lucide-react"; // Using Lucide for icons
+import { ArrowLeft, Send, Phone, User, Clock, AlertCircle, Calendar } from "lucide-react"; 
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
 import { getSlaTimer } from "../../../utils/slaTImer";
+import useChat from "../../../hooks/useChat";
 
 const ManagerTicketDetail = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
   const [resolveModalOpen,setResolveModalOpen]=useState(false);
   const [resolveLoading,setResolveLoading]=useState(false);
   const [timeLeft,setTimeLeft]=useState(null)
 
-  const [escalateLoading,setEscalateLoading]=useState(false)
-  const [escalateModalOpen, setEscalateModalOpen] = useState(false);
 
-
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const { messages, newMessage, setNewMessage,
+         handleSendMessage, messageEndRef, handleKeyDown } = useChat(id,ticket?.current_user_id);
+  const currentUserId = Number(ticket?.current_user_id);
 
   useEffect(()=>{
     if (!ticket?.sla?.sla_deadline) return;
@@ -32,13 +34,12 @@ const ManagerTicketDetail = () => {
 
   useEffect(() => {
     fetchTicket();
-    setEscalateModalOpen(false);
     setResolveModalOpen(false);
   }, [id]);
 
   const fetchTicket = async () => {
     try {
-      const data = await getTicketDetail(id);
+      const data = await getUserTicketDetail(id);
       setTicket(data.message);
     } catch (error) {
       console.error(error);
@@ -47,29 +48,13 @@ const ManagerTicketDetail = () => {
     }
   };
 
-  const handleEscalateConfirm = async()=>{
-    setEscalateLoading(true);
-    try {
-      await escalateTicket(id);
-      await fetchTicket();
-      setEscalateModalOpen(false);
-      navigate('/team-lead/assigned-tickets')
-      
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setEscalateLoading(false);
-    }
-  }
-  const handleCancelEscalate = () => {
-      setEscalateModalOpen(false);
-    };
 
   const handleConfirmResolve  = async () => {
     setResolveLoading(true);
     try {
       await resolveTicket(id);
       await fetchTicket();
+      notifySuccess('Ticket successfully Resolved')
       setResolveModalOpen(false)
     } catch (error) {
       console.error(error);
@@ -97,7 +82,7 @@ const ManagerTicketDetail = () => {
           <h1 className="text-xl font-bold">Ticket #{ticket.ticket_code || id}</h1>
         </div>
         
-        {ticket.status !== "RESOLVED" && (
+        {ticket.status !== "RESOLVED" && ticket.status !=='CLOSED' && (
           <button
             disabled={resolveLoading}
             onClick={()=> setResolveModalOpen(true) }
@@ -160,17 +145,6 @@ const ManagerTicketDetail = () => {
                 {ticket.created_at ? new Date(ticket.created_at).toLocaleString() : "1/3/2026, 10:30:00 AM"}
               </p>
             </div>
-
-            {/* Last Updated Section */}
-            <div className="pt-4 border-t">
-              <div className="flex items-center gap-2 text-gray-400 text-sm mb-2">
-                <Clock size={16} />
-                Last updated
-              </div>
-              <p className="text-sm font-medium">
-                {ticket.updated_at ? new Date(ticket.updated_at).toLocaleString() : "1/3/2026, 10:30:00 AM"}
-              </p>
-            </div>
           </div>
         </div>
 
@@ -194,22 +168,44 @@ const ManagerTicketDetail = () => {
             </div>
 
             {/* Chat Area */}
-            <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
-              <div className="self-end max-w-[80%]">
-                <div className="flex items-center justify-end gap-2 mb-2">
-                  <span className="text-xs text-gray-500 font-bold">User_here</span>
-                  <span className="text-[10px] text-gray-400 uppercase tracking-tighter">10:30:00 AM</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="bg-[#005AB5] text-white p-4 rounded-2xl rounded-tr-none shadow-sm text-sm">
-                    {ticket.description || "I am unable to login to my account. Getting an error message."}
-                  </div>
-                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                    U
-                  </div>
-                </div>
-              </div>
-            </div>
+<div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+  {messages.map((msg, index) => {
+    const senderId = Number(msg.sender_id ?? msg.sender);
+  const isMe = senderId === currentUserId;
+
+    return (
+      <div
+        key={index}
+        className={`flex flex-col ${isMe ? "items-end" : "items-start"} gap-2`}
+      >
+        <div className="flex items-center gap-2 text-xs text-gray-500 font-bold">
+          {/* {msg.sender_name} */}
+          <span className="text-[10px] text-gray-400">
+            {new Date(msg.created_at).toLocaleTimeString()}
+          </span>
+        </div>
+
+        <div className={`flex items-end gap-3 max-w-[80%] ${isMe ? "flex-row-reverse" : ""}`}>
+          <div
+            className={`p-4 rounded-2xl text-sm shadow-sm ${
+              isMe
+                ? "bg-blue-600 text-white rounded-tr-none"
+                : "bg-gray-200 text-black rounded-tl-none"
+            }`}
+          >
+            {msg.message}
+          </div>
+
+          <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center text-white text-xs font-bold">
+            {msg.sender_name?.[0]}
+          </div>
+        </div>
+      </div>
+    );
+  })}
+  <div ref={messageEndRef} />
+</div>
+
 
             {/* Message Input Area */}
             <div className="p-6 border-t border-gray-100">
@@ -218,8 +214,11 @@ const ManagerTicketDetail = () => {
               </div>
               
               <div className="relative flex items-center">
-                <input 
+                <textarea 
                   type="text" 
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyDown={handleKeyDown}
                   placeholder="Type your message..." 
                   className="w-full bg-gray-100 rounded-2xl py-4 pl-6 pr-24 focus:outline-none focus:ring-1 focus:ring-gray-300"
                 />
@@ -227,7 +226,7 @@ const ManagerTicketDetail = () => {
                   <button className="text-green-500 hover:scale-110 transition-transform">
                     <Phone size={24} fill="currentColor" stroke="none" className="rotate-[100deg]" />
                   </button>
-                  <button className="text-black hover:translate-x-1 transition-transform">
+                  <button onClick={handleSendMessage} className="text-black hover:translate-x-1 transition-transform">
                     <Send size={24} />
                   </button>
                 </div>
@@ -249,17 +248,6 @@ const ManagerTicketDetail = () => {
         loading={resolveLoading}
         onConfirm={handleConfirmResolve}
         onCancel={handleCancelResolve}
-      />
-      <ConfirmModal
-        isOpen={escalateModalOpen}
-        title="Escalate Ticket"
-        message={`Are you sure you want to escalate ticket #${ticket.ticket_code || id}? This will notify your team lead.`}
-        confirmText="Yes, Escalate"
-        cancelText="Cancel"
-        loadingText="Escalating..."
-        loading={escalateLoading}
-        onConfirm={handleEscalateConfirm}
-        onCancel={handleCancelEscalate}
       />
     </>
   )

@@ -14,6 +14,13 @@ backend/db.sqlite3
 backend/.vscode/
 backend/.idea/
 
+# Inside C:\TRS\.gitignore
+**/celerybeat-schedule*
+backend/celerybeat-schedule*   # Celery Beat scheduler DB (JSON/SQLite)
+celeryd.pid            # Worker PID files
+celerybeat-schedule
+celerybeat-schedule*
+
 # Django logs
 backend/*.log
 

@@ -43,6 +43,7 @@ useEffect(() => {
         setLoading(true)
         try {
             const data = await getTickets({search,sort:sortType,page:pageNum});
+             console.log("API RESPONSE:", data);
             setTickets(data.message || [])
             setPagination(data.pagination || {})
             setActiveSortBtn(sortType)

@@ -21,7 +21,7 @@ const ClientManagement = () => {
 
   const fetchClients = async (page=1) => {
     try {
-      const response = await api.get(`/auth/admin/clients/?page=${page}`, {
+      const response = await api.get(`/admins/clients/?page=${page}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`
         }

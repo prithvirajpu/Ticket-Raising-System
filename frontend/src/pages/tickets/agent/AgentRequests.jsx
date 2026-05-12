@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Search, ChevronDown } from "lucide-react";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
 import Pagination from '../../../components/Pagination'
+import { notifyError } from "../../../utils/notify";
 
 const AgentRequests = () => {
   const [tickets, setTickets] = useState([]);
@@ -54,7 +55,7 @@ useEffect(() => {
       setPagination(res.pagination)
       setActiveSortBtn(sortType);
     } catch (error) {
-      console.error(error);
+      console.log(error)
     } finally {
       setLoading(false);
     }
@@ -92,7 +93,8 @@ const handleConfirmAction = async () => {
 
     fetchRequests(searchTerm, sort);
   } catch (err) {
-    console.error(err);
+      const errMsg= err.response?.data?.errors?.details ||'something went wrong'
+      notifyError(errMsg)
   } finally {
     setModalLoading(false);
     setIsModalOpen(false);
@@ -108,12 +110,6 @@ const handleConfirmAction = async () => {
   return (
     <DashboardLayout>
       <div className="bg-white min-h-screen">
-        {/* Work Status Toggle Placeholder */}
-        <div className="flex justify-end mb-4 pr-44">
-          <button className="border border-gray-400 px-6 py-2 rounded-xl text-lg hover:bg-gray-50 transition-colors">
-            Work status
-          </button>
-        </div>
 
         {/* Main Content Container */}
         <div className="max-w-4xl mx-auto border border-gray-200 rounded-[2rem] p-10 shadow-sm min-h-[600px] flex flex-col">

@@ -29,7 +29,7 @@ const AgentManagement = () => {
 
   const fetchAgents = async (page = 1) => {
     try {
-      const response = await api.get(`/auth/admin/agents/?page=${page}`, {
+      const response = await api.get(`/admins/agents/?page=${page}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access")}`
         }
@@ -56,7 +56,7 @@ const AgentManagement = () => {
     setLoading(true);
     console.log('is active',selectedAgent.is_active)
     try {
-      await api.patch(`/auth/admin/agents/${selectedAgent.id}/status/`,{
+      await api.patch(`/admins/agents/${selectedAgent.id}/status/`,{
         is_active: !selectedAgent.is_active
       })
       fetchAgents(currentPage);
