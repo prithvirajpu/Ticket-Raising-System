@@ -3,3 +3,4 @@ from .auth_services import reset_password_service,forgot_password_service,google
 from .client_services import client_signup_service
 from .user_services import check_user_email_exists
 from .otp_service import resend_otp_service,verify_otp_service
+from .sso_login_service import sso_login_service

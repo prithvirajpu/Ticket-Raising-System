@@ -225,3 +225,6 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
     },
 }
+
+SSO_SHARED_SECRET = "my-super-long-cross-app-secret-key-2026"
+

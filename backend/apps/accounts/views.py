@@ -9,15 +9,55 @@ from apps.core_app.models import AgentApplication
 from rest_framework.parsers import MultiPartParser, FormParser
 from .services import (verify_otp_service,agent_signup_service,reset_password_service,resend_otp_service,
                        check_user_email_exists,forgot_password_service,client_signup_service,google_client_auth_service,
-                       login_service)
+                       login_service,sso_login_service)
 from .serializers import (LoginSerializer,ClientSignupSerializer,
     VerifyOTPSerializer,ForgotPasswordSerializer,ResetPasswordSerializer)
 from django.contrib.auth import get_user_model
+from django.http import HttpResponse
 import logging
 logger=logging.getLogger(__name__)
 
 User=get_user_model()
 
+class SSOLoginAPIView(APIView):
+    permission_classes = []
+
+    def post(self, request):
+        token = request.data.get('token')
+        
+        result = sso_login_service(request, token)
+        if result["errors"]:
+            return return_response(result)
+
+        data = result["data"]
+
+        sso_loading_url = (
+            f"http://localhost:5173/sso-loading"
+            f"?access={data['access']}"
+            f"&refresh={data['refresh']}"
+            f"&role={data['role']}"
+            f"&profile_completed={str(data['profile_completed']).lower()}"
+            f"&approval_status=APPROVED"
+        )
+
+        html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Redirecting to Dashboard...</title>
+        </head>
+        <body>
+            <h3>Redirecting to dashboard...</h3>
+            
+            <script>
+                window.location.replace("{sso_loading_url}");
+            </script>
+        </body>
+        </html>
+        """
+
+        return HttpResponse(html)
+        
 class LoginView(APIView):
     permission_classes=[]
 

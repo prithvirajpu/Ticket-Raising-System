@@ -1,9 +1,12 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 from .views import (LoginView,AgentSignupView,ClientSignupView,GoogleClientAuthView,VerifyOTPView,
-                ResendOTPView,ResendOTPView,ResetPasswordView, CheckUserExistsView  )
+                ResendOTPView,ResendOTPView,ResetPasswordView, CheckUserExistsView,
+                  SSOLoginAPIView  )
 
 urlpatterns = [
+    path('sso-login/',SSOLoginAPIView.as_view()),
+
     path('login/',LoginView.as_view()),
     path('signup/agent/',AgentSignupView.as_view()),
     path('signup/client/',ClientSignupView.as_view()),
