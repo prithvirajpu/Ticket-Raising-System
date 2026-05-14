@@ -46,7 +46,7 @@ export const acceptTicket = async (id) => {
         return res.data.data;
     } catch (error) {
         console.log("❌ TICKET ACCEPT API CALL FAILED =====================");
-        throw error; 
+        throw error;
     }
 };
 

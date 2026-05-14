@@ -43,6 +43,7 @@ import AgentSummary from './pages/tickets/agent/AgentSummary';
 import TeamLeadDashboard from './pages/dashboards/TeamLeadDashboard';
 import AgentFakeTicketsPage from './pages/tickets/agent/AgentFakeTicketsPage ';
 import AgentFakeTicketDetail from './pages/tickets/agent/AgentFakeTicketDetail';
+import SSOLoading from './auth/SSOLoading';
 
 
 const App = () => {
@@ -57,6 +58,7 @@ const App = () => {
             width: "300px", }}/>
 
         <Routes>
+            <Route path='/sso-loading' element={<SSOLoading />} />
             <Route path='/signup' element={<StaffSignup/>}/>
             <Route path='/verify-otp' element={<VerifyOtp />} />
             <Route path='/forgot-password' element={<ForgotPassword/>}/>

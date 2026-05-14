@@ -3,7 +3,7 @@ import { useAuth } from './AuthContext';
 
 const ProtectedRoute = ({ children, role }) => {
   const { userRole, loading, profileCompleted, approvalStatus } = useAuth();
-  if (loading) return null;
+  if (loading) return ;
 
   if (!userRole) return <Navigate to='/' replace />;
   if (role && !role.includes(userRole)) return <Navigate to='/unauthorized' replace />;
