@@ -226,5 +226,5 @@ CHANNEL_LAYERS = {
     },
 }
 
-SSO_SHARED_SECRET = "my-super-long-cross-app-secret-key-2026"
-
+SSO_SHARED_SECRET = os.getenv('SSO_SHARED_SECRET')
+INTERNAL_API_KEY = os.getenv('INTERNAL_API_KEY')

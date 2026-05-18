@@ -311,7 +311,7 @@ const TicketDetail = () => {
               {/* Input */}
               <div className="p-6 border-t border-gray-100 bg-white">
                 <div className="relative flex items-center">
-                  <textPath
+                  <textarea
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}

@@ -1,7 +1,7 @@
 import {BrowserRouter,Routes,Route} from 'react-router-dom'
 import { AuthProvider } from './auth/AuthContext'
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
 import Login from './pages/Login'
 import ProtectedRoute from './auth/ProtectedRoute'
 import AdminDashboard from './pages/dashboards/AdminDashboard'
@@ -15,7 +15,7 @@ import ForgotPassword from './pages/signup/ForgotPassword'
 import ResetPassword from './pages/signup/ResetPassword'
 import AgentDetail from './pages/admin/AgentDetail'
 import CompleteProfile from './pages/signup/CompleteProfile'
-import AgentCompleteProfile from './pages/signup/AgentCompleteProfile '
+import AgentCompleteProfile from './pages/signup/AgentCompleteProfile'
 import UserDashboard from './pages/dashboards/UserDashboard'
 import AgentManagement from './pages/admin/AgentManagement';
 import ClientManagement from './pages/admin/ClientManagement';
@@ -44,6 +44,7 @@ import TeamLeadDashboard from './pages/dashboards/TeamLeadDashboard';
 import AgentFakeTicketsPage from './pages/tickets/agent/AgentFakeTicketsPage ';
 import AgentFakeTicketDetail from './pages/tickets/agent/AgentFakeTicketDetail';
 import SSOLoading from './auth/SSOLoading';
+import VerifyTicketPage from './pages/tickets/agent/VerifyTicketPage'
 
 
 const App = () => {
@@ -160,7 +161,9 @@ const App = () => {
             <Route path='/agent/fake-tickets/:id' element={<ProtectedRoute role={['AGENT']}>
                 <AgentFakeTicketDetail />
             </ProtectedRoute>} />
-            
+            <Route path="/agent/tickets/:id/verify" element={<ProtectedRoute role={['AGENT']}>
+                <VerifyTicketPage/>
+            </ProtectedRoute>} />
            
         </Routes>
         </BrowserRouter>

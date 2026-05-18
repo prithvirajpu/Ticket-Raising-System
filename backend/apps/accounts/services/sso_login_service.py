@@ -31,7 +31,8 @@ def sso_login_service(request,token):
                 ),
                 is_active=True,
                 is_verified=True,
-                client=client
+                client=client,
+                approval_status='APPROVED'
             )
         return login_service(user)
     except jwt.ExpiredSignatureError as e:

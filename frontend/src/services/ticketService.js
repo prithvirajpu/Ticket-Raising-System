@@ -252,3 +252,15 @@ export const getTicketTimeline= async(ticketId)=>{
     console.log(error)
    }
 }
+
+export const verifyTicketDetails =async (payload)=>{
+    try {
+        const res= await api.post('/agents/verify/',payload);
+        return res.data.data
+    } catch (error) {
+        console.log('verify error: ',error.response?.data)
+
+        console.log('something wrong with verifyticket')
+        throw error.response?.data ||error
+    }
+}

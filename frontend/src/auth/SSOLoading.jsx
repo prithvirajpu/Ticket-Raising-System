@@ -5,7 +5,7 @@ import { useAuth } from './AuthContext';
 const SSOLoading = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const { login } = useAuth();     // Use your existing login function
+    const { login } = useAuth();
 
     useEffect(() => {
         const access = searchParams.get("access");

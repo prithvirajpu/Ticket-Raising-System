@@ -14,6 +14,7 @@ from .serializers import (LoginSerializer,ClientSignupSerializer,
     VerifyOTPSerializer,ForgotPasswordSerializer,ResetPasswordSerializer)
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
+from rest_framework.response import Response
 import logging
 logger=logging.getLogger(__name__)
 

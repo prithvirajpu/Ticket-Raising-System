@@ -10,10 +10,16 @@ from django.contrib.auth import get_user_model
 
 User=get_user_model()
 
+ISSUE_PRIORITY_MAP = {
+    "PAYMENT_ISSUE": "HIGH",
+    "REFUND_ISSUE": "HIGH",
+    "DELIVERY_ISSUE": "MEDIUM",
+    "ORDER_ISSUE": "MEDIUM",
+    "PRODUCT_ISSUE": "LOW",
+    "ACCOUNT_ISSUE": "HIGH",
+}
 def create_ticket_service(data,user):
     from .attach_sla_to_ticket import attach_sla_to_ticket
-    print("USER:", user)
-    print("CLIENT:", user.client)
     
     subscription=ClientSubscription.objects.filter(client=user.client,status='ACTIVE').first()
     if not subscription:
@@ -39,12 +45,14 @@ def create_ticket_service(data,user):
                     "errors": {"details": "No agents under this team lead"},
                     "status": status.HTTP_400_BAD_REQUEST
                 }
-            
+            issue_type = data.get("issue_type")
+            priority= ISSUE_PRIORITY_MAP.get(issue_type,'MEDIUM')
+
             ticket=Ticket.objects.create(
                 subject=data.get('subject'),
                 description=data.get('description'),
-                issue_type=data.get('issue_type'),
-                priority=data.get('priority','MEDIUM'),
+                issue_type=issue_type,
+                priority=priority,
                 client=user.client,
                 created_by=user,
                 assigned_to=None,
