@@ -37,7 +37,7 @@ const AgentCompleteProfile = () => {
 
     try {
       console.log('in try')
-      const response = await api.put("/agents/agent/profile/update/", formData, {
+      const response = await api.put("/agents/profile/update/", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           "Authorization": `Bearer ${localStorage.getItem("access")}`,

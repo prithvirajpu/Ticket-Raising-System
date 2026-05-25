@@ -20,6 +20,8 @@ const Navbar = () => {
           { label: 'Agent Management', path: '/admin/agent-manage' },
           { label: 'Client Management', path: '/admin/client-manage' },
           { label: 'User Management', path: '/admin/user-manage' },
+          { label: 'SLA Rules', path: '/admin/sla' },
+          { label: 'Hierarchy', path: '/admin/hierarchy' },
           { label: 'About', path: '/about' },
         ]
       case 'AGENT':
@@ -57,6 +59,7 @@ const Navbar = () => {
           { label: 'Dashboard', path: '/client/dashboard' },
           { label: 'My Tickets', path: '/client/tickets' },
           { label: 'Upload', path: '/client/upload' },
+          { label: 'Plans', path: '/client/plans' },
           { label: 'About', path: '/about' },
         ]
     }

@@ -3,9 +3,21 @@ from apps.core_app.utils import generate_otp,send_otp_email
 from datetime import timedelta
 from django.utils import timezone
 from rest_framework import status
+from django.contrib.auth import get_user_model
+User=get_user_model()
 
 def client_signup_service(serializer):
     email=serializer.validated_data['email']
+
+    if User.objects.filter(client__isnull=False).exists():
+        return {
+            'data': {},
+            'errors': {
+                'details': "New accounts will be a future feature."
+            },
+            'status': status.HTTP_400_BAD_REQUEST
+        }
+    
     serializer.save()
     EmailOTP.objects.filter(email=email,purpose='SIGNUP').delete()
 

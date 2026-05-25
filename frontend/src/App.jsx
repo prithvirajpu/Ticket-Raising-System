@@ -45,6 +45,10 @@ import AgentFakeTicketsPage from './pages/tickets/agent/AgentFakeTicketsPage ';
 import AgentFakeTicketDetail from './pages/tickets/agent/AgentFakeTicketDetail';
 import SSOLoading from './auth/SSOLoading';
 import VerifyTicketPage from './pages/tickets/agent/VerifyTicketPage'
+import SubscriptionPlans from './pages/tickets/client/SubscriptionPlans'
+import SlaRules from './pages/admin/SlaRules'
+import UserManagement from './pages/admin/UserManagement'
+import HierarchyPage from './pages/admin/HierarchyPage'
 
 
 const App = () => {
@@ -69,7 +73,7 @@ const App = () => {
             <Route path='/agent/complete-profile' element={<AgentCompleteProfile/>}/>
             <Route path='/' element={<PublicRoute><Login/></PublicRoute>}/>
             <Route path='/unauthorized' element={<Unauthorized/>} />
-            <Route path='/profile' element={<ProtectedRoute role={['USER','AGENT','TEAM_LEAD','MANAGER','CLIENT']}>
+            <Route path='/profile' element={<ProtectedRoute role={['USER','AGENT','TEAM_LEAD','MANAGER','CLIENT','ADMIN']}>
                 <ProfilePage />
             </ProtectedRoute>} />
 
@@ -81,6 +85,9 @@ const App = () => {
             </ProtectedRoute>} />
             <Route path='/client/upload' element={<ProtectedRoute role={['CLIENT']}>
                 <UploadFile />
+            </ProtectedRoute>} />
+            <Route path='/client/plans' element={<ProtectedRoute role={['CLIENT']}>
+                <SubscriptionPlans />
             </ProtectedRoute>} />
             <Route path='/agent/dashboard' element={<ProtectedRoute role={['AGENT']}>
                 <AgentDashboard />
@@ -133,6 +140,15 @@ const App = () => {
             </ProtectedRoute>} />
             <Route path='/admin/pending-req' element={<ProtectedRoute role={['ADMIN']}>
                  <PendingUsers />
+            </ProtectedRoute>} />
+            <Route path='/admin/sla' element={<ProtectedRoute role={['ADMIN']}>
+                 <SlaRules />
+            </ProtectedRoute>} />
+            <Route path='/admin/user-manage' element={<ProtectedRoute role={['ADMIN']}>
+                 <UserManagement />
+            </ProtectedRoute>} />
+            <Route path='/admin/hierarchy' element={<ProtectedRoute role={['ADMIN']}>
+                 <HierarchyPage />
             </ProtectedRoute>} />
             <Route path='/user/create-ticket' element={<ProtectedRoute role={['USER']}>
                 <CreateTicket />

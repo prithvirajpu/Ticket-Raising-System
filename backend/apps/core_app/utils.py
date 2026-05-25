@@ -54,20 +54,42 @@ def generate_access_token_only(user):
     refresh = RefreshToken.for_user(user)
     return str(refresh.access_token)
 
+
 def return_response(result):
     """
-    Checks the service result dict .and for same pattern .
+    Checks the service result dict and returns
+    a standard response pattern.
     """
+
     if result is None:
+
         result = {
+
             "data": None,
-            "errors": {"details": "No data available"},
-            "status": 200  # Or 400/404 as needed
+
+            "errors": {
+                "details": "No data available"
+            },
+
+            "status": 200
         }
+
+    response_data = {
+
+        "data": result.get("data", None),
+
+        "errors": result.get("errors", None),
+    }
+
+    if result.get("paginator"):
+
+        response_data["paginator"] = result.get(
+            "paginator"
+        )
+
     return Response(
-        {
-            "data": result.get("data",None),
-            "errors": result.get("errors",None),
-        },
+
+        response_data,
+
         status=result.get("status", 200)
     )

@@ -2,6 +2,7 @@ from rest_framework import status
 from django.db import transaction
 from django.contrib.auth import get_user_model
 from apps.core_app.models import AgentApplication,AgentCertificate
+from apps.tickets.models import ClientProfile
 from apps.core_app.constants import UserRole, ApprovalStatus
 from rest_framework.pagination import PageNumberPagination
 
@@ -9,7 +10,7 @@ User=get_user_model()
 
 def approve_user_service(user_id, role):
 
-    if role not in [UserRole.AGENT, UserRole.MANAGER, UserRole.TEAM_LEAD]:
+    if role not in [UserRole.AGENT, UserRole.MANAGER, UserRole.TEAM_LEAD, UserRole.CLIENT]:
         return {
             "data": {},
             "errors": {"role": "Invalid role"},
@@ -21,11 +22,10 @@ def approve_user_service(user_id, role):
             id=user_id,
             status=ApprovalStatus.PENDING
         )
-
     except AgentApplication.DoesNotExist:
         return {
             "data": {},
-            "errors": {"details": "Agent not found"},
+            "errors": {"details": "Request not found"},
             "status": status.HTTP_404_NOT_FOUND
         }
 
@@ -33,53 +33,14 @@ def approve_user_service(user_id, role):
 
         user = User.objects.filter(email=agent.email).first()
 
-        # FETCH CLIENT PROFILE
-        from ...tickets.models import ClientProfile
-        client_profile = ClientProfile.objects.first()
-
-        # FETCH TEAM LEAD FROM CLIENT PROFILE
-        team_lead = None
-
-        if client_profile:
-            team_lead = client_profile.team_lead
-
-        # FETCH MANAGER UNDER TEAM LEAD
-        manager = None
-
-        if team_lead:
-            manager = User.objects.filter(
-                role=UserRole.MANAGER,
-                team_lead=team_lead
-            ).first()
-
         if user:
-
             user.role = role
             user.approval_status = ApprovalStatus.APPROVED
             user.is_active = True
             user.is_verified = agent.email_verified
-
-            # ROLE BASED ASSIGNMENTS
-
-            if role == UserRole.AGENT:
-
-                user.client = client_profile
-                user.manager = manager
-                user.team_lead = team_lead
-
-            elif role == UserRole.TEAM_LEAD:
-
-                user.client = client_profile
-                user.manager = manager
-
-            elif role == UserRole.MANAGER:
-
-                user.client = client_profile
-
             user.save()
 
         else:
-
             user = User.objects.create(
                 email=agent.email,
                 name=agent.full_name,
@@ -88,13 +49,7 @@ def approve_user_service(user_id, role):
                 approval_status=ApprovalStatus.APPROVED,
                 is_active=True,
                 is_verified=agent.email_verified,
-                password=agent.password,
-
-                client=client_profile,
-
-                manager=manager if role == UserRole.AGENT else None,
-
-                team_lead=team_lead if role == UserRole.AGENT else None,
+                password=agent.password
             )
 
         agent.status = ApprovalStatus.APPROVED
@@ -102,7 +57,7 @@ def approve_user_service(user_id, role):
 
     return {
         "data": {
-            "message": f"Agent request approved as {role}."
+            "message": f"User approved as {role}. Hierarchy will be assigned by admin."
         },
         "errors": {},
         "status": status.HTTP_200_OK
@@ -169,7 +124,7 @@ def get_client_list_service(request):
         clients = User.objects.filter(role=UserRole.CLIENT).order_by("-created_at")
 
         paginator = PageNumberPagination()
-        paginator.page_size = 10
+        paginator.page_size = 5
         page = paginator.paginate_queryset(clients, request) or []
 
         total_clients = clients.count()
@@ -182,7 +137,8 @@ def get_client_list_service(request):
             "phone": client.phone,
             "business_type": client.business_type,
             "is_active": client.is_active,
-            "date_joined": client.created_at
+            "date_joined": client.created_at,
+            'client_name':client.client_profile.company_name
         } for client in page]
 
         return {
@@ -218,7 +174,7 @@ def get_agent_list_service(request):
         ).order_by("-created_at")
 
         paginator = PageNumberPagination()
-        paginator.page_size = 10
+        paginator.page_size = 5
 
         page = paginator.paginate_queryset(agents, request) 
 

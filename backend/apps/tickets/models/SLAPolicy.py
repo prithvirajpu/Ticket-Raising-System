@@ -11,8 +11,6 @@ class SLAPolicy(models.Model):
     plan=models.ForeignKey(SubscriptionPlan,on_delete=models.CASCADE,related_name='sla_policies')
     priority=models.CharField(max_length=20,choices=PRIORITY,default='MEDIUM')
     resolution_time_minutes=models.IntegerField()
-    auto_reassign=models.BooleanField(default=True)
-    max_reassign_attempts=models.IntegerField(default=3)
     is_active=models.BooleanField(default=True)
 
     def __str__(self):

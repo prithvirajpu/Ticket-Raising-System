@@ -14,8 +14,6 @@ def auto_assign_service():
     )
     logger.info(f"Expired count: {expired_assignments.count()}")
 
-    print("EXPIRED FOUND:", expired_assignments.count())
-
     for assignment in expired_assignments:
 
         with transaction.atomic():
@@ -42,11 +40,13 @@ def auto_assign_service():
             ticket.assigned_to = agent
             ticket.status = "IN_PROGRESS"
             ticket.save(update_fields=["assigned_to", "status"])
+            
             TicketAssignment.objects.filter(
                     ticket=ticket,
                     agent=agent,
                     status="PENDING"
                 ).update(status="ACCEPTED")
+            
             TicketAssignment.objects.filter(
                     ticket=ticket,
                     status="PENDING"
@@ -65,11 +65,6 @@ def auto_assign_service():
                         defaults={"role": "AGENT"}
                     )
 
-            TicketAssignment.objects.create(
-                ticket=ticket,
-                agent=agent,
-                status="ACCEPTED"
-            )
             TicketActivity.objects.create(
                 ticket=ticket,
                 action="AUTO_ASSIGNED",

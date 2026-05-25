@@ -54,8 +54,8 @@ const ManagerTicketDetail = () => {
     try {
       await resolveTicket(id);
       await fetchTicket();
-      notifySuccess('Ticket successfully Resolved')
       setResolveModalOpen(false)
+      notifySuccess('Ticket successfully Resolved')
     } catch (error) {
       console.error(error);
     }finally{

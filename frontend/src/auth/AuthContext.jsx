@@ -10,7 +10,7 @@ export const AuthProvider=({children})=>{
                         localStorage.getItem("profile_completed") === "true"
                     );
     const [approvalStatus, setApprovalStatus] = useState(
-                        localStorage.getItem("approval_status") || null
+                        localStorage.getItem("approval_status") || 'APPROVED'
                     );
 
     useEffect(()=>{

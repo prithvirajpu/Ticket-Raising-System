@@ -54,8 +54,10 @@ const AgentTicketDetail = () => {
       await escalateTicket(id);
       await fetchTicket();
       setEscalateModalOpen(false);
-      navigate('/agent/assigned-tickets')
       notifySuccess('Ticket escalated to the Team Lead')
+      setTimeout(()=>{
+        navigate('/agent/assigned-tickets')
+      },300)
       
     } catch (error) {
       console.log(error);

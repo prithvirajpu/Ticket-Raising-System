@@ -10,7 +10,6 @@ from .views import (
 )
 
 urlpatterns = [
-    # tickets
     path("tickets/create/", CreateTicketView.as_view()),
     path("tickets/list/", TicketListView.as_view()),
     path("details/<int:ticket_id>/", TicketDetailView.as_view()),

@@ -101,9 +101,10 @@ const handleSubmit = async (e) => {
     const message =
     error?.response?.data?.non_field_errors?.[0] ||
     error?.response?.data?.error ||
-    error?.response?.data?.detail ||
+    error?.response?.data?.errors?.details ||
     "Signup failed. Please try again.";
     notifyError( message);
+    console.log()
   }finally{
     setLoading(false)
   }

@@ -20,8 +20,16 @@ ISSUE_PRIORITY_MAP = {
 }
 def create_ticket_service(data,user):
     from .attach_sla_to_ticket import attach_sla_to_ticket
+    client = getattr(user, "client_profile", None)
+
+    if not client:
+        return {
+            "data": None,
+            "errors": {"details": "Client profile not found"},
+            "status": status.HTTP_400_BAD_REQUEST
+        }
     
-    subscription=ClientSubscription.objects.filter(client=user.client,status='ACTIVE').first()
+    subscription=ClientSubscription.objects.filter(client=client,status='ACTIVE').first()
     if not subscription:
         return {
             "data":None,
@@ -31,7 +39,7 @@ def create_ticket_service(data,user):
 
     try:
         with transaction.atomic(): 
-            team_lead=user.client.team_lead
+            team_lead = client.team_lead
             if not team_lead:
                 return {
                     "data": None,
@@ -53,14 +61,14 @@ def create_ticket_service(data,user):
                 description=data.get('description'),
                 issue_type=issue_type,
                 priority=priority,
-                client=user.client,
+                client=client,
                 created_by=user,
                 assigned_to=None,
                 status="OPEN"
                 )
             TicketActivity.objects.create(ticket=ticket,action='CREATED',performed_by=user,description='Ticket created by customer')
             attach_sla_to_ticket(ticket)
-            expiry_time=timezone.now()+timedelta(minutes=10)
+            expiry_time=timezone.now()+timedelta(minutes=1)
             assignments=[
                 TicketAssignment(ticket=ticket,agent=agent,status='PENDING',expires_at=expiry_time)
                 for agent in agents

@@ -15,7 +15,7 @@ class JWTAuthMiddleware:
     def __init__(self, inner):
         self.inner = inner
 
-    async def __call__(self, scope, receive, send):   # ✅ IMPORTANT
+    async def __call__(self, scope, receive, send):   
         query_string = scope.get("query_string", b"").decode()
         query_params = parse_qs(query_string)
 
@@ -39,3 +39,4 @@ class JWTAuthMiddleware:
             return User.objects.get(id=user_id)
         except Exception:
             return AnonymousUser()
+        

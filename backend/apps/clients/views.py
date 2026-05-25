@@ -8,9 +8,10 @@ from apps.core_app.constants import ApprovalStatus
 from apps.core_app.utils import return_response
 from apps.core_app.models import AgentApplication
 from rest_framework.parsers import MultiPartParser, FormParser
-from .services import (update_client_profile_service,upload_client_doc_service)
+from .services import (handle_demo_payment_service,plan_fetch_service,update_client_profile_service,upload_client_doc_service)
 from ..tickets.serializer import TicketSerializer
 from django.contrib.auth import get_user_model
+
 import logging
 logger=logging.getLogger(__name__)
 
@@ -36,4 +37,18 @@ class UploadDocView(APIView):
                 'status':400
             }
         result=upload_client_doc_service(request.user,files)
+        return return_response(result)
+    
+class SubscriptionPlanView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def get(self,request):
+        result=plan_fetch_service(request)
+        return return_response(result)
+    
+class HandleDemoPaymentView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def post(self,request):
+        result= handle_demo_payment_service(request)
         return return_response(result)

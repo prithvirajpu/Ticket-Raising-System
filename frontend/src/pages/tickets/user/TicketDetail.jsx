@@ -65,6 +65,7 @@ const TicketDetail = () => {
       setTimeline(timelineData.message);
       setTicket(updated.message);
       setReopenModalOpen(false);
+      notifySuccess('Ticket is successfully reopened')
     } catch (error) {
       console.log(error);
     } finally {

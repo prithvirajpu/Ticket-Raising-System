@@ -58,8 +58,10 @@ const TeamLeadTicketDetail = () => {
       await escalateTicket(id);
       await fetchTicket();
       setEscalateModalOpen(false);
-      navigate('/team-lead/assigned-tickets')
       notifySuccess('Ticket escalated to the Manager')
+      setTimeout(()=>{
+        navigate('/team-lead/assigned-tickets')
+      },300)
       
     } catch (error) {
       console.log(error);
@@ -76,8 +78,8 @@ const TeamLeadTicketDetail = () => {
     try {
       await resolveTicket(id);
       await fetchTicket();
-      notifySuccess('Ticket marked as Resolved')
       setResolveModalOpen(false)
+      notifySuccess('Ticket marked as Resolved')
     } catch (error) {
       console.error(error);
     }finally{
