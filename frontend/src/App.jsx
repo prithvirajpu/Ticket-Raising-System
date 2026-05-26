@@ -147,9 +147,6 @@ const App = () => {
             <Route path='/admin/user-manage' element={<ProtectedRoute role={['ADMIN']}>
                  <UserManagement />
             </ProtectedRoute>} />
-            <Route path='/admin/hierarchy' element={<ProtectedRoute role={['ADMIN']}>
-                 <HierarchyPage />
-            </ProtectedRoute>} />
             <Route path='/user/create-ticket' element={<ProtectedRoute role={['USER']}>
                 <CreateTicket />
             </ProtectedRoute>} />

@@ -331,7 +331,7 @@ export const assignHierarchy = async (payload) => {
 export const getAllUsers = async () => {
   try {
     const res = await api.get("/admins/users/all/");
-    return res.data;
+    return res.data.data;
   } catch (err) {
     throw err;
   }

@@ -14,9 +14,9 @@ def sso_login_service(request,token):
         email=payload.get('email')
         app_name= payload.get('app_name','Shopkickora')
         from apps.tickets.models import ClientProfile
-        client=None
+        client_profile=None
         if app_name:
-            client = ClientProfile.objects.filter(
+            client_profile = ClientProfile.objects.filter(
                 company_name__iexact=app_name
             ).first()
         user=User.objects.filter(email=email).first()
@@ -31,9 +31,14 @@ def sso_login_service(request,token):
                 ),
                 is_active=True,
                 is_verified=True,
-                client=client,
                 approval_status='APPROVED'
             )
+            from apps.users.models import ClientUser
+            if client_profile:
+                ClientUser.objects.create(
+                    user=user,
+                    client_profile=client_profile
+                )
         return login_service(user)
     except jwt.ExpiredSignatureError as e:
         return {

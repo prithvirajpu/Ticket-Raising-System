@@ -20,8 +20,8 @@ const Navbar = () => {
           { label: 'Agent Management', path: '/admin/agent-manage' },
           { label: 'Client Management', path: '/admin/client-manage' },
           { label: 'User Management', path: '/admin/user-manage' },
-          { label: 'SLA Rules', path: '/admin/sla' },
-          { label: 'Hierarchy', path: '/admin/hierarchy' },
+          { label: 'SLA & Hierarchy', path: '/admin/sla' },
+          // { label: 'Hierarchy', path: '/admin/hierarchy' },
           { label: 'About', path: '/about' },
         ]
       case 'AGENT':
