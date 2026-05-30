@@ -7,6 +7,7 @@ import DashboardLayout from "../../../layouts/DashboardLayout";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
 import { getSlaTimer } from "../../../utils/slaTImer";
 import useChat from "../../../hooks/useChat";
+import { notifySuccess } from "../../../utils/notify";
 
 const ManagerTicketDetail = () => {
   const { id } = useParams();
@@ -40,6 +41,7 @@ const ManagerTicketDetail = () => {
   const fetchTicket = async () => {
     try {
       const data = await getUserTicketDetail(id);
+      console.log('getuserticketdetail --',data.message)
       setTicket(data.message);
     } catch (error) {
       console.error(error);

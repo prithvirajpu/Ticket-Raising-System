@@ -33,12 +33,12 @@ def sso_login_service(request,token):
                 is_verified=True,
                 approval_status='APPROVED'
             )
-            from apps.users.models import ClientUser
-            if client_profile:
-                ClientUser.objects.create(
-                    user=user,
-                    client_profile=client_profile
-                )
+        from apps.users.models import ClientUser
+        if client_profile:
+            ClientUser.objects.get_or_create(
+                user=user,
+                client_profile=client_profile
+            )
         return login_service(user)
     except jwt.ExpiredSignatureError as e:
         return {

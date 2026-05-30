@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { escalateTicket, getUserTicketDetail, resolveTicket } from "../../../services/ticketService";
 import Loader from "../../../components/modals/Loader";
-import {  useNavigate, useParams } from "react-router-dom";
+import {  replace, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Send, Phone, User, Clock, AlertCircle, Calendar } from "lucide-react"; // Using Lucide for icons
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
@@ -45,6 +45,7 @@ const TeamLeadTicketDetail = () => {
     try {
       const data = await getUserTicketDetail(id);
       setTicket(data.message);
+      console.log('getuserticketdetail --',data.message)
     } catch (error) {
       console.error(error);
     } finally {
@@ -56,11 +57,10 @@ const TeamLeadTicketDetail = () => {
     setEscalateLoading(true);
     try {
       await escalateTicket(id);
-      await fetchTicket();
-      setEscalateModalOpen(false);
       notifySuccess('Ticket escalated to the Manager')
+      setEscalateModalOpen(false);
       setTimeout(()=>{
-        navigate('/team-lead/assigned-tickets')
+        navigate('/team-lead/assigned-tickets',{replace:true})
       },300)
       
     } catch (error) {
@@ -92,7 +92,6 @@ const TeamLeadTicketDetail = () => {
   };
 
   if (loading) return <Loader />;
-  if (!ticket) return <p className="p-6">Ticket not found</p>;
 
   return (
      <>

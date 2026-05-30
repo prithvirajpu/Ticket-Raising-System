@@ -12,6 +12,8 @@ from google.oauth2 import id_token as google_id_token
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from apps.tickets.models import ClientProfile
+import logging
+logger=logging.getLogger(__name__)
 
 User=get_user_model()
 
@@ -147,6 +149,7 @@ def google_client_auth_service(token,role=None):
         else:
             if role == UserRole.CLIENT:
                 existing_client=ClientProfile.objects.exists()
+                logger.info('The exist client is here %s',existing_client)
                 
                 if existing_client:
                     return {

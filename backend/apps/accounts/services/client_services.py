@@ -4,12 +4,14 @@ from datetime import timedelta
 from django.utils import timezone
 from rest_framework import status
 from django.contrib.auth import get_user_model
+from apps.tickets.models import ClientProfile
 User=get_user_model()
 
 def client_signup_service(serializer):
     email=serializer.validated_data['email']
+    existing_client=ClientProfile.objects.exists()
 
-    if User.objects.filter(client__isnull=False).exists():
+    if existing_client:
         return {
             'data': {},
             'errors': {

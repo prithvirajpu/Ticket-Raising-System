@@ -7,7 +7,7 @@ export const createTicket= async(data)=>{
         const response= await api.post('/users/tickets/create/',data)
     return response.data.data
     } catch (error) {
-        console.log("CREATE TICKET FAILED ❌")
+        console.log("CREATE TICKET FAILED ❌",error.response?.data)
         throw error
     }
 }

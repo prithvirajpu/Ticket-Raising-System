@@ -7,6 +7,7 @@ import DashboardLayout from "../../../layouts/DashboardLayout";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
 import { getSlaTimer } from "../../../utils/slaTImer";
 import useChat from "../../../hooks/useChat";
+import { notifySuccess } from "../../../utils/notify";
 
 const AgentTicketDetail = () => {
   const { id } = useParams();
@@ -18,7 +19,7 @@ const AgentTicketDetail = () => {
 
   const [escalateLoading,setEscalateLoading]=useState(false)
   const [escalateModalOpen, setEscalateModalOpen] = useState(false);
-  const { messages, newMessage, setNewMessage,
+  const { messages, newMessage, setNewMessage,handleCall,
          handleSendMessage, messageEndRef, handleKeyDown } = useChat(id,ticket?.current_user_id);
   const currentUserId = Number(ticket?.current_user_id);
 
@@ -52,11 +53,10 @@ const AgentTicketDetail = () => {
     setEscalateLoading(true);
     try {
       await escalateTicket(id);
-      await fetchTicket();
-      setEscalateModalOpen(false);
       notifySuccess('Ticket escalated to the Team Lead')
+      setEscalateModalOpen(false);
       setTimeout(()=>{
-        navigate('/agent/assigned-tickets')
+        navigate('/agent/assigned-tickets',{replace:true})
       },300)
       
     } catch (error) {
@@ -231,8 +231,10 @@ const AgentTicketDetail = () => {
             {/* Message Input Area */}
             <div className="p-6 border-t border-gray-100">
               <div className="flex justify-end gap-2 mb-4">
+              {ticket.status!='RESOLVED'&&(
                 <button onClick={()=>setEscalateModalOpen(true)} 
                  className="bg-red-600 text-white text-xs px-4 py-1 rounded-lg font-bold">Escalate</button>
+              )}
                 <button onClick={()=>navigate(`/agent/tickets/${id}/verify`)}
                 className="bg-blue-600 text-white text-xs px-4 py-1 rounded-lg font-bold">Verify</button>
               </div>
@@ -247,11 +249,13 @@ const AgentTicketDetail = () => {
                       className="w-full bg-gray-100 rounded-2xl py-4 pl-6 pr-24 focus:outline-none"
                     />
                 <div className="absolute right-4 flex items-center gap-4">
-                  <button className="text-green-500 hover:scale-110 transition-transform">
-                    <Phone size={24} fill="currentColor" stroke="none" className="rotate-[100deg]" />
+                  <button onClick={()=>handleCall(ticket.created_by_id)}
+                   className="text-green-500 hover:scale-110 transition-transform">
+                    <Phone className="rotate-[100deg]"
+                    size={20} fill="currentColor" stroke="none" />
                   </button>
                   <button onClick={handleSendMessage} className="text-black hover:translate-x-1 transition-transform">
-                    <Send size={24} />
+                    <Send size={20} />
                   </button>
                 </div>
               </div>

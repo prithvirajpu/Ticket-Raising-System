@@ -25,7 +25,7 @@ const SSOLoading = () => {
         } else {
             console.error("SSO failed - missing data");
             navigate("/login", { replace: true });
-        }
+        } 
     }, [searchParams, login, navigate]);
 
     return (

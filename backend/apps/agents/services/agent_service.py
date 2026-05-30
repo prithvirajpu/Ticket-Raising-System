@@ -155,14 +155,13 @@ def get_agent_ticket_requests_service(user,sort='newest',search='',page=1,page_s
     
 def get_agent_ticket_detail_service(request,ticket_id):
 
-    assignment=TicketAssignment.objects.filter(ticket_id=ticket_id,agent=request.user).select_related('ticket','ticket__client').first()
-    if not assignment:
+    ticket=Ticket.objects.filter(id=ticket_id,assigned_to=request.user).first()
+    if not ticket:
         return {
             'data':None,
             "errors":{'details':"Ticket not assigned to this agent"},
             'status':status.HTTP_403_FORBIDDEN
         }
-    ticket=assignment.ticket
     serializer=TicketSerializer(ticket, context={"request": request})
     return {
         'data':{'message':serializer.data},

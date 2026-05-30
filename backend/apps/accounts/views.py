@@ -1,11 +1,5 @@
 from rest_framework.views import APIView
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.generics import ListAPIView 
-from rest_framework.permissions import IsAuthenticated
-from apps.core_app.permissions import IsAdmin
-from apps.core_app.constants import ApprovalStatus
 from apps.core_app.utils import return_response
-from apps.core_app.models import AgentApplication
 from rest_framework.parsers import MultiPartParser, FormParser
 from .services import (verify_otp_service,agent_signup_service,reset_password_service,resend_otp_service,
                        check_user_email_exists,forgot_password_service,client_signup_service,google_client_auth_service,
@@ -14,7 +8,6 @@ from .serializers import (LoginSerializer,ClientSignupSerializer,
     VerifyOTPSerializer,ForgotPasswordSerializer,ResetPasswordSerializer)
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
-from rest_framework.response import Response
 import logging
 logger=logging.getLogger(__name__)
 

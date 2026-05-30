@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import DashboardLayout from "../../../layouts/DashboardLayout";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   getTicketTimeline,
   reopenTicket,
@@ -25,6 +25,7 @@ import ConfirmModal from "../../../components/modals/ConfirmModal";
 import ReviewModal from "../../../components/modals/ReviewModal";
 import useChat from "../../../hooks/useChat";
 import { notifySuccess } from "../../../utils/notify";
+import IncomingCallModal from "../../../components/modals/IncomingCallModal";
 
 const TicketDetail = () => {
   const { id } = useParams();
@@ -42,17 +43,24 @@ const TicketDetail = () => {
   const [reopenLoading, setReopenLoading] = useState(false);
 
   const [timeline, setTimeline] = useState([]);
+  const localStreamRef = useRef(null);
 
   const {
+    handleKeyDown,
     messages,
     newMessage,
     setNewMessage,
     handleSendMessage,
     messageEndRef,
-  } = useChat(id);
+    incomingCall,
+    setIncomingCall,
+    socketRef,
+    handleAccept,
+    remoteAudioRef
+  } = useChat(id,ticket?.current_user_id);
 
   const currentUserId = Number(ticket?.current_user_id);
-  // if (!ticket?.current_user_id) return <Loader />;.
+
   useEffect(() => {
     console.log("FULL TICKET:", ticket);
   }, [ticket]);
@@ -120,6 +128,8 @@ const TicketDetail = () => {
       setReviewLoading(false);
     }
   };
+
+
   const formatTime = (t) => {
     if (!t) return "";
 
@@ -316,6 +326,7 @@ const TicketDetail = () => {
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyDown={handleKeyDown}
                     placeholder="Type your message..."
                     className="w-full pl-6 pr-24 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none"
                   />
@@ -399,6 +410,23 @@ const TicketDetail = () => {
         loading={reopenLoading}
         onConfirm={handleConfirmReopen}
         onCancel={() => setReopenModalOpen(false)}
+      />
+      <IncomingCallModal
+      isOpen={!!incomingCall}
+      callerName={incomingCall?.caller_name}
+      onAccept={()=>{
+        console.log('accepted')
+        console.log("INCOMING CALL", incomingCall);
+        handleAccept(incomingCall,currentUserId)
+      }}
+      onReject={()=>{
+        console.log('rejected')
+        setIncomingCall(null)
+      }}
+      />
+      <audio
+      ref={remoteAudioRef}
+      autoPlay playsInline hidden
       />
     </DashboardLayout>
   );
