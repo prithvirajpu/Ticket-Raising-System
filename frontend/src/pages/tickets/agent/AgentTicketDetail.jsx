@@ -8,6 +8,8 @@ import ConfirmModal from "../../../components/modals/ConfirmModal";
 import { getSlaTimer } from "../../../utils/slaTImer";
 import useChat from "../../../hooks/useChat";
 import { notifySuccess } from "../../../utils/notify";
+import OngoingCallModal from '../../../components/modals/OngoingCallModal'
+import CallingModal from '../../../components/modals/CallingModal'
 
 const AgentTicketDetail = () => {
   const { id } = useParams();
@@ -19,8 +21,9 @@ const AgentTicketDetail = () => {
 
   const [escalateLoading,setEscalateLoading]=useState(false)
   const [escalateModalOpen, setEscalateModalOpen] = useState(false);
-  const { messages, newMessage, setNewMessage,handleCall,
-         handleSendMessage, messageEndRef, handleKeyDown } = useChat(id,ticket?.current_user_id);
+  const { messages, newMessage, setNewMessage,handleCall,callState,setCallState,handleEndCall,
+         handleSendMessage, messageEndRef, handleKeyDown,incomingCall,
+         } = useChat(id,ticket?.current_user_id);
   const currentUserId = Number(ticket?.current_user_id);
 
   const navigate = useNavigate();
@@ -251,7 +254,7 @@ const AgentTicketDetail = () => {
                 <div className="absolute right-4 flex items-center gap-4">
                   <button onClick={()=>handleCall(ticket.created_by_id)}
                    className="text-green-500 hover:scale-110 transition-transform">
-                    <Phone className="rotate-[100deg]"
+                    <Phone className="rotate-[30deg]"
                     size={20} fill="currentColor" stroke="none" />
                   </button>
                   <button onClick={handleSendMessage} className="text-black hover:translate-x-1 transition-transform">
@@ -288,6 +291,15 @@ const AgentTicketDetail = () => {
         onConfirm={handleEscalateConfirm}
         onCancel={handleCancelEscalate}
       />
+      <OngoingCallModal
+        isOpen={callState === "in_call"}
+  onEnd={handleEndCall}
+      />
+      <CallingModal
+    isOpen={callState === "calling"}
+    userName={ticket.customer_name}
+    onCancel={handleEndCall}
+/>
     </>
   );
 };

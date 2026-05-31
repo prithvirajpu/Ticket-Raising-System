@@ -5,14 +5,13 @@ export const startPeerCall = async (
     localStreamRef,remoteAudioRef
 ) => {
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: false,
-    });
-
-    localStreamRef.current = stream;
-
+  
     const peer = getPeer();
+    const stream = localStreamRef.current ;
+    if (!stream) {
+        console.error("No local stream");
+        return;
+      }
 
     if (!peer) {
       console.log("❌ Peer not ready");
@@ -29,9 +28,7 @@ export const startPeerCall = async (
       if (remoteAudioRef.current) {
         remoteAudioRef.current.srcObject = remoteStream;
 
-        remoteAudioRef.current
-          .play()
-          .catch((err) =>
+        remoteAudioRef.current.play().catch((err) =>
             console.error("Audio play failed", err)
           );
       }

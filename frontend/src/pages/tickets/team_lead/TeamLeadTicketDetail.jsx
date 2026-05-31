@@ -8,6 +8,7 @@ import ConfirmModal from "../../../components/modals/ConfirmModal";
 import { getSlaTimer } from "../../../utils/slaTImer";
 import { notifySuccess } from "../../../utils/notify";
 import useChat from "../../../hooks/useChat";
+import OngoingCallModal from "../../../components/modals/OngoingCallModal";
 
 const TeamLeadTicketDetail = () => {
   const { id } = useParams();
@@ -21,7 +22,7 @@ const TeamLeadTicketDetail = () => {
   const [escalateLoading,setEscalateLoading]=useState(false)
   const [escalateModalOpen, setEscalateModalOpen] = useState(false);
 
-  const { messages, newMessage, setNewMessage,
+  const { messages, newMessage, setNewMessage, handleCall, callState, handleEndCall,
          handleSendMessage, messageEndRef, handleKeyDown } = useChat(id,ticket?.current_user_id);
   const currentUserId = Number(ticket?.current_user_id);
 
@@ -250,11 +251,12 @@ const TeamLeadTicketDetail = () => {
                   className="w-full bg-gray-100 rounded-2xl py-4 pl-6 pr-24 focus:outline-none focus:ring-1 focus:ring-gray-300"
                 />
                 <div className="absolute right-4 flex items-center gap-4">
-                  <button className="text-green-500 hover:scale-110 transition-transform">
-                    <Phone size={24} fill="currentColor" stroke="none" className="rotate-[100deg]" />
+                  <button onClick={()=>handleCall(ticket.created_by_id)}
+                  className="text-green-500 hover:scale-110 transition-transform">
+                    <Phone size={20} fill="currentColor" stroke="none" className="rotate-[30deg]" />
                   </button>
                   <button onClick={handleSendMessage} className="text-black hover:translate-x-1 transition-transform">
-                    <Send size={24} />
+                    <Send size={20} />
                   </button>
                 </div>
               </div>
@@ -286,6 +288,10 @@ const TeamLeadTicketDetail = () => {
         loading={escalateLoading}
         onConfirm={handleEscalateConfirm}
         onCancel={handleCancelEscalate}
+      />
+      <OngoingCallModal
+        isOpen={callState === "in_call"}
+  onEnd={handleEndCall}
       />
     </>
   )

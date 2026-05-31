@@ -1,21 +1,17 @@
 import Peer from "peerjs";
 
 let peerInstance = null;
+let getLocalStream = null;
 
-export const createPeer = (userId, remoteAudioRef) => {
+export const createPeer = (userId, remoteAudioRef,streamGetter) => {
   const peerId = `user-${userId}`;
-
+  getLocalStream= streamGetter;
   if (
-    peerInstance &&
-    !peerInstance.destroyed &&
-    peerInstance.id === peerId
-  ) {
-    return peerInstance;
-  }
-
-  if (peerInstance && !peerInstance.destroyed) {
-    peerInstance.destroy();
-  }
+        peerInstance &&
+        !peerInstance.destroyed
+    ) {
+        return peerInstance;
+    }
 
   peerInstance = new Peer(peerId, {
     debug: 2,
@@ -28,11 +24,11 @@ export const createPeer = (userId, remoteAudioRef) => {
   peerInstance.on("call", async (call) => {
     try {
       console.log("📞 Incoming Peer Call from:", call.peer);
-
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: false,
-      });
+      const stream = getLocalStream?.();
+      if (!stream) {
+            console.error("No mic stream found");
+            return;
+        }
 
       call.answer(stream);
 
@@ -42,9 +38,7 @@ export const createPeer = (userId, remoteAudioRef) => {
         if (remoteAudioRef?.current) {
           remoteAudioRef.current.srcObject = remoteStream;
 
-          remoteAudioRef.current
-            .play()
-            .catch((err) =>
+          remoteAudioRef.current.play().catch((err) =>
               console.error("Audio play failed", err)
             );
         }

@@ -26,6 +26,7 @@ import ReviewModal from "../../../components/modals/ReviewModal";
 import useChat from "../../../hooks/useChat";
 import { notifySuccess } from "../../../utils/notify";
 import IncomingCallModal from "../../../components/modals/IncomingCallModal";
+import OngoingCallModal from '../../../components/modals/OngoingCallModal'
 
 const TicketDetail = () => {
   const { id } = useParams();
@@ -45,18 +46,10 @@ const TicketDetail = () => {
   const [timeline, setTimeline] = useState([]);
   const localStreamRef = useRef(null);
 
-  const {
-    handleKeyDown,
-    messages,
-    newMessage,
-    setNewMessage,
-    handleSendMessage,
-    messageEndRef,
-    incomingCall,
-    setIncomingCall,
-    socketRef,
-    handleAccept,
-    remoteAudioRef
+  const {handleKeyDown, messages, newMessage, setNewMessage, handleSendMessage, 
+    messageEndRef, incomingCall,setIncomingCall, socketRef, handleAccept, 
+    remoteAudioRef, callState, setCallState, handleEndCall,handleReject,
+
   } = useChat(id,ticket?.current_user_id);
 
   const currentUserId = Number(ticket?.current_user_id);
@@ -421,8 +414,14 @@ const TicketDetail = () => {
       }}
       onReject={()=>{
         console.log('rejected')
-        setIncomingCall(null)
+        handleReject(incomingCall)
+        setIncomingCall(null);
+        
       }}
+      />
+      <OngoingCallModal
+      isOpen={callState === "in_call"}
+  onEnd={handleEndCall}
       />
       <audio
       ref={remoteAudioRef}

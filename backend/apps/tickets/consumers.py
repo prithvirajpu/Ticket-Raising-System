@@ -48,6 +48,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 await self.handle_call_request(data)
             elif event_type=='call_accepted':
                 await self.handle_call_accepted(data)
+            elif event_type=='call_ended':
+                await self.handle_call_ended(data)
+            elif event_type=='call_rejected':
+                await self.handle_call_rejected(data)
+            elif event_type=='call_missed':
+                await self.handle_call_missed(data)
             else:
                 logger.warning('unknown event type: %s',event_type)
 
@@ -113,6 +119,50 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'peer_id':peer_id
             }
         )
+    async def handle_call_rejected(self,data):
+        caller_id= data['caller_id']
+
+        await self.channel_layer.group_send(
+            f'user_{caller_id}',
+            {'type':'call_rejected'}
+        )
+
+    async def handle_call_missed(self,data):
+        customer_id = data.get("customer_id")
+
+        await self.channel_layer.group_send(
+            f'user_{customer_id}',
+            {'type':'call_missed'}
+        )
+    
+
+    async def call_rejected(self,event):
+        await self.send(text_data=json.dumps({
+            'type':'call_rejected'
+        }))
+    async def call_missed(self,event):
+        await self.send(text_data=json.dumps({
+            'type':'call_missed'
+        }))
+
+    async def handle_call_ended(self,data):
+        customer_id = data.get("customer_id")
+        receiver_id = data.get("receiver_id")
+        await self.channel_layer.group_send(
+            f'user_{customer_id}',
+            {'type':'call_ended'}
+        )
+
+        await self.channel_layer.group_send(
+            f'user_{receiver_id}',
+            {'type':'call_ended'}
+        )
+
+    async def call_ended(self,event):
+        await self.send(text_data=json.dumps({
+            'type':'call_ended'
+        }))
+
          
     async def incoming_call(self,event):
         logger.info('event in incoming call method %s',event)
