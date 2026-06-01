@@ -23,14 +23,12 @@ const useChat = (ticketId, currentUserId) => {
     if (!currentUserId) return;
 
     const initPeer = async () => {
-
         createPeer(currentUserId, remoteAudioRef,()=>localStreamRef.current);
     };
 
     initPeer();
 }, [currentUserId]);
     
-
     useEffect(() => {
     if (!ticketId) return;
 

@@ -79,6 +79,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "created_at": chat_data.get("created_at"),
             }
         )
+
+    async def chat_message(self, event):
+        logger.info("EVENT DATA: %s", event)
+        await self.send(text_data=json.dumps({
+            'type':'chat_message',
+            "message": event["message"],
+            "sender_name": event["sender_name"],
+            "sender_id": event["sender_id"],
+            "created_at": event["created_at"],
+        }))
     
     async def handle_call_request(self, data):
         try:
@@ -107,6 +117,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         except Exception:
             logger.exception("CALL REQUEST FAILED")
+
+    async def incoming_call(self,event):
+        logger.info('event in incoming call method %s',event)
+        logger.info('incoming call=>caller= %s ticket= %s',
+                    event['caller_id'],event['ticket_id'])
+        await self.send(
+            text_data=json.dumps({
+                "type": "incoming_call",
+                "caller_id": event["caller_id"],
+                "caller_name": event["caller_name"],
+                "ticket_id": event["ticket_id"],
+            })
+        )
 
     async def handle_call_accepted(self,data):
         caller_id=data.get('caller_id')
@@ -163,20 +186,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'type':'call_ended'
         }))
 
-         
-    async def incoming_call(self,event):
-        logger.info('event in incoming call method %s',event)
-        logger.info('incoming call=>caller= %s ticket= %s',
-                    event['caller_id'],event['ticket_id'])
-        await self.send(
-            text_data=json.dumps({
-                "type": "incoming_call",
-                "caller_id": event["caller_id"],
-                "caller_name": event["caller_name"],
-                "ticket_id": event["ticket_id"],
-            })
-        )
-
     async def call_accepted(self,event):
         await self.send(
             text_data=json.dumps({
@@ -185,12 +194,4 @@ class ChatConsumer(AsyncWebsocketConsumer):
             })
         )
 
-    async def chat_message(self, event):
-        logger.info("EVENT DATA: %s", event)
-        await self.send(text_data=json.dumps({
-            'type':'chat_message',
-            "message": event["message"],
-            "sender_name": event["sender_name"],
-            "sender_id": event["sender_id"],
-            "created_at": event["created_at"],
-        }))
+

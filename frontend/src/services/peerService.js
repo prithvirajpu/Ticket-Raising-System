@@ -5,6 +5,9 @@ let getLocalStream = null;
 
 export const createPeer = (userId, remoteAudioRef,streamGetter) => {
   const peerId = `user-${userId}`;
+  
+console.log("createPeer called for", peerId);
+console.log("Returning existing peer", peerInstance?.id);
   getLocalStream= streamGetter;
   if (
         peerInstance &&
@@ -22,6 +25,12 @@ export const createPeer = (userId, remoteAudioRef,streamGetter) => {
   });
 
   peerInstance.on("call", async (call) => {
+    console.log('this is peerinstanse call in peerjs .on',call)
+    console.log(
+    "Incoming call event",
+    call.peer,
+    getLocalStream?.()
+);
     try {
       console.log("📞 Incoming Peer Call from:", call.peer);
       const stream = getLocalStream?.();

@@ -7,6 +7,9 @@ export const startPeerCall = async (
   try {
   
     const peer = getPeer();
+    console.log("Current peer:", peer);
+console.log("Current peer id:", peer?.id);
+    
     const stream = localStreamRef.current ;
     if (!stream) {
         console.error("No local stream");
@@ -21,6 +24,12 @@ export const startPeerCall = async (
     console.log("📞 Calling:", peerId);
 
     const call = peer.call(peerId, stream);
+      console.log("Call object created:", call);
+console.log("Peer instance id:", peer.id);
+console.log("Target peer:", peerId);
+call.on("error", (err) => {
+    console.error("CALL ERROR", err);
+});
 
     call.on("stream", (remoteStream) => {
       console.log("🎧 Remote stream received");

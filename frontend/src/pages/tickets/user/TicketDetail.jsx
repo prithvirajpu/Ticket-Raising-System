@@ -142,7 +142,7 @@ const TicketDetail = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-6xl mx-auto font-sans">
+      <div className="max-w-7xl mx-auto font-sans">
         {/* Header Actions */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
@@ -177,10 +177,11 @@ const TicketDetail = () => {
           </div>
         </div>
 
-        {/* Main Content Grid */}
+        {/* Combined Unified Grid: 3-column, 6-column, 3-column split */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Sidebar: Ticket Details */}
-          <div className="lg:col-span-4 space-y-6">
+          
+          {/* 1. LEFT SIDEBAR: Ticket Details (Takes up 3 spaces) */}
+          <div className="lg:col-span-3 space-y-6">
             <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
               <h2 className="text-lg font-bold text-gray-800 mb-6">
                 Ticket Details
@@ -221,7 +222,7 @@ const TicketDetail = () => {
                   <div className="flex items-center gap-2 text-gray-400 text-sm font-medium">
                     <User size={16} /> Customer
                   </div>
-                  <span className="text-sm font-bold text-gray-900">
+                  <span className="text-sm font-bold text-gray-900 break-words">
                     {ticket.customer?.name || "User_here"}
                   </span>
                 </div>
@@ -243,137 +244,132 @@ const TicketDetail = () => {
             </div>
           </div>
 
-          {/* Right Content */}
-          <div className="lg:col-span-8 grid grid-cols-1 xl:grid-cols-12 gap-6">
-            {/* CHAT SECTION */}
-            <div className="xl:col-span-8 flex flex-col h-[700px] bg-white border border-gray-200 rounded-3xl shadow-sm overflow-hidden">
-              {/* Conversation Header */}
-              <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-                <div>
-                  <h2 className="text-xl font-bold text-gray-800">
-                    Conversation
-                  </h2>
-
-                  <p className="text-sm text-gray-400">
-                    Chat with the support team
-                  </p>
-                </div>
-              </div>
-
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-gray-50/30">
-                {messages.map((msg, index) => {
-                  const isMe = Number(msg.sender_id) === Number(currentUserId);
-
-                  return (
-                    <div
-                      key={index}
-                      className={`flex flex-col ${
-                        isMe ? "items-end" : "items-start"
-                      } gap-2`}
-                    >
-                      <div className="flex items-center gap-2 text-[11px] text-gray-400 font-bold uppercase">
-                        {/* {msg.sender_name.split("@")[0]} */}
-
-                        <span className="font-normal normal-case">
-                          {formatTime(msg.created_at)}
-                        </span>
-                      </div>
-
-                      <div
-                        className={`flex gap-3 items-end max-w-[80%] ${
-                          isMe ? "flex-row-reverse" : ""
-                        }`}
-                      >
-                        {/* Bubble */}
-                        <div
-                          className={`p-4 rounded-2xl text-sm shadow-sm ${
-                            isMe
-                              ? "bg-[#005bb7] text-white rounded-tr-none"
-                              : "bg-gray-200 text-gray-900 rounded-tl-none"
-                          }`}
-                        >
-                          {msg.message}
-                        </div>
-
-                        {/* Avatar */}
-                        <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${
-                            isMe ? "bg-emerald-500" : "bg-gray-500"
-                          }`}
-                        >
-                          {msg.sender_name?.[0]}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-
-                <div ref={messageEndRef} />
-              </div>
-
-              {/* Input */}
-              <div className="p-6 border-t border-gray-100 bg-white">
-                <div className="relative flex items-center">
-                  <textarea
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Type your message..."
-                    className="w-full pl-6 pr-24 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none"
-                  />
-
-                  <div className="absolute right-3 flex items-center gap-2">
-                    <button className="p-2 text-gray-400 hover:text-gray-600">
-                      <Paperclip size={20} />
-                    </button>
-
-                    <button
-                      onClick={handleSendMessage}
-                      className="p-2 text-gray-900"
-                    >
-                      <Send size={20} />
-                    </button>
-                  </div>
-                </div>
+          {/* 2. MIDDLE PORTION: Chat Section (Takes up 6 spaces) */}
+          <div className="lg:col-span-6 flex flex-col h-[700px] bg-white border border-gray-200 rounded-3xl shadow-sm overflow-hidden">
+            {/* Conversation Header */}
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-bold text-gray-800">
+                  Conversation
+                </h2>
+                <p className="text-sm text-gray-400">
+                  Chat with the support team
+                </p>
               </div>
             </div>
 
-            {/* TIMELINE SECTION */}
-            <div className="xl:col-span-4 bg-white border border-gray-200 rounded-3xl p-6 h-[700px] overflow-y-auto shadow-sm">
-              <h2 className="text-lg font-bold text-gray-800 mb-6">Timeline</h2>
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-gray-50/30">
+              {messages.map((msg, index) => {
+                const isMe = Number(msg.sender_id) === Number(currentUserId);
 
-              <div className="relative">
-                {timeline.map((item, index) => (
-                  <div key={item.id} className="relative pl-8 pb-8">
-                    {/* Vertical Line */}
-                    {index !== timeline.length - 1 && (
-                      <div className="absolute left-[11px] top-5 w-[2px] h-full bg-gray-200" />
-                    )}
+                return (
+                  <div
+                    key={index}
+                    className={`flex flex-col ${
+                      isMe ? "items-end" : "items-start"
+                    } gap-2`}
+                  >
+                    <div className="flex items-center gap-2 text-[11px] text-gray-400 font-bold uppercase">
+                      <span className="font-normal normal-case">
+                        {formatTime(msg.created_at)}
+                      </span>
+                    </div>
 
-                    {/* Dot */}
-                    <div className="absolute left-0 top-1 w-6 h-6 rounded-full bg-blue-600 border-4 border-white shadow" />
+                    <div
+                      className={`flex gap-3 items-end max-w-[85%] ${
+                        isMe ? "flex-row-reverse" : ""
+                      }`}
+                    >
+                      {/* Bubble */}
+                      <div
+                        className={`p-4 rounded-2xl text-sm shadow-sm ${
+                          isMe
+                            ? "bg-[#005bb7] text-white rounded-tr-none"
+                            : "bg-gray-200 text-gray-900 rounded-tl-none"
+                        }`}
+                      >
+                        {msg.message}
+                      </div>
 
-                    {/* Content */}
-                    <div className="space-y-1">
-                      <p className="text-sm font-bold text-gray-900">
-                        {item.action}
-                      </p>
-
-                      <p className="text-xs text-gray-500">
-                        {item.description}
-                      </p>
-
-                      <p className="text-[11px] text-gray-400">
-                        {new Date(item.created_at).toLocaleString()}
-                      </p>
+                      {/* Avatar */}
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${
+                          isMe ? "bg-emerald-500" : "bg-gray-500"
+                        }`}
+                      >
+                        {msg.sender_name?.[0]}
+                      </div>
                     </div>
                   </div>
-                ))}
+                );
+              })}
+
+              <div ref={messageEndRef} />
+            </div>
+
+            {/* Input */}
+            <div className="p-6 border-t border-gray-100 bg-white">
+              <div className="relative flex items-center">
+                <textarea
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Type your message..."
+                  className="w-full pl-6 pr-24 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none resize-none"
+                />
+
+                <div className="absolute right-3 flex items-center gap-2">
+                  <button className="p-2 text-gray-400 hover:text-gray-600">
+                    <Paperclip size={20} />
+                  </button>
+
+                  <button
+                    onClick={handleSendMessage}
+                    className="p-2 text-gray-900"
+                  >
+                    <Send size={20} />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
+
+          {/* 3. RIGHT SIDEBAR: Timeline (Takes up 3 spaces) */}
+          <div className="lg:col-span-3 bg-white border border-gray-200 rounded-3xl p-6 h-[700px] overflow-y-auto shadow-sm">
+            <h2 className="text-lg font-bold text-gray-800 mb-6">Timeline</h2>
+
+            <div className="relative">
+              {timeline.map((item, index) => (
+                <div key={item.id} className="relative pl-8 pb-8">
+                  {/* Vertical Line */}
+                  {index !== timeline.length - 1 && (
+                    <div className="absolute left-[11px] top-5 w-[2px] h-full bg-gray-200" />
+                  )}
+
+                  {/* Dot */}
+                  <div className="absolute left-0 top-1 w-6 h-6 rounded-full bg-blue-600 border-4 border-white shadow" />
+
+                  {/* Content */}
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold text-gray-900">
+                      {item.action}
+                    </p>
+
+                    <p className="text-xs text-gray-500">
+                      {item.description}
+                    </p>
+
+                    <p className="text-[11px] text-gray-400">
+                      {new Date(item.created_at).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
       </div>
       <ConfirmModal
@@ -405,27 +401,27 @@ const TicketDetail = () => {
         onCancel={() => setReopenModalOpen(false)}
       />
       <IncomingCallModal
-      isOpen={!!incomingCall}
-      callerName={incomingCall?.caller_name}
-      onAccept={()=>{
-        console.log('accepted')
-        console.log("INCOMING CALL", incomingCall);
-        handleAccept(incomingCall,currentUserId)
-      }}
-      onReject={()=>{
-        console.log('rejected')
-        handleReject(incomingCall)
-        setIncomingCall(null);
-        
-      }}
+        isOpen={!!incomingCall}
+        callerName={incomingCall?.caller_name}
+        onAccept={()=>{
+          console.log('accepted')
+          console.log("INCOMING CALL", incomingCall);
+          handleAccept(incomingCall,currentUserId)
+        }}
+        onReject={()=>{
+          console.log('rejected')
+          handleReject(incomingCall)
+          setIncomingCall(null);
+          
+        }}
       />
       <OngoingCallModal
-      isOpen={callState === "in_call"}
-  onEnd={handleEndCall}
+        isOpen={callState === "in_call"}
+        onEnd={handleEndCall}
       />
       <audio
-      ref={remoteAudioRef}
-      autoPlay playsInline hidden
+        ref={remoteAudioRef}
+        autoPlay playsInline hidden
       />
     </DashboardLayout>
   );
