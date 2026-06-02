@@ -22,6 +22,12 @@ console.log("Current peer id:", peer?.id);
     }
 
     console.log("📞 Calling:", peerId);
+    console.log(
+    "peer open:",
+    peer.open,
+    "destroyed:",
+    peer.destroyed
+);
 
     const call = peer.call(peerId, stream);
       console.log("Call object created:", call);

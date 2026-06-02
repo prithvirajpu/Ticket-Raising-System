@@ -179,6 +179,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'peer_id':peer_id
             }
         )
+
+    async def call_accepted(self,event):
+        await self.send(
+            text_data=json.dumps({
+                'type':'call_accepted',
+                'peer_id':event['peer_id'],
+            })
+        )
+
+
     async def handle_call_rejected(self,data):
         caller_id= data['caller_id']
 
@@ -223,12 +233,5 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'type':'call_ended'
         }))
 
-    async def call_accepted(self,event):
-        await self.send(
-            text_data=json.dumps({
-                'type':'call_accepted',
-                'peer_id':event['peer_id'],
-            })
-        )
 
 

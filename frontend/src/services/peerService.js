@@ -6,16 +6,18 @@ let getLocalStream = null;
 export const createPeer = (userId, remoteAudioRef,streamGetter) => {
   const peerId = `user-${userId}`;
   
-console.log("createPeer called for", peerId);
-console.log("Returning existing peer", peerInstance?.id);
   getLocalStream= streamGetter;
-  if (
-        peerInstance &&
-        !peerInstance.destroyed
-    ) {
-        return peerInstance;
-    }
-
+  if (peerInstance && !peerInstance.destroyed) {
+    console.log("Peer already exists");
+    return peerInstance;
+}
+console.log("CREATING NEW PEER", peerId);
+console.log(
+    "peer exists?",
+    peerInstance,
+    "destroyed?",
+    peerInstance?.destroyed
+);
   peerInstance = new Peer(peerId, {
     debug: 2,
   });
@@ -88,7 +90,9 @@ console.log("Returning existing peer", peerInstance?.id);
 export const getPeer = () => peerInstance;
 
 export const destroyPeer = () => {
+ 
   if (peerInstance && !peerInstance.destroyed) {
+     console.log('destroying peer')
     peerInstance.destroy();
   }
   peerInstance = null;

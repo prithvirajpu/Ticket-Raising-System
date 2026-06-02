@@ -24,12 +24,4 @@ class TicketChatSerializer(serializers.ModelSerializer):
     
     
     def get_is_seen(self, obj):
-        user = getattr(self.context.get("request"), "user", None)
-
-        if not user:
-            user = self.context.get("user", None)
-
-        if not user:
-            return False
-
-        return obj.reads.filter(user=user).exists() 
+        return obj.reads.exclude(user=obj.sender).exists()

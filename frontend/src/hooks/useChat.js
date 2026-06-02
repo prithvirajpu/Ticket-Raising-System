@@ -20,15 +20,22 @@ const useChat = (ticketId, currentUserId) => {
     const timeoutRef = useRef(null);
     const callLockRef = useRef(false);
 
-   useEffect(() => {
+useEffect(() => {
+    console.log("PEER EFFECT RUN", currentUserId);
+
     if (!currentUserId) return;
 
-    const initPeer = async () => {
-        createPeer(currentUserId, remoteAudioRef,()=>localStreamRef.current);
-    };
+    createPeer(
+        currentUserId,
+        remoteAudioRef,
+        () => localStreamRef.current
+    );
 
-    initPeer();
+    return () => {
+        console.log("PEER EFFECT CLEANUP");
+    };
 }, [currentUserId]);
+
     
     useEffect(() => {
     if (!ticketId) return;
@@ -153,6 +160,9 @@ if (data.type === "messages_read") {
     const fetchMessages = async () => {
         const message = await getTicketMessages(ticketId);
         console.log('getTicketmessages',message)
+        console.log(
+  message.data.filter(m => m.id === 221 || m.id === 222)
+);
         const res=message.data
 
         const normalized = res.map((m) => ({
@@ -163,6 +173,9 @@ if (data.type === "messages_read") {
             created_at: m.created_at,
             is_seen:m.is_seen,
         }));
+        console.log('normalized',normalized)
+        console.log('another data',normalized[normalized.length - 1]);
+        console.log('another data2',normalized[normalized.length - 2]);
 
         setMessages(normalized);
         scrollToBottom();

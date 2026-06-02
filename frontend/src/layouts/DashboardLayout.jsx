@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
 import Navbar from '../components/Navbar'
-import {createPeer} from '../services/peerService'
 
 const DashboardLayout = ({ title, subtitle, headerAction, children }) => {
 
