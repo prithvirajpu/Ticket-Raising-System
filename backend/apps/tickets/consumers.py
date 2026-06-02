@@ -3,6 +3,9 @@ from django.utils.timezone import now
 from channels.generic.websocket import AsyncWebsocketConsumer
 from apps.tickets.services import send_message_service
 from channels.db import database_sync_to_async
+from django.utils import timezone
+from apps.tickets.models import TicketChat
+from apps.tickets.services import  mark_messages_read_service
 import logging
 
 logger = logging.getLogger(__name__)
@@ -44,6 +47,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             logger.info("WS: event %s", event_type)
             if event_type=='chat_message':
                 await self.handle_chat_message(data)
+            elif event_type == "mark_read":
+                logger.info('mard read received')
+                await self.handle_mark_read(data)
             elif event_type=='call_request':
                 await self.handle_call_request(data)
             elif event_type=='call_accepted':
@@ -73,6 +79,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             {
                 'type':'chat_message',
+                'id':chat_data.get('id'),
                 "message": chat_data.get("message"),
                 "sender_id": chat_data.get("sender_id"),
                 "sender_name": chat_data.get("sender_name"),
@@ -84,12 +91,42 @@ class ChatConsumer(AsyncWebsocketConsumer):
         logger.info("EVENT DATA: %s", event)
         await self.send(text_data=json.dumps({
             'type':'chat_message',
+            'id':event["id"],
             "message": event["message"],
             "sender_name": event["sender_name"],
             "sender_id": event["sender_id"],
             "created_at": event["created_at"],
         }))
     
+    @database_sync_to_async
+    def mark_read_db(self):
+        return mark_messages_read_service(
+            ticket_id=self.ticket_id,
+            user=self.scope['user']
+        )
+    
+    async def handle_mark_read(self, data):
+        message_ids = await self.mark_read_db()
+        logger.info('ids are ---%s',message_ids)
+
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "messages_read",
+                "message_ids": message_ids,
+                "reader_id": self.scope["user"].id,
+            }
+        )
+
+    async def messages_read(self, event):
+        await self.send(
+            text_data=json.dumps({
+                "type": "messages_read",
+                "message_ids": event["message_ids"],
+                'reader_id': self.scope["user"].id,
+            })
+        )
+
     async def handle_call_request(self, data):
         try:
             customer_id = data.get("customer_id")

@@ -73,7 +73,7 @@ class TicketMessageView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, ticket_id):
-        result = get_messages_service(request.user, ticket_id)
+        result = get_messages_service(request.user, ticket_id,request=request)
         return Response(result)
 
 class ResolveTicketView(APIView):

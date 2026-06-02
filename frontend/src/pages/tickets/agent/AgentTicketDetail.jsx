@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { escalateTicket, getAgentTicketDetail, resolveTicket } from "../../../services/ticketService";
 import Loader from "../../../components/modals/Loader";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, Phone, User, Clock, AlertCircle, Calendar } from "lucide-react"; // Using Lucide for icons
+import { ArrowLeft, Send, Phone, User, Clock, AlertCircle, Calendar,Check,CheckCheck } from "lucide-react"; // Using Lucide for icons
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
 import { getSlaTimer } from "../../../utils/slaTImer";
@@ -211,15 +211,25 @@ const AgentTicketDetail = () => {
         </div>
 
         <div className={`flex items-end gap-3 max-w-[80%] ${isMe ? "flex-row-reverse" : ""}`}>
-          <div
-            className={`p-4 rounded-2xl text-sm shadow-sm ${
-              isMe
-                ? "bg-blue-600 text-white rounded-tr-none"
-                : "bg-gray-200 text-black rounded-tl-none"
-            }`}
-          >
-            {msg.message}
-          </div>
+         <div
+                        className={`relative p-4 rounded-2xl text-sm shadow-sm ${
+                          isMe
+                            ? "bg-[#3f644b] text-white rounded-tr-none"
+                            : "bg-gray-200 text-gray-900 rounded-tl-none"
+                        }`}
+                      >
+                        {msg.message}
+
+{isMe && (
+  <span className="absolute bottom-1 right-2">
+    {msg.is_seen ? (
+      <CheckCheck size={14} className="text-sky-300" />
+    ) : (
+      <CheckCheck size={14} className="text-gray-400" />
+    )}
+  </span>
+)}
+                      </div>
 
           <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center text-white text-xs font-bold">
             {msg.sender_name?.[0]}
@@ -252,7 +262,8 @@ const AgentTicketDetail = () => {
                       className="w-full bg-gray-100 rounded-2xl py-4 pl-6 pr-24 focus:outline-none"
                     />
                 <div className="absolute right-4 flex items-center gap-4">
-                  <button onClick={()=>handleCall(ticket.created_by_id)}
+                  <button onClick={()=>handleCall(ticket.created_by_id)} 
+                  disabled={callState !== "idle"}
                    className="text-green-500 hover:scale-110 transition-transform">
                     <Phone className="rotate-[30deg]"
                     size={20} fill="currentColor" stroke="none" />

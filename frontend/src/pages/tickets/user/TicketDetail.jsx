@@ -6,7 +6,6 @@ import {
   reopenTicket,
   closeTicket,
   getUserTicketDetail,
-  getTicketMessages,
   sendMessage,
   submitReview,
 } from "../../../services/ticketService";
@@ -18,6 +17,8 @@ import {
   Clock,
   RefreshCcw,
   Send,
+  Check,
+  CheckCheck,
   Paperclip,
 } from "lucide-react";
 import Loader from "../../../components/modals/Loader";
@@ -26,7 +27,7 @@ import ReviewModal from "../../../components/modals/ReviewModal";
 import useChat from "../../../hooks/useChat";
 import { notifySuccess } from "../../../utils/notify";
 import IncomingCallModal from "../../../components/modals/IncomingCallModal";
-import OngoingCallModal from '../../../components/modals/OngoingCallModal'
+import OngoingCallModal from "../../../components/modals/OngoingCallModal";
 
 const TicketDetail = () => {
   const { id } = useParams();
@@ -46,11 +47,23 @@ const TicketDetail = () => {
   const [timeline, setTimeline] = useState([]);
   const localStreamRef = useRef(null);
 
-  const {handleKeyDown, messages, newMessage, setNewMessage, handleSendMessage, 
-    messageEndRef, incomingCall,setIncomingCall, socketRef, handleAccept, 
-    remoteAudioRef, callState, setCallState, handleEndCall,handleReject,
-
-  } = useChat(id,ticket?.current_user_id);
+  const {
+    handleKeyDown,
+    messages,
+    newMessage,
+    setNewMessage,
+    handleSendMessage,
+    messageEndRef,
+    incomingCall,
+    setIncomingCall,
+    socketRef,
+    handleAccept,
+    remoteAudioRef,
+    callState,
+    setCallState,
+    handleEndCall,
+    handleReject,
+  } = useChat(id, ticket?.current_user_id);
 
   const currentUserId = Number(ticket?.current_user_id);
 
@@ -66,7 +79,7 @@ const TicketDetail = () => {
       setTimeline(timelineData.message);
       setTicket(updated.message);
       setReopenModalOpen(false);
-      notifySuccess('Ticket is successfully reopened')
+      notifySuccess("Ticket is successfully reopened");
     } catch (error) {
       console.log(error);
     } finally {
@@ -112,7 +125,7 @@ const TicketDetail = () => {
     try {
       await submitReview(id, data);
       setShowReviewModal(false);
-      notifySuccess('Review sumbitted successfully')
+      notifySuccess("Review sumbitted successfully");
       const updated = await getUserTicketDetail(id);
       setTicket(updated.message);
     } catch (error) {
@@ -121,7 +134,6 @@ const TicketDetail = () => {
       setReviewLoading(false);
     }
   };
-
 
   const formatTime = (t) => {
     if (!t) return "";
@@ -179,7 +191,6 @@ const TicketDetail = () => {
 
         {/* Combined Unified Grid: 3-column, 6-column, 3-column split */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          
           {/* 1. LEFT SIDEBAR: Ticket Details (Takes up 3 spaces) */}
           <div className="lg:col-span-3 space-y-6">
             <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
@@ -282,16 +293,26 @@ const TicketDetail = () => {
                       }`}
                     >
                       {/* Bubble */}
+
                       <div
-                        className={`p-4 rounded-2xl text-sm shadow-sm ${
+                        className={`relative p-4 rounded-2xl text-sm shadow-sm ${
                           isMe
-                            ? "bg-[#005bb7] text-white rounded-tr-none"
+                            ? "bg-[#3f644b] text-white rounded-tr-none"
                             : "bg-gray-200 text-gray-900 rounded-tl-none"
                         }`}
                       >
                         {msg.message}
-                      </div>
 
+{isMe && (
+  <span className="absolute bottom-1 right-2">
+    {msg.is_seen ? (
+      <CheckCheck size={14} className="text-sky-300" />
+    ) : (
+      <CheckCheck size={14} className="text-gray-400" />
+    )}
+  </span>
+)}
+                      </div>
                       {/* Avatar */}
                       <div
                         className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${
@@ -357,9 +378,7 @@ const TicketDetail = () => {
                       {item.action}
                     </p>
 
-                    <p className="text-xs text-gray-500">
-                      {item.description}
-                    </p>
+                    <p className="text-xs text-gray-500">{item.description}</p>
 
                     <p className="text-[11px] text-gray-400">
                       {new Date(item.created_at).toLocaleString()}
@@ -369,7 +388,6 @@ const TicketDetail = () => {
               ))}
             </div>
           </div>
-
         </div>
       </div>
       <ConfirmModal
@@ -403,26 +421,22 @@ const TicketDetail = () => {
       <IncomingCallModal
         isOpen={!!incomingCall}
         callerName={incomingCall?.caller_name}
-        onAccept={()=>{
-          console.log('accepted')
+        onAccept={() => {
+          console.log("accepted");
           console.log("INCOMING CALL", incomingCall);
-          handleAccept(incomingCall,currentUserId)
+          handleAccept(incomingCall, currentUserId);
         }}
-        onReject={()=>{
-          console.log('rejected')
-          handleReject(incomingCall)
+        onReject={() => {
+          console.log("rejected");
+          handleReject(incomingCall);
           setIncomingCall(null);
-          
         }}
       />
       <OngoingCallModal
         isOpen={callState === "in_call"}
         onEnd={handleEndCall}
       />
-      <audio
-        ref={remoteAudioRef}
-        autoPlay playsInline hidden
-      />
+      <audio ref={remoteAudioRef} autoPlay playsInline hidden />
     </DashboardLayout>
   );
 };

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import {  getUserTicketDetail, resolveTicket } from "../../../services/ticketService";
 import Loader from "../../../components/modals/Loader";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, Phone, User, Clock, AlertCircle, Calendar } from "lucide-react"; 
+import { ArrowLeft, Send, Phone, User, Clock, AlertCircle, Calendar,Check, CheckCheck } from "lucide-react"; 
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
 import { getSlaTimer } from "../../../utils/slaTImer";
@@ -174,9 +174,9 @@ const ManagerTicketDetail = () => {
             {/* Chat Area */}
 <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
   {messages.map((msg, index) => {
+    
     const senderId = Number(msg.sender_id ?? msg.sender);
   const isMe = senderId === currentUserId;
-
     return (
       <div
         key={index}
@@ -191,14 +191,24 @@ const ManagerTicketDetail = () => {
 
         <div className={`flex items-end gap-3 max-w-[80%] ${isMe ? "flex-row-reverse" : ""}`}>
           <div
-            className={`p-4 rounded-2xl text-sm shadow-sm ${
-              isMe
-                ? "bg-blue-600 text-white rounded-tr-none"
-                : "bg-gray-200 text-black rounded-tl-none"
-            }`}
-          >
-            {msg.message}
-          </div>
+                        className={`relative p-4 rounded-2xl text-sm shadow-sm ${
+                          isMe
+                            ? "bg-[#3f644b] text-white rounded-tr-none"
+                            : "bg-gray-200 text-gray-900 rounded-tl-none"
+                        }`}
+                      >
+                        {msg.message}
+
+                     {isMe && (
+  <span className="absolute bottom-1 right-2">
+    {msg.is_seen ? (
+      <CheckCheck size={14} className="text-sky-300" />
+    ) : (
+      <CheckCheck size={14} className="text-gray-400" />
+    )}
+  </span>
+)}
+                      </div>
 
           <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center text-white text-xs font-bold">
             {msg.sender_name?.[0]}
@@ -228,6 +238,7 @@ const ManagerTicketDetail = () => {
                 />
                 <div className="absolute right-4 flex items-center gap-4">
                   <button onClick={()=>handleCall(ticket.created_by_id)}
+                  disabled={callState !== "idle"}
                   className="text-green-500 hover:scale-110 transition-transform">
                     <Phone size={20} fill="currentColor" stroke="none" className="rotate-[30deg]" />
                   </button>

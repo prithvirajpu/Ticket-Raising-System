@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { escalateTicket, getUserTicketDetail, resolveTicket } from "../../../services/ticketService";
 import Loader from "../../../components/modals/Loader";
 import {  replace, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Send, Phone, User, Clock, AlertCircle, Calendar } from "lucide-react"; // Using Lucide for icons
+import { ArrowLeft, Send, Phone, User, Clock, AlertCircle, Calendar, CheckCheck } from "lucide-react"; // Using Lucide for icons
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
 import { getSlaTimer } from "../../../utils/slaTImer";
@@ -213,11 +213,20 @@ const TeamLeadTicketDetail = () => {
           <div
             className={`p-4 rounded-2xl text-sm shadow-sm ${
               isMe
-                ? "bg-blue-600 text-white rounded-tr-none"
+                ? "bg-[#3f644b] text-white rounded-tr-none"
                 : "bg-gray-200 text-black rounded-tl-none"
             }`}
           >
             {msg.message}
+{isMe && (
+  <span className="absolute bottom-1 right-2">
+    {msg.is_seen ? (
+      <CheckCheck size={14} className="text-sky-300" />
+    ) : (
+      <CheckCheck size={14} className="text-gray-400" />
+    )}
+  </span>
+)}
           </div>
 
           <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center text-white text-xs font-bold">

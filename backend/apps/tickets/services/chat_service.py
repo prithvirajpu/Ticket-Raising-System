@@ -26,7 +26,7 @@ def send_message_service(user,ticket_id,message):
         "status": 200
     }
 
-def get_messages_service(user,ticket_id):
+def get_messages_service(user,ticket_id,request=None):
     try:
         ticket=Ticket.objects.get(id=ticket_id)
     except Ticket.DoesNotExist:
@@ -38,7 +38,7 @@ def get_messages_service(user,ticket_id):
         raise PermissionDenied('Not allowed')
     
     chats=TicketChat.objects.filter(ticket=ticket).order_by('created_at')
-    serialized = TicketChatSerializer(chats, many=True).data
+    serialized = TicketChatSerializer(chats, many=True,context={"user": user}).data
     logger = logging.getLogger(__name__)
     first_chat = chats.first()
 

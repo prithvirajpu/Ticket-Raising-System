@@ -18,6 +18,7 @@ const useChat = (ticketId, currentUserId) => {
     const localStreamRef = useRef(null);
     const remoteAudioRef = useRef(null);
     const timeoutRef = useRef(null);
+    const callLockRef = useRef(false);
 
    useEffect(() => {
     if (!currentUserId) return;
@@ -39,18 +40,43 @@ const useChat = (ticketId, currentUserId) => {
     socketRef.current.onmessage = (event) => {
         const data = JSON.parse(event.data);
         console.log('WS data',data)
-        if (data.type==='chat_message'){
-            setMessages((prev) => [
-                ...prev,
-                {
-                    id: Date.now(), // temporary id
-                    message: data.message,
-                    sender_id: Number(data.sender_id),
-                    sender_name: data.sender_name,
-                    created_at: data.created_at || new Date().toISOString()
-                }
-            ]);
-        }
+
+    if (data.type === "chat_message") {
+
+  setMessages(prev => [
+    ...prev,
+    {
+      id: data.id,
+      message: data.message,
+      sender_id: Number(data.sender_id),
+      sender_name: data.sender_name,
+      created_at: data.created_at,
+      is_seen: false,
+    }
+  ]);
+
+  // IMPORTANT: only receiver marks read
+  if (Number(data.sender_id) !== Number(currentUserId)) {
+    socketRef.current?.send(
+      JSON.stringify({ type: "mark_read" })
+    );
+  }
+}
+
+if (data.type === "messages_read") {
+  const { message_ids, reader_id } = data;
+
+  // only apply if OTHER user read it
+  if (Number(reader_id) === Number(currentUserId)) return;
+
+  setMessages(prev =>
+    prev.map(msg =>
+      message_ids.includes(msg.id)
+        ? { ...msg, is_seen: true }
+        : msg
+    )
+  );
+}
         const playRingtone = () => {
             const audio = new Audio("/sounds/bye-bye-bye.mp3");
                 audio.loop = true;
@@ -135,10 +161,23 @@ const useChat = (ticketId, currentUserId) => {
             sender_id: Number(m.sender_id),   
             sender_name: m.sender_name,
             created_at: m.created_at,
+            is_seen:m.is_seen,
         }));
 
         setMessages(normalized);
         scrollToBottom();
+        console.log(
+    "WS state before mark read:",
+    socketRef.current?.readyState
+);
+        if (socketRef.current?.readyState === WebSocket.OPEN) {
+        socketRef.current.send(
+            JSON.stringify({
+                type: "mark_read"
+            })
+        );
+        console.log("SENDING MARK READ");
+    }
     };
 
     if (ticketId) fetchMessages();
@@ -168,6 +207,9 @@ const useChat = (ticketId, currentUserId) => {
 
    const handleCall = async (targetUserId) => {
     if (callState!=='idle') return
+    if (callLockRef.current) return;
+
+    callLockRef.current = true;
     try {
         await setupLocalStream();
 
@@ -202,6 +244,7 @@ const useChat = (ticketId, currentUserId) => {
         }, 30000);
     } catch (err) {
         console.error("Mic permission denied", err);
+        callLockRef.current = false;
     }
 };
 
@@ -276,6 +319,7 @@ const stopRingtone = () => {
 };
 
 const resetCallState = () => {
+    callLockRef.current = false;
     setIncomingCall(null);
     setCallPartnerId(null);
     if (remoteAudioRef.current) {
