@@ -188,7 +188,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             })
         )
 
-
     async def handle_call_rejected(self,data):
         caller_id= data['caller_id']
 

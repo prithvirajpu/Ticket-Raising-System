@@ -26,6 +26,7 @@ def login_service(user):
             "access": str(refresh.access_token),
             "refresh": str(refresh),
             "role": user.role,
+            "user_id":user.id,
             "profile_completed": getattr(user, 'profile_completed', True),
             "approval_status": getattr(user, 'approval_status', 'APPROVED'),
         },

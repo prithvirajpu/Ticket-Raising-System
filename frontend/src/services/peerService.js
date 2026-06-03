@@ -3,21 +3,21 @@ import Peer from "peerjs";
 let peerInstance = null;
 let getLocalStream = null;
 
-export const createPeer = (userId, remoteAudioRef,streamGetter) => {
+export const createPeer = (userId, remoteAudioRef, streamGetter) => {
   const peerId = `user-${userId}`;
-  
-  getLocalStream= streamGetter;
+
+  getLocalStream = streamGetter;
   if (peerInstance && !peerInstance.destroyed) {
     console.log("Peer already exists");
     return peerInstance;
-}
-console.log("CREATING NEW PEER", peerId);
-console.log(
+  }
+  console.log("CREATING NEW PEER", peerId);
+  console.log(
     "peer exists?",
     peerInstance,
     "destroyed?",
-    peerInstance?.destroyed
-);
+    peerInstance?.destroyed,
+  );
   peerInstance = new Peer(peerId, {
     debug: 2,
   });
@@ -27,19 +27,15 @@ console.log(
   });
 
   peerInstance.on("call", async (call) => {
-    console.log('this is peerinstanse call in peerjs .on',call)
-    console.log(
-    "Incoming call event",
-    call.peer,
-    getLocalStream?.()
-);
+    console.log("this is peerinstanse call in peerjs .on", call);
+    console.log("Incoming call event", call.peer, getLocalStream?.());
     try {
       console.log("📞 Incoming Peer Call from:", call.peer);
       const stream = getLocalStream?.();
       if (!stream) {
-            console.error("No mic stream found");
-            return;
-        }
+        console.error("No mic stream found");
+        return;
+      }
 
       call.answer(stream);
 
@@ -49,9 +45,9 @@ console.log(
         if (remoteAudioRef?.current) {
           remoteAudioRef.current.srcObject = remoteStream;
 
-          remoteAudioRef.current.play().catch((err) =>
-              console.error("Audio play failed", err)
-            );
+          remoteAudioRef.current
+            .play()
+            .catch((err) => console.error("Audio play failed", err));
         }
       });
 
@@ -62,7 +58,6 @@ console.log(
       call.on("error", (err) => {
         console.error("🚨 Call error", err);
       });
-
     } catch (err) {
       console.error(err);
     }
@@ -90,9 +85,8 @@ console.log(
 export const getPeer = () => peerInstance;
 
 export const destroyPeer = () => {
- 
   if (peerInstance && !peerInstance.destroyed) {
-     console.log('destroying peer')
+    console.log("destroying peer");
     peerInstance.destroy();
   }
   peerInstance = null;

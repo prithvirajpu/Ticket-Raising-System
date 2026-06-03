@@ -13,11 +13,12 @@ const SSOLoading = () => {
         const role = searchParams.get("role");
         const profile_completed = searchParams.get("profile_completed");
         const approval_status = searchParams.get("approval_status");
+        const user_id = searchParams.get("user_id");
 
         console.log("SSO Data Received:", { access: !!access, role });
 
         if (access && role) {
-            login(access, refresh, role, profile_completed, approval_status);
+            login(access, refresh, role, profile_completed, approval_status,user_id);
 
             setTimeout(() => {
                 navigate("/user/dashboard", { replace: true });
