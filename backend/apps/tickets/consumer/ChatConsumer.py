@@ -50,16 +50,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             elif event_type == "mark_read":
                 logger.info('mard read received')
                 await self.handle_mark_read(data)
-            elif event_type=='call_request':
-                await self.handle_call_request(data)
-            elif event_type=='call_accepted':
-                await self.handle_call_accepted(data)
-            elif event_type=='call_ended':
-                await self.handle_call_ended(data)
-            elif event_type=='call_rejected':
-                await self.handle_call_rejected(data)
-            elif event_type=='call_missed':
-                await self.handle_call_missed(data)
             else:
                 logger.warning('unknown event type: %s',event_type)
 

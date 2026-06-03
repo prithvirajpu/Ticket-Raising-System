@@ -298,10 +298,10 @@ const TeamLeadTicketDetail = () => {
         onConfirm={handleEscalateConfirm}
         onCancel={handleCancelEscalate}
       />
-      <OngoingCallModal
+      {/* <OngoingCallModal
         isOpen={callState === "in_call"}
   onEnd={handleEndCall}
-      />
+      /> */}
     </>
   )
 }

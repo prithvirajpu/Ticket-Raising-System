@@ -28,6 +28,7 @@ import useChat from "../../../hooks/useChat";
 import { notifySuccess } from "../../../utils/notify";
 import IncomingCallModal from "../../../components/modals/IncomingCallModal";
 import OngoingCallModal from "../../../components/modals/OngoingCallModal";
+import { useCall } from "../../../auth/CallContext";
 
 const TicketDetail = () => {
   const { id } = useParams();
@@ -47,25 +48,32 @@ const TicketDetail = () => {
   const [timeline, setTimeline] = useState([]);
   const localStreamRef = useRef(null);
 
-  const {
-    handleKeyDown,
+const {
     messages,
     newMessage,
     setNewMessage,
     handleSendMessage,
     messageEndRef,
+    handleKeyDown
+} = useChat(id, ticket?.current_user_id);
+
+const {
     incomingCall,
     setIncomingCall,
-    socketRef,
     handleAccept,
-    remoteAudioRef,
-    callState,
-    setCallState,
-    handleEndCall,
     handleReject,
-  } = useChat(id, ticket?.current_user_id);
+    handleEndCall,
+    callState,
+    remoteAudioRef
+} = useCall();
 
   const currentUserId = Number(ticket?.current_user_id);
+
+console.log("Modal open?", !!incomingCall);
+
+useEffect(() => {
+  console.log("TicketDetail incomingCall:", incomingCall);
+}, [incomingCall]);
 
   useEffect(() => {
     console.log("FULL TICKET:", ticket);
@@ -418,7 +426,7 @@ const TicketDetail = () => {
         onConfirm={handleConfirmReopen}
         onCancel={() => setReopenModalOpen(false)}
       />
-      <IncomingCallModal
+      {/* <IncomingCallModal
         isOpen={!!incomingCall}
         callerName={incomingCall?.caller_name}
         onAccept={() => {
@@ -435,7 +443,7 @@ const TicketDetail = () => {
       <OngoingCallModal
         isOpen={callState === "in_call"}
         onEnd={handleEndCall}
-      />
+      /> */}
       <audio ref={remoteAudioRef} autoPlay playsInline hidden />
     </DashboardLayout>
   );

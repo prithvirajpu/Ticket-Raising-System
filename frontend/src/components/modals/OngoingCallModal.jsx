@@ -11,7 +11,7 @@ const OngoingCallModal = ({ isOpen, onEnd }) => {
         slowing-down slide directly into the top right corner.
     */
     <div 
-      className="fixed top-6 right-6 z-50 pointer-events-none"
+      className="fixed top-24 right-6 z-[99999] pointer-events-none"
       style={{
         animation: "slideInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards"
       }}

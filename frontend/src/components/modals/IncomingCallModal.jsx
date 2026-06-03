@@ -13,7 +13,7 @@ const IncomingCallModal = ({
 
   return (
     /* Dark backdrop overlay to center the modal popup box */
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[9999] flex items-center justify-center p-4">
       
       {/* Centered Modal Container */}
       <div className="w-full max-w-md bg-[#0b141a] rounded-3xl border border-zinc-800 shadow-2xl flex flex-col justify-between p-8 text-white font-sans h-[550px] animate-in fade-in zoom-in-95 duration-200">

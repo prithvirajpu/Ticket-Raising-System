@@ -302,10 +302,10 @@ const AgentTicketDetail = () => {
         onConfirm={handleEscalateConfirm}
         onCancel={handleCancelEscalate}
       />
-      <OngoingCallModal
+      {/* <OngoingCallModal
         isOpen={callState === "in_call"}
   onEnd={handleEndCall}
-      />
+      /> */}
       <CallingModal
     isOpen={callState === "calling"}
     userName={ticket.customer_name}

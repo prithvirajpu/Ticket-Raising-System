@@ -1,5 +1,6 @@
 import {BrowserRouter,Routes,Route} from 'react-router-dom'
 import { AuthProvider } from './auth/AuthContext'
+import {CallProvider} from './auth/CallContext'
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import Login from './pages/Login'
@@ -49,11 +50,16 @@ import SubscriptionPlans from './pages/tickets/client/SubscriptionPlans'
 import SlaRules from './pages/admin/SlaRules'
 import UserManagement from './pages/admin/UserManagement'
 import HierarchyPage from './pages/admin/HierarchyPage'
+import CallAudio from './auth/CallAudio'
+import GlobalCallModal from './auth/GlobalCallModal'
 
 
 const App = () => {
   return (
     <AuthProvider>
+        <CallProvider>
+            <CallAudio/>
+            <GlobalCallModal/>
         <BrowserRouter>
         <ToastContainer position="top-right" autoClose={2500} hideProgressBar newestOnTop 
         closeOnClick pauseOnHover draggable={false} theme="light" toastStyle={{
@@ -180,6 +186,7 @@ const App = () => {
            
         </Routes>
         </BrowserRouter>
+        </CallProvider>
     </AuthProvider>
   )
 }

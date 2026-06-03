@@ -23,6 +23,7 @@ import useChat from "../../../hooks/useChat";
 import { notifySuccess } from "../../../utils/notify";
 import OngoingCallModal from "../../../components/modals/OngoingCallModal";
 import CallingModal from "../../../components/modals/CallingModal";
+import { useCall } from "../../../auth/CallContext";
 
 const ManagerTicketDetail = () => {
   const { id } = useParams();
@@ -34,17 +35,26 @@ const ManagerTicketDetail = () => {
   const [resolveLoading, setResolveLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(null);
 
-  const {
+const {
     messages,
     newMessage,
     setNewMessage,
-    handleCall,
-    callState,
-    handleEndCall,
     handleSendMessage,
     messageEndRef,
-    handleKeyDown,
-  } = useChat(id, ticket?.current_user_id);
+    handleKeyDown
+} = useChat(id, ticket?.current_user_id);
+
+const {
+    incomingCall,
+    setIncomingCall,
+    handleCall,
+    handleAccept,
+    handleReject,
+    handleEndCall,
+    callState,
+    remoteAudioRef
+} = useCall();
+
   const currentUserId = Number(ticket?.current_user_id);
 
   useEffect(() => {
@@ -278,7 +288,10 @@ const ManagerTicketDetail = () => {
                     />
                     <div className="absolute right-4 flex items-center gap-4">
                       <button
-                        onClick={() => handleCall(ticket.created_by_id)}
+                        onClick={() => {
+                          console.log("PHONE BUTTON CLICKED");
+                          handleCall(ticket.created_by_id)
+                        }}
                         disabled={callState !== "idle"}
                         className="text-green-500 hover:scale-110 transition-transform"
                       >
@@ -314,10 +327,10 @@ const ManagerTicketDetail = () => {
         onConfirm={handleConfirmResolve}
         onCancel={handleCancelResolve}
       />
-      <OngoingCallModal
+      {/* <OngoingCallModal
         isOpen={callState === "in_call"}
         onEnd={handleEndCall}
-      />
+      /> */}
       <CallingModal
         isOpen={callState === "calling"}
         userName={ticket.customer_name}
