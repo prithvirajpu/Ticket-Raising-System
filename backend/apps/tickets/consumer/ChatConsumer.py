@@ -22,20 +22,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
-        await self.channel_layer.group_add(
-            self.user_room,
-            self.channel_name
-        )
 
         await self.accept()
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
             self.room_group_name,
-            self.channel_name
-        )
-        await self.channel_layer.group_discard(
-            self.user_room,
             self.channel_name
         )
 
@@ -117,110 +109,4 @@ class ChatConsumer(AsyncWebsocketConsumer):
             })
         )
 
-    async def handle_call_request(self, data):
-        try:
-            customer_id = data.get("customer_id")
-            caller = self.scope["user"]
-
-            logger.info("customer_id received = %s", customer_id)
-            logger.info("caller here self.scope['user'] %s", caller)
-            logger.info("sending to group user_%s", customer_id)
-
-            await self.channel_layer.group_send(
-                f"user_{customer_id}",
-                {
-                    "type": "incoming_call",
-                    "caller_id": caller.id,
-                    "caller_name": getattr(
-                        caller,
-                        "full_name",
-                        caller.email
-                    ),
-                    "ticket_id": self.ticket_id,
-                }
-            )
-
-            logger.info("group_send completed")
-
-        except Exception:
-            logger.exception("CALL REQUEST FAILED")
-
-    async def incoming_call(self,event):
-        logger.info('event in incoming call method %s',event)
-        logger.info('incoming call=>caller= %s ticket= %s',
-                    event['caller_id'],event['ticket_id'])
-        await self.send(
-            text_data=json.dumps({
-                "type": "incoming_call",
-                "caller_id": event["caller_id"],
-                "caller_name": event["caller_name"],
-                "ticket_id": event["ticket_id"],
-            })
-        )
-
-    async def handle_call_accepted(self,data):
-        caller_id=data.get('caller_id')
-        peer_id=data.get('peer_id')
-
-        await self.channel_layer.group_send(
-            f'user_{caller_id}',
-            {
-                'type':'call_accepted',
-                'peer_id':peer_id
-            }
-        )
-
-    async def call_accepted(self,event):
-        await self.send(
-            text_data=json.dumps({
-                'type':'call_accepted',
-                'peer_id':event['peer_id'],
-            })
-        )
-
-    async def handle_call_rejected(self,data):
-        caller_id= data['caller_id']
-
-        await self.channel_layer.group_send(
-            f'user_{caller_id}',
-            {'type':'call_rejected'}
-        )
-
-    async def handle_call_missed(self,data):
-        customer_id = data.get("customer_id")
-
-        await self.channel_layer.group_send(
-            f'user_{customer_id}',
-            {'type':'call_missed'}
-        )
     
-
-    async def call_rejected(self,event):
-        await self.send(text_data=json.dumps({
-            'type':'call_rejected'
-        }))
-    async def call_missed(self,event):
-        await self.send(text_data=json.dumps({
-            'type':'call_missed'
-        }))
-
-    async def handle_call_ended(self,data):
-        customer_id = data.get("customer_id")
-        receiver_id = data.get("receiver_id")
-        await self.channel_layer.group_send(
-            f'user_{customer_id}',
-            {'type':'call_ended'}
-        )
-
-        await self.channel_layer.group_send(
-            f'user_{receiver_id}',
-            {'type':'call_ended'}
-        )
-
-    async def call_ended(self,event):
-        await self.send(text_data=json.dumps({
-            'type':'call_ended'
-        }))
-
-
-
