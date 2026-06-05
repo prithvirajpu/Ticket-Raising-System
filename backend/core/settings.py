@@ -225,3 +225,6 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
     },
 }
+
+SSO_SHARED_SECRET = os.getenv('SSO_SHARED_SECRET')
+INTERNAL_API_KEY = os.getenv('INTERNAL_API_KEY')

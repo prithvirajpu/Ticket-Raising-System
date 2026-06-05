@@ -14,6 +14,15 @@ class Ticket(models.Model):
         ("HIGH","High"),
     ]
 
+    ISSUE_TYPES = (
+    ('ORDER_ISSUE', 'Order Issue'),
+    ('PAYMENT_ISSUE', 'Payment Issue'),
+    ('REFUND_ISSUE', 'Refund Issue'),
+    ('DELIVERY_ISSUE', 'Delivery Issue'),
+    ('WALLET_ISSUE', 'Wallet Issue'),
+    ('PRODUCT_ISSUE', 'Product Issue'),
+    )
+
     STATUS_CHOICES=[
         ("OPEN","Open"),
         ("IN_PROGRESS","In Progress"),
@@ -29,7 +38,7 @@ class Ticket(models.Model):
     assigned_to=models.ForeignKey(User,on_delete=models.SET_NULL,
                                   null=True,blank=True,related_name='assigned_tickets' )
 
-    issue_type=models.CharField(max_length=100)
+    issue_type=models.CharField(max_length=100,choices=ISSUE_TYPES,default='ORDER_ISSUE')
     priority=models.CharField(max_length=10,choices=PRIORITY_CHOICES,default='MEDIUM')
     status=models.CharField(max_length=20,choices=STATUS_CHOICES,default='OPEN')
     is_ai_generated = models.BooleanField(default=False)
@@ -38,19 +47,6 @@ class Ticket(models.Model):
     description=models.TextField()
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)
-
-    def save(self, *args, **kwargs):
-        if self.pk:
-            old = Ticket.objects.filter(pk=self.pk).first()
-
-            if old and old.assigned_to != self.assigned_to:
-                print("\n🔥🔥 ASSIGNED_TO CHANGED")
-                print("OLD:", old.assigned_to)
-                print("NEW:", self.assigned_to)
-
-                print("\n🔥 CALL CONTEXT TRACE END\n")
-
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.ticket_code

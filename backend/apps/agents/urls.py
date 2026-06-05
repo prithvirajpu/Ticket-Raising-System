@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (UpdateAgentProfileView,    AgentTicketRequestsView,
     AgentOngoingTicketsView,AcceptTicketView,RejectTicketView,
     AgentTicketDetailView,AgentSummaryView,AgentFakeTicketsView,
-    AgentFakeTicketDetailView,)
+    AgentFakeTicketDetailView,VerifyTicketAPIView)
 
 urlpatterns=[
     path("profile/update/", UpdateAgentProfileView.as_view()),
@@ -19,4 +19,6 @@ urlpatterns=[
 
     path('fake-tickets/', AgentFakeTicketsView.as_view()),
     path('fake-tickets/<int:id>/', AgentFakeTicketDetailView.as_view()),
+    path('verify/',VerifyTicketAPIView.as_view()),
+
 ]

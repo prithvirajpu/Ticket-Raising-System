@@ -21,6 +21,7 @@ def approve_user_service(user_id, role):
             id=user_id,
             status=ApprovalStatus.PENDING
         )
+
     except AgentApplication.DoesNotExist:
         return {
             "data": {},
@@ -32,14 +33,53 @@ def approve_user_service(user_id, role):
 
         user = User.objects.filter(email=agent.email).first()
 
+        # FETCH CLIENT PROFILE
+        from ...tickets.models import ClientProfile
+        client_profile = ClientProfile.objects.first()
+
+        # FETCH TEAM LEAD FROM CLIENT PROFILE
+        team_lead = None
+
+        if client_profile:
+            team_lead = client_profile.team_lead
+
+        # FETCH MANAGER UNDER TEAM LEAD
+        manager = None
+
+        if team_lead:
+            manager = User.objects.filter(
+                role=UserRole.MANAGER,
+                team_lead=team_lead
+            ).first()
+
         if user:
+
             user.role = role
             user.approval_status = ApprovalStatus.APPROVED
             user.is_active = True
             user.is_verified = agent.email_verified
+
+            # ROLE BASED ASSIGNMENTS
+
+            if role == UserRole.AGENT:
+
+                user.client = client_profile
+                user.manager = manager
+                user.team_lead = team_lead
+
+            elif role == UserRole.TEAM_LEAD:
+
+                user.client = client_profile
+                user.manager = manager
+
+            elif role == UserRole.MANAGER:
+
+                user.client = client_profile
+
             user.save()
 
         else:
+
             user = User.objects.create(
                 email=agent.email,
                 name=agent.full_name,
@@ -48,14 +88,22 @@ def approve_user_service(user_id, role):
                 approval_status=ApprovalStatus.APPROVED,
                 is_active=True,
                 is_verified=agent.email_verified,
-                password=agent.password
+                password=agent.password,
+
+                client=client_profile,
+
+                manager=manager if role == UserRole.AGENT else None,
+
+                team_lead=team_lead if role == UserRole.AGENT else None,
             )
 
         agent.status = ApprovalStatus.APPROVED
         agent.save()
 
     return {
-        "data": {"message": f"Agent request approved as {role}."},
+        "data": {
+            "message": f"Agent request approved as {role}."
+        },
         "errors": {},
         "status": status.HTTP_200_OK
     }

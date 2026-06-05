@@ -6,7 +6,6 @@ from ..tickets.serializer import TicketSerializer
 from .services import (create_ticket_service,get_ticket_list_service,get_ticket_detail_service,close_ticket_service,get_profile_service,update_profile_service,
                        submit_review_service,reopen_ticket_service,timeline_service)
 
-# Create your views here.
 
 class CreateTicketView(APIView):
     permission_classes=[IsAuthenticated]

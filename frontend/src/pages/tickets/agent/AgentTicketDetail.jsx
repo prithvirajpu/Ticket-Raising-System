@@ -231,7 +231,8 @@ const AgentTicketDetail = () => {
               <div className="flex justify-end gap-2 mb-4">
                 <button onClick={()=>setEscalateModalOpen(true)} 
                  className="bg-red-600 text-white text-xs px-4 py-1 rounded-lg font-bold">Escalate</button>
-                <button className="bg-blue-600 text-white text-xs px-4 py-1 rounded-lg font-bold">Verify</button>
+                <button onClick={()=>navigate(`/agent/tickets/${id}/verify`)}
+                className="bg-blue-600 text-white text-xs px-4 py-1 rounded-lg font-bold">Verify</button>
               </div>
               
               <div className="relative flex items-center">

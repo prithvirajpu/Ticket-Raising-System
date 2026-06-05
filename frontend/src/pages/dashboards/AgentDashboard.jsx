@@ -62,12 +62,7 @@ const AgentDashboard = () => {
           iconColor="text-orange-500"
           value={data.in_progress || 0}
         />
-        <StatsCard 
-          label="Active Time - Month" 
-          value='150 Hrs'
-          icon={CheckCircle} 
-          iconColor="text-green-500"
-        />
+       
       </div>
 
       <hr className="border-gray-200 mb-10" />

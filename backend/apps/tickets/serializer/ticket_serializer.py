@@ -6,10 +6,13 @@ class TicketSerializer(serializers.ModelSerializer):
     created_by_id = serializers.IntegerField(source="created_by.id", read_only=True)
     assigned_to_id = serializers.IntegerField(source="assigned_to.id", read_only=True)
     current_user_id = serializers.SerializerMethodField()
+    customer_name= serializers.CharField(source='created_by.name',read_only=True)
+    customer_email= serializers.CharField(source='created_by.email',read_only=True)
 
     class Meta:
         model=Ticket
-        fields=['id','ticket_code','subject','description','status','issue_type','priority','created_at','sla','created_by_id','assigned_to_id','current_user_id']
+        fields=['id','ticket_code','subject','description','status','issue_type','priority','created_at','sla','created_by_id','assigned_to_id','current_user_id',
+                 'customer_name','customer_email',]
 
     def get_current_user_id(self, obj):
         request = self.context.get("request")

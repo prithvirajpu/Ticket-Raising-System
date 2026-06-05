@@ -46,7 +46,7 @@ export const acceptTicket = async (id) => {
         return res.data.data;
     } catch (error) {
         console.log("❌ TICKET ACCEPT API CALL FAILED =====================");
-        throw error; 
+        throw error;
     }
 };
 
@@ -251,4 +251,16 @@ export const getTicketTimeline= async(ticketId)=>{
     console.log(error.response?.data)
     console.log(error)
    }
+}
+
+export const verifyTicketDetails =async (payload)=>{
+    try {
+        const res= await api.post('/agents/verify/',payload);
+        return res.data.data
+    } catch (error) {
+        console.log('verify error: ',error.response?.data)
+
+        console.log('something wrong with verifyticket')
+        throw error.response?.data ||error
+    }
 }

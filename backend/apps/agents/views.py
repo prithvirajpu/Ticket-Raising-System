@@ -10,7 +10,8 @@ from apps.core_app.models import AgentApplication
 from rest_framework.parsers import MultiPartParser, FormParser
 from .services import (update_agent_profile_service,get_agent_ticket_requests_service,get_agent_ongoing_tickets_service,get_agent_ticket_detail_service,
                        agent_summary_service,fetch_fake_tickets_service,get_fake_ticket_detail_service,accept_ticket_service,reject_ticket_service,
-                       )
+                       verify_ticket_service
+)
 from django.contrib.auth import get_user_model
 import logging
 logger=logging.getLogger(__name__)
@@ -89,3 +90,9 @@ class RejectTicketView(APIView):
         result=reject_ticket_service(ticket_id,request.user,reason)
         return return_response(result)
     
+class VerifyTicketAPIView(APIView):
+    permission_classes= [IsAuthenticated]
+
+    def post(self,request):
+        result= verify_ticket_service(request.data)
+        return return_response(result)
