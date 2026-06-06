@@ -316,6 +316,7 @@ const {
           </div>
         </div>
       </DashboardLayout>
+     
       <ConfirmModal
         isOpen={resolveModalOpen}
         title="Resolve Ticket"
@@ -327,10 +328,7 @@ const {
         onConfirm={handleConfirmResolve}
         onCancel={handleCancelResolve}
       />
-      {/* <OngoingCallModal
-        isOpen={callState === "in_call"}
-        onEnd={handleEndCall}
-      /> */}
+
       <CallingModal
         isOpen={callState === "calling"}
         userName={ticket.customer_name}

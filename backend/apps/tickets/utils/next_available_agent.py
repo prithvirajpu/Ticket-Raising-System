@@ -2,6 +2,9 @@ from django.contrib.auth import get_user_model
 from apps.tickets.models import TicketAssignment
 from django.db.models import Count, Q
 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+
 User = get_user_model()
 import logging
 logger=logging.getLogger(__name__)
@@ -35,3 +38,4 @@ def get_next_available_agent(ticket):
     logger.info(f"Rejected agents: {list(rejected_agent_ids)}")
     logger.info(f"Selected agent: {agent}")
     return agents.first()
+

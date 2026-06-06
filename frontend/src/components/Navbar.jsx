@@ -1,15 +1,20 @@
 import React, { useState } from 'react'
 import { useAuth } from '../auth/AuthContext'
 import { Link, useLocation } from 'react-router-dom'
-import { LogOut, User, Ticket, Menu, X } from 'lucide-react'
+import { LogOut, User, Ticket, Menu, X, Bell } from 'lucide-react'
 import ConfirmModal from './modals/ConfirmModal'
+import { useNotifications } from '../auth/NotificationProvider'
+import NotificationPage from './NotificationsPage'
 
 const Navbar = () => {
   const { userRole, logout } = useAuth()
+  const { unreadCount } = useNotifications()
   const [loading, setLoading] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
   const location = useLocation()
+  console.log('unread count',unreadCount)
 
   // Define nav items for each role
   const getNavItems = () => {
@@ -21,7 +26,6 @@ const Navbar = () => {
           { label: 'Client Management', path: '/admin/client-manage' },
           { label: 'User Management', path: '/admin/user-manage' },
           { label: 'SLA & Hierarchy', path: '/admin/sla' },
-          // { label: 'Hierarchy', path: '/admin/hierarchy' },
           { label: 'About', path: '/about' },
         ]
       case 'AGENT':
@@ -73,6 +77,7 @@ const Navbar = () => {
   return (
     <header className="w-full bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        
         {/* Left Section: Logo and Desktop Nav */}
         <div className="flex items-center gap-8 lg:gap-12">
           <Link to="/" className="flex items-center gap-2 flex-shrink-0" onClick={closeMobileMenu}>
@@ -100,20 +105,41 @@ const Navbar = () => {
         </div>
 
         {/* Right Section: Actions */}
-        <div className="flex items-center gap-2 sm:gap-6">
-          {/* Desktop Only Actions */}
-          <div className="hidden md:flex items-center gap-6 border-r border-gray-200 pr-6">
+        <div className="flex items-center gap-2 sm:gap-4">
+          
+          {/* Notification Bell - Always Visible Outside on All Screen Sizes */}
+          <div className="relative z-50">
+            <button
+              onClick={() => setShowNotifications(prev => !prev)}
+              className="relative p-1.5 rounded-full hover:bg-gray-100 transition-colors text-gray-600 hover:text-black"
+            >
+              <Bell size={22} />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold rounded-full h-5 min-w-[20px] px-1 flex items-center justify-center">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            <NotificationPage
+              isOpen={showNotifications}
+              onClose={() => setShowNotifications(false)}
+            />
+          </div>
+
+          {/* Desktop Only Actions (Divider & Logout) */}
+          <div className="hidden md:flex items-center border-l border-r border-gray-200 px-2 mx-1">
             <button
               onClick={() => setIsModalOpen(true)}
-              className="text-gray-500 hover:text-red-600 transition-colors p-1"
+              className="text-gray-500 hover:text-red-600 transition-colors p-1.5 rounded-full hover:bg-gray-50"
               title="Logout"
             >
               <LogOut className="w-5 h-5" />
             </button>
           </div>
 
-          {/* User Profile - Visible on all screens, but smaller on mobile */}
-          <div className="flex items-center gap-2 sm:pl-2">
+          {/* User Profile - Visible on all screens */}
+          <div className="flex items-center gap-2">
             <Link 
               to='/profile' 
               className="p-1.5 bg-gray-50 rounded-full border border-gray-200 hover:bg-gray-100 transition-colors"
@@ -156,7 +182,9 @@ const Navbar = () => {
                 {item.label}
               </Link>
             ))}
-            <div className="pt-4 mt-4 border-t border-gray-100">
+
+            {/* Mobile Logout Row */}
+            <div className="pt-2 mt-2 border-t border-gray-100">
               <button
                 onClick={() => {
                   closeMobileMenu()
@@ -172,6 +200,7 @@ const Navbar = () => {
         </div>
       )}
 
+      {/* Confirmation Modal */}
       <ConfirmModal
         isOpen={isModalOpen}
         title="Confirm Logout"

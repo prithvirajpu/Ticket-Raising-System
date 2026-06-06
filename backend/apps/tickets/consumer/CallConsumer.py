@@ -1,4 +1,5 @@
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
+from apps.tickets.utils import async_send_notification
 import json
 import logging
 
@@ -113,6 +114,11 @@ class CallConsumer(AsyncJsonWebsocketConsumer):
             f'user_{caller_id}',
             {'type':'call_rejected'}
         )
+    
+    async def call_rejected(self,event):
+        await self.send(text_data=json.dumps({
+            'type':'call_rejected'
+        }))
 
     async def handle_call_missed(self,data):
         customer_id = data.get("customer_id")
@@ -121,12 +127,12 @@ class CallConsumer(AsyncJsonWebsocketConsumer):
             f'user_{customer_id}',
             {'type':'call_missed'}
         )
+        await async_send_notification( user_id=customer_id,
+            notification_type="MISSED_CALL",
+            title="Missed Call",
+            message="You have a missed call from Support Team.",
+            data={})
     
-
-    async def call_rejected(self,event):
-        await self.send(text_data=json.dumps({
-            'type':'call_rejected'
-        }))
     async def call_missed(self,event):
         await self.send(text_data=json.dumps({
             'type':'call_missed'

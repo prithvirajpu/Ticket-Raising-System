@@ -52,12 +52,15 @@ import UserManagement from './pages/admin/UserManagement'
 import HierarchyPage from './pages/admin/HierarchyPage'
 import CallAudio from './auth/CallAudio'
 import GlobalCallModal from './auth/GlobalCallModal'
+import NotificationProvider from './auth/NotificationProvider'
+import NotificationsPage from './components/NotificationsPage'
 
 
 const App = () => {
   return (
     <AuthProvider>
         <CallProvider>
+            <NotificationProvider>
             <CallAudio/>
             <GlobalCallModal/>
         <BrowserRouter>
@@ -183,9 +186,13 @@ const App = () => {
             <Route path="/agent/tickets/:id/verify" element={<ProtectedRoute role={['AGENT']}>
                 <VerifyTicketPage/>
             </ProtectedRoute>} />
+            <Route path="/notifications" element={<ProtectedRoute role={['AGENT','MANAGER','ADMIN','CLIENT','USER','TEAM_LEAD']}>
+                <NotificationsPage/>
+            </ProtectedRoute>} />
            
         </Routes>
         </BrowserRouter>
+        </NotificationProvider>
         </CallProvider>
     </AuthProvider>
   )

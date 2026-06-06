@@ -10,6 +10,7 @@ import useChat from "../../../hooks/useChat";
 import { notifySuccess } from "../../../utils/notify";
 import OngoingCallModal from '../../../components/modals/OngoingCallModal'
 import CallingModal from '../../../components/modals/CallingModal'
+import { useCall } from "../../../auth/CallContext";
 
 const AgentTicketDetail = () => {
   const { id } = useParams();
@@ -21,9 +22,25 @@ const AgentTicketDetail = () => {
 
   const [escalateLoading,setEscalateLoading]=useState(false)
   const [escalateModalOpen, setEscalateModalOpen] = useState(false);
-  const { messages, newMessage, setNewMessage,handleCall,callState,setCallState,handleEndCall,
-         handleSendMessage, messageEndRef, handleKeyDown,incomingCall,
-         } = useChat(id,ticket?.current_user_id);
+  const {
+    messages,
+    newMessage,
+    setNewMessage,
+    handleSendMessage,
+    messageEndRef,
+    handleKeyDown
+} = useChat(id, ticket?.current_user_id);
+
+const {
+    incomingCall,
+    setIncomingCall,
+    handleCall,
+    handleAccept,
+    handleReject,
+    handleEndCall,
+    callState,
+    remoteAudioRef
+} = useCall();
   const currentUserId = Number(ticket?.current_user_id);
 
   const navigate = useNavigate();
@@ -280,6 +297,7 @@ const AgentTicketDetail = () => {
       </div>
     </div>
     </DashboardLayout>
+    {/* <audio ref={remoteAudioRef} autoPlay playsInline hidden /> */}
     <ConfirmModal
         isOpen={resolveModalOpen}
         title="Resolve Ticket"

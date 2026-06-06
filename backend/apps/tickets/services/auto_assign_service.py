@@ -2,7 +2,7 @@ def auto_assign_service():
     from django.utils import timezone
     from django.db import transaction
     from apps.tickets.models import TicketAssignment, Ticket,TicketActivity
-    from apps.tickets.utils import get_next_available_agent
+    from backend.apps.tickets.utils.next_available_agent import get_next_available_agent
     import logging
     logger = logging.getLogger(__name__)
 

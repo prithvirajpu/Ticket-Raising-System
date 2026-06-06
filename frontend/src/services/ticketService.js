@@ -336,3 +336,17 @@ export const getAllUsers = async () => {
     throw err;
   }
 };
+
+export const getNotifications= async()=>{
+    const res= await api.get('/tickets/notifications/');
+    return res.data.data
+}
+
+export const markNotificationRead= async(Id)=>{
+    const res= await api.patch(`/tickets/notifications/${Id}/read/`)
+    return res.data.data
+}
+export const markAllNotificationsRead= async()=>{
+    const res= await api.put(`/tickets/notifications/mark-all-read/`)
+    return res.data.data
+}

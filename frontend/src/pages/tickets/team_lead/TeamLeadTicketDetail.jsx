@@ -2,13 +2,15 @@ import { useEffect, useState } from "react";
 import { escalateTicket, getUserTicketDetail, resolveTicket } from "../../../services/ticketService";
 import Loader from "../../../components/modals/Loader";
 import {  replace, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Send, Phone, User, Clock, AlertCircle, Calendar, CheckCheck } from "lucide-react"; // Using Lucide for icons
+import { ArrowLeft, Send, Phone, User, Clock, AlertCircle, Calendar, CheckCheck,Check, } from "lucide-react"; // Using Lucide for icons
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
 import { getSlaTimer } from "../../../utils/slaTImer";
 import { notifySuccess } from "../../../utils/notify";
 import useChat from "../../../hooks/useChat";
 import OngoingCallModal from "../../../components/modals/OngoingCallModal";
+import { useCall } from "../../../auth/CallContext";
+import CallingModal from "../../../components/modals/CallingModal";
 
 const TeamLeadTicketDetail = () => {
   const { id } = useParams();
@@ -22,8 +24,26 @@ const TeamLeadTicketDetail = () => {
   const [escalateLoading,setEscalateLoading]=useState(false)
   const [escalateModalOpen, setEscalateModalOpen] = useState(false);
 
-  const { messages, newMessage, setNewMessage, handleCall, callState, handleEndCall,
-         handleSendMessage, messageEndRef, handleKeyDown } = useChat(id,ticket?.current_user_id);
+  const {
+    messages,
+    newMessage,
+    setNewMessage,
+    handleSendMessage,
+    messageEndRef,
+    handleKeyDown
+} = useChat(id, ticket?.current_user_id);
+
+const {
+    incomingCall,
+    setIncomingCall,
+    handleCall,
+    handleAccept,
+    handleReject,
+    handleEndCall,
+    callState,
+    remoteAudioRef
+} = useCall();
+
   const currentUserId = Number(ticket?.current_user_id);
 
 
@@ -211,7 +231,7 @@ const TeamLeadTicketDetail = () => {
 
         <div className={`flex items-end gap-3 max-w-[80%] ${isMe ? "flex-row-reverse" : ""}`}>
           <div
-            className={`p-4 rounded-2xl text-sm shadow-sm ${
+            className={`relative p-4 rounded-2xl text-sm shadow-sm ${
               isMe
                 ? "bg-[#3f644b] text-white rounded-tr-none"
                 : "bg-gray-200 text-black rounded-tl-none"
@@ -276,6 +296,7 @@ const TeamLeadTicketDetail = () => {
       </div>
     </div>
     </DashboardLayout>
+    {/* <audio ref={remoteAudioRef} autoPlay playsInline hidden /> */}
     <ConfirmModal
         isOpen={resolveModalOpen}
         title="Resolve Ticket"
@@ -298,10 +319,12 @@ const TeamLeadTicketDetail = () => {
         onConfirm={handleEscalateConfirm}
         onCancel={handleCancelEscalate}
       />
-      {/* <OngoingCallModal
-        isOpen={callState === "in_call"}
-  onEnd={handleEndCall}
-      /> */}
+      <CallingModal
+        isOpen={callState === "calling"}
+        userName={ticket.customer_name}
+        onCancel={handleEndCall}
+      />
+
     </>
   )
 }

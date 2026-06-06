@@ -426,24 +426,7 @@ useEffect(() => {
         onConfirm={handleConfirmReopen}
         onCancel={() => setReopenModalOpen(false)}
       />
-      {/* <IncomingCallModal
-        isOpen={!!incomingCall}
-        callerName={incomingCall?.caller_name}
-        onAccept={() => {
-          console.log("accepted");
-          console.log("INCOMING CALL", incomingCall);
-          handleAccept(incomingCall, currentUserId);
-        }}
-        onReject={() => {
-          console.log("rejected");
-          handleReject(incomingCall);
-          setIncomingCall(null);
-        }}
-      />
-      <OngoingCallModal
-        isOpen={callState === "in_call"}
-        onEnd={handleEndCall}
-      /> */}
+    
       <audio ref={remoteAudioRef} autoPlay playsInline hidden />
     </DashboardLayout>
   );
