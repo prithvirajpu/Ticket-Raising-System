@@ -62,18 +62,10 @@ def escalate_ticket_service(user, ticket_id):
     send_notification(user_id=next_assignee.id,
             notification_type="TICKET_ESCALATED",
             title="Ticket Escalated",
-            message=f"Ticket #{ticket.id} has been escalated to you",
-            data={"ticket_id": ticket.id}   
+            message=f"Ticket #{ticket.ticket_code} has been escalated to you",
+            data={"ticket_id": ticket.id,"ticket_code": ticket.ticket_code}   
             )
-    notification= Notification.objects.create(
-        user_id=next_assignee.id,
-        notification='TICKET_ESCALATED',
-        title="Ticket Escalated",
-        message=f"Ticket #{ticket.id} has been escalated to you",
-        data={"ticket_id": ticket.id} 
 
-
-    )
     TicketActivity.objects.create(
         ticket=ticket,
         action="ESCALATED",

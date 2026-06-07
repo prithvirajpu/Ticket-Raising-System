@@ -1,8 +1,10 @@
-from apps.tickets.models import Ticket,TicketChat,TicketChatParticipant
+from apps.tickets.models import Ticket,TicketChat,TicketChatParticipant,Notification
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.exceptions import PermissionDenied,ValidationError
 from apps.tickets.serializer import TicketChatSerializer
+from apps.tickets.utils import send_notification
 import logging
+logger=logging.getLogger(__name__)
 
 def send_message_service(user,ticket_id,message):
     try:
@@ -20,6 +22,32 @@ def send_message_service(user,ticket_id,message):
         raise ValidationError('Message cannot be empty')
     
     chat= TicketChat.objects.create(ticket=ticket,sender=user,message=message)
+    if user.id == ticket.created_by_id:
+        receiver_id = ticket.assigned_to_id
+    else:
+        receiver_id = ticket.created_by_id
+    notification = Notification.objects.filter(
+        user_id=receiver_id,
+        notification_type="CHAT_MESSAGE",
+        is_read=False,
+        data__ticket_id=ticket.id
+    ).first()
+
+    if notification:
+        notification.message = f"{user.name}: {message}"
+        notification.save(update_fields=["message"])
+    else:
+        send_notification(
+            user_id=receiver_id,
+            notification_type="CHAT_MESSAGE",
+            title="New Message",
+            message=f"{user.name }: sent you a message",
+            data={
+                "ticket_id": ticket.id,
+                "ticket_code": ticket.ticket_code
+            }
+        )
+    
     return {
         "data": TicketChatSerializer(chat).data,
         "errors": None,

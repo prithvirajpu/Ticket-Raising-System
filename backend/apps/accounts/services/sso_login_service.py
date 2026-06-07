@@ -13,6 +13,7 @@ def sso_login_service(request,token):
         payload=jwt.decode(token,settings.SSO_SHARED_SECRET,algorithms=['HS256'])
         email=payload.get('email')
         app_name= payload.get('app_name','Shopkickora')
+        name= payload.get('username','User')
         from apps.tickets.models import ClientProfile
         client_profile=None
         if app_name:
@@ -20,10 +21,13 @@ def sso_login_service(request,token):
                 company_name__iexact=app_name
             ).first()
         user=User.objects.filter(email=email).first()
+        if user:
+            if user.role !='USER':
+                return redirect( "http://localhost:5173/sso-error?code=role_conflict")
         if not user:
             user = User.objects.create(
                 email=email,
-                name=payload.get("full_name"),
+                name=name,
                 role=payload.get("role", "USER"),
                 profile_completed=payload.get(
                     "is_profile_completed",

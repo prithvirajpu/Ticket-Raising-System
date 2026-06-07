@@ -8,6 +8,7 @@ from .serializers import (LoginSerializer,ClientSignupSerializer,
     VerifyOTPSerializer,ForgotPasswordSerializer,ResetPasswordSerializer)
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
+from django.shortcuts import redirect
 import logging
 logger=logging.getLogger(__name__)
 
@@ -20,12 +21,20 @@ class SSOLoginAPIView(APIView):
         token = request.data.get('token')
         
         result = sso_login_service(request, token)
-        if result["errors"]:
-            return return_response(result)
+        if isinstance(result, HttpResponse):
+            return result
 
-        data = result["data"]
+        data = result.get("data",{})
         logger.info('user id is : %s',data['user_id'])
 
+        if not data:
+            return HttpResponse(
+                """
+                <script>
+                    window.location.replace("http://localhost:5173/sso-error?code=invalid_login");
+                </script>
+                """
+            )
         sso_loading_url = (
             f"http://localhost:5173/sso-loading"
             f"?access={data['access']}"

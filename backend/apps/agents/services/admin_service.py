@@ -17,6 +17,7 @@ def update_agent_profile_service(user, data, files):
             "status": status.HTTP_404_NOT_FOUND
         }
 
+    full_name=data.get('full_name')
     phone = data.get("phone")
     skills = data.get("skills")
     resume = files.get("resume")
@@ -27,12 +28,13 @@ def update_agent_profile_service(user, data, files):
             "errors": {"details": "Phone and skills are required"},
             "status": status.HTTP_400_BAD_REQUEST
         }
-
+    user.name=full_name
     user.phone = phone
     user.profile_completed = True
     user.save(update_fields=[
         "phone",
-        "profile_completed"
+        "profile_completed",
+        "name"
     ])
     agent_app.skills=skills
     agent_app.phone=phone

@@ -6,10 +6,12 @@ User=get_user_model()
 class Notification(models.Model):
 
     NOTIFICATION_TYPES = (
+        ("WELCOME_ACCOUNT_CREATED", "welcome account created"),
         ("TICKET_ASSIGNED", "Ticket Assigned"),
         ("TICKET_ESCALATED", "Ticket Escalated"),
         ("TICKET_RESOLVED", "Ticket Resolved"),
         ("MISSED_CALL", "Missed Call"),
+        ("TICKET_REOPENED", "ticket reopened"),
         ("CHAT_MESSAGE", "Chat Message"),
     )
     user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="notifications")

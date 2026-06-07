@@ -54,6 +54,7 @@ import CallAudio from './auth/CallAudio'
 import GlobalCallModal from './auth/GlobalCallModal'
 import NotificationProvider from './auth/NotificationProvider'
 import NotificationsPage from './components/NotificationsPage'
+import SSOErrorPage from './auth/SSOErrorPage'
 
 
 const App = () => {
@@ -73,6 +74,7 @@ const App = () => {
 
         <Routes>
             <Route path='/sso-loading' element={<SSOLoading />} />
+            <Route path='/sso-error' element={<SSOErrorPage />} />
             <Route path='/signup' element={<StaffSignup/>}/>
             <Route path='/verify-otp' element={<VerifyOtp />} />
             <Route path='/forgot-password' element={<ForgotPassword/>}/>

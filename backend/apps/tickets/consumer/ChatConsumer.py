@@ -3,9 +3,7 @@ from django.utils.timezone import now
 from channels.generic.websocket import AsyncWebsocketConsumer
 from apps.tickets.services import send_message_service
 from channels.db import database_sync_to_async
-from django.utils import timezone
-from apps.tickets.models import TicketChat
-from apps.tickets.services import  mark_messages_read_service
+from apps.tickets.services import  mark_messages_read_service,mark_chat_notifications_read
 import logging
 
 logger = logging.getLogger(__name__)
@@ -89,7 +87,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
     
     async def handle_mark_read(self, data):
         message_ids = await self.mark_read_db()
+        logger.info("HANDLE MARK READ CALLED")
         logger.info('ids are ---%s',message_ids)
+
+        await database_sync_to_async(mark_chat_notifications_read)(
+            ticket_id=self.ticket_id,
+            user=self.scope['user']
+            )
 
         await self.channel_layer.group_send(
             self.room_group_name,

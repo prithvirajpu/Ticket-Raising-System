@@ -1,6 +1,7 @@
 from rest_framework import status
-from apps.tickets.models import Ticket,TicketAssignment,ClientSubscription,TicketSLATracking,TicketReview,TicketActivity
+from apps.tickets.models import Ticket,TicketAssignment,ClientSubscription,TicketSLATracking,TicketReview,TicketActivity,Notification
 from apps.tickets.serializer import TicketSerializer,TicketActivitySerializer
+from apps.tickets.utils import send_notification
 from django.db import transaction
 from django.utils import timezone
 from datetime import timedelta
@@ -250,6 +251,17 @@ def submit_review_service(user,ticket_id,rating,review):
         }
 
     TicketReview.objects.create(ticket=ticket,rating=rating,review=review)
+    send_notification(
+            user_id=ticket.assigned_to_id,
+            notification_type="TICKET_REVIEWED",
+            title="Customer Feedback Received",
+            message=f"Customer rated Ticket #{ticket.ticket_code} with {rating} stars",
+            data={
+                "ticket_id": ticket.id,
+                "ticket_code": ticket.ticket_code,
+                "rating": rating,
+            }
+        )
     return {
             "data": {'message':'Review submitted successfully'},
             "errors": {},
@@ -274,6 +286,13 @@ def reopen_ticket_service(user,ticket_id):
                 }
             ticket.status='IN_PROGRESS'
             ticket.save(update_fields=['status'])
+            send_notification(user_id=ticket.assigned_to_id,
+                    notification_type="TICKET_REOPENED",
+                    title="Ticket Reopened",
+                    message=f"Ticket #{ticket.ticket_code} has been re-opened",
+                    data={"ticket_id": ticket.id,"ticket_code": ticket.ticket_code}   
+                )
+
             TicketActivity.objects.create(
                 ticket=ticket,
                 action="REOPENED",

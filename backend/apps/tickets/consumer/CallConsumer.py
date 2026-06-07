@@ -53,18 +53,13 @@ class CallConsumer(AsyncJsonWebsocketConsumer):
 
             logger.info("customer_id received = %s", customer_id)
             logger.info("caller here self.scope['user'] %s", caller)
-            logger.info("sending to group user_%s", customer_id)
 
             await self.channel_layer.group_send(
                 f"user_{customer_id}",
                 {
                     "type": "incoming_call",
                     "caller_id": caller.id,
-                    "caller_name": getattr(
-                        caller,
-                        "full_name",
-                        caller.email
-                    ),
+                    "caller_name": getattr(caller,"name",None)or "Agent",
                     "ticket_id": ticket_id,
                 }
             )

@@ -1,4 +1,4 @@
-import { Bell, CheckCircle, AlertTriangle, X, PhoneMissed } from "lucide-react";
+import { Bell, CheckCircle, AlertTriangle, X, PhoneMissed, MessageSquare, RefreshCw, UserPlus, Star } from "lucide-react";
 import { useNotifications } from "../auth/NotificationProvider";
 import { useState } from "react";
 
@@ -6,45 +6,68 @@ const NotificationPage = ({ isOpen, onClose }) => {
     const { 
         notifications, 
         unreadCount, 
-        setUnreadCount, 
         handleNotificationClick, 
         handleMarkAllRead 
     } = useNotifications();
 
     const getIcon = (type) => {
-        switch (type) {
-            case "MISSED_CALL":
-                return (
-                    <div className="p-2 bg-rose-50 rounded-lg text-rose-600 border border-rose-100">
-                        <PhoneMissed size={16} />
-                    </div>
-                );
-            case "TICKET_ESCALATED":
-                return (
-                    <div className="p-2 bg-amber-50 rounded-lg text-amber-600 border border-amber-100">
-                        <AlertTriangle size={16} />
-                    </div>
-                );
-            case "TICKET_ASSIGNED":
-                return (
-                    <div className="p-2 bg-blue-50 rounded-lg text-blue-600 border border-blue-100">
-                        <Bell size={16} />
-                    </div>
-                );
-            case "TICKET_RESOLVED":
-                return (
-                    <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600 border border-emerald-100">
-                        <CheckCircle size={16} />
-                    </div>
-                );
-            default:
-                return (
-                    <div className="p-2 bg-slate-50 rounded-lg text-slate-600 border border-slate-100">
-                        <Bell size={16} />
-                    </div>
-                );
-        }
-    };
+    switch (type) {
+        case "MISSED_CALL":
+            return (
+                <div className="p-2 bg-rose-50 rounded-lg text-rose-600 border border-rose-100">
+                    <PhoneMissed size={16} />
+                </div>
+            );
+        case "TICKET_REVIEWED":
+            return (
+                <div className="p-2 bg-yellow-50 rounded-lg text-yellow-600 border border-yellow-100">
+                    <Star size={16} />
+                </div>
+            );
+        case "TICKET_ESCALATED":
+            return (
+                <div className="p-2 bg-amber-50 rounded-lg text-amber-600 border border-amber-100">
+                    <AlertTriangle size={16} />
+                </div>
+            );
+        case "TICKET_ASSIGNED":
+            return (
+                <div className="p-2 bg-blue-50 rounded-lg text-blue-600 border border-blue-100">
+                    <Bell size={16} />
+                </div>
+            );
+        case "TICKET_RESOLVED":
+            return (
+                <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600 border border-emerald-100">
+                    <CheckCircle size={16} />
+                </div>
+            );
+        case "TICKET_REOPENED":
+            return (
+                <div className="p-2 bg-orange-50 rounded-lg text-orange-600 border border-orange-100">
+                    <RefreshCw size={16} />
+                </div>
+            );
+        // case "WELCOME_ACCOUNT_CREATED":
+        //     return (
+        //         <div className="p-2 bg-purple-50 rounded-lg text-purple-600 border border-purple-100">
+        //             <UserPlus size={16} />
+        //         </div>
+        //     );
+        case "CHAT_MESSAGE":
+            return (
+                <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600 border border-indigo-100">
+                    <MessageSquare size={16} />
+                </div>
+            );
+        default:
+            return (
+                <div className="p-2 bg-slate-50 rounded-lg text-slate-600 border border-slate-100">
+                    <Bell size={16} />
+                </div>
+            );
+    }
+};
 
     if (!isOpen) return null;
 
@@ -97,6 +120,7 @@ const NotificationPage = ({ isOpen, onClose }) => {
                     </div>
                 ) : (
                     notifications.map((notification) => (
+                        
                         <div
                             key={notification.id}
                             onClick={() => handleNotificationClick(notification)}
@@ -106,6 +130,7 @@ const NotificationPage = ({ isOpen, onClose }) => {
                                     : "bg-white hover:bg-slate-50"
                             }`}
                         >
+                            {console.log(notification)}
                             {/* Icon Wrapper */}
                             <div className="flex-shrink-0">
                                 {getIcon(notification.notification_type)}
@@ -134,9 +159,10 @@ const NotificationPage = ({ isOpen, onClose }) => {
 
                                 {/* Meta section container */}
                                 <div className="mt-2.5 flex items-center gap-2.5 flex-wrap">
+
                                     {notification.data?.ticket_id && (
                                         <span className="inline-flex items-center font-medium text-[11px] px-1.5 py-0.5 bg-slate-100 text-slate-700 rounded">
-                                            Ticket #{notification.data.ticket_id}
+                                            Ticket #{notification.data.ticket_code}
                                         </span>
                                     )}
                                     <span className="text-[11px] text-slate-400">

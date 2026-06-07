@@ -6,7 +6,7 @@ const NotificationContext= createContext()
 const NotificationProvider = ({children}) => {
     const {accessToken} =useAuth()
     const [notifications,setNotifications]=useState([])
-    const [unreadCount, setUnreadCount] = useState(0);
+    const unreadCount= notifications.filter(n=>!n.is_read).length;
     
     useEffect(()=>{
          if (!accessToken) return;
@@ -16,8 +16,8 @@ const NotificationProvider = ({children}) => {
         ws.onmessage=(event)=>{
             console.log('notification data in front',event.data)
             const data= JSON.parse(event.data);
-            setNotifications(prev=>[data,...prev])
-            setUnreadCount(prev=>prev+1)
+            setNotifications(prev => [data,...prev]);
+            
         }
         ws.onopen = () => {
         console.log("Notification WS Connected");
@@ -50,21 +50,20 @@ const NotificationProvider = ({children}) => {
             const res= await getNotifications();
             console.log(res)
             setNotifications(res.serializer)
-            setUnreadCount(res.unread_count)
         } catch (error) {
             console.log(error)
         }
     }
 
     const handleNotificationClick= async(notification)=>{
-        console.log('clicked',notification)
+        console.log("clicked notification", notification);
+    console.log("notification id", notification.id);
     if(!notification.is_read){
         setNotifications(prev=>
             prev.map(item=>
                 item.id===notification.id ? {...item,is_read:true}: item
             )
         )
-        setUnreadCount(prev=>Math.max(prev-1,0));
         try {
             await markNotificationRead(notification.id)
             console.log('maked read')
@@ -75,6 +74,7 @@ const NotificationProvider = ({children}) => {
     }
 
     const handleMarkAllRead = async() => {
+        if (unreadCount === 0) return;
         setNotifications(prev =>
             prev.map(item => ({
                 ...item,
@@ -82,7 +82,6 @@ const NotificationProvider = ({children}) => {
             }))
         );
 
-        setUnreadCount(0);
         try {
             await markAllNotificationsRead();
         } catch (error) {
@@ -92,9 +91,9 @@ const NotificationProvider = ({children}) => {
 
   return (
     <NotificationContext.Provider value={{
-        notifications,unreadCount,
-        setUnreadCount,handleNotificationClick,
-        handleMarkAllRead
+        notifications,
+        handleNotificationClick,
+        handleMarkAllRead,unreadCount,
     }}>
         {children}
     </NotificationContext.Provider>
