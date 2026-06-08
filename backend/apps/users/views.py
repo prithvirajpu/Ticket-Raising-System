@@ -6,18 +6,24 @@ from ..tickets.serializer import TicketSerializer
 from .services import (create_ticket_service,get_ticket_list_service,get_ticket_detail_service,close_ticket_service,get_profile_service,update_profile_service,
                        submit_review_service,reopen_ticket_service,timeline_service)
 
+import logging
+logger= logging.getLogger(__name__)
 
 class CreateTicketView(APIView):
     permission_classes=[IsAuthenticated]
 
     def post(self,request):
+        logger.info("REQUEST USER ID :%s", request.user.id)
+        logger.info("REQUEST USER EMAIL :%s", request.user.email)
         serializer=TicketSerializer(data=request.data)
         if not serializer.is_valid():
+            logger.info('validated errors %s', serializer.errors)
             return Response({
                 "data":None,
                 "errors":serializer.errors,
                 "status":400
             })
+        logger.info('validated data %s',serializer.validated_data)
         result=create_ticket_service(serializer.validated_data,request.user)
 
         return return_response(result)

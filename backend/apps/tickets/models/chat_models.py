@@ -23,6 +23,21 @@ class TicketChat(models.Model):
     def __str__(self):
         return f"{self.sender} -> {self.ticket}"
 
+class MessageRead(models.Model):
+    message = models.ForeignKey(
+        TicketChat,
+        on_delete=models.CASCADE,
+        related_name="reads"
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+    read_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("message", "user")
+
 class TicketChatParticipant(models.Model):
     ROLE_CHOICES = [
         ("USER", "User"),

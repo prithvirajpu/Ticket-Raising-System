@@ -1,12 +1,15 @@
 from rest_framework import status
-from apps.tickets.models import Ticket,TicketAssignment,ClientSubscription,TicketSLATracking,TicketReview,TicketActivity
+from apps.tickets.models import Ticket,TicketAssignment,ClientSubscription,TicketSLATracking,TicketReview,TicketActivity,Notification
 from apps.tickets.serializer import TicketSerializer,TicketActivitySerializer
+from apps.tickets.utils import send_notification
 from django.db import transaction
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Q
 from django.core.paginator import Paginator
 from django.contrib.auth import get_user_model
+import logging
+logger= logging.getLogger(__name__)
 
 User=get_user_model()
 
@@ -20,8 +23,19 @@ ISSUE_PRIORITY_MAP = {
 }
 def create_ticket_service(data,user):
     from .attach_sla_to_ticket import attach_sla_to_ticket
+    client_user = getattr(user, "client_user", None)
+
+    if not client_user:
+        return {
+            "data": None,
+            "errors": {
+                "details": "User not linked to any client"
+            },
+            "status": status.HTTP_400_BAD_REQUEST
+        }
+    client = client_user.client_profile
     
-    subscription=ClientSubscription.objects.filter(client=user.client,status='ACTIVE').first()
+    subscription=ClientSubscription.objects.filter(client=client,status='ACTIVE').first()
     if not subscription:
         return {
             "data":None,
@@ -31,7 +45,7 @@ def create_ticket_service(data,user):
 
     try:
         with transaction.atomic(): 
-            team_lead=user.client.team_lead
+            team_lead = client.team_lead
             if not team_lead:
                 return {
                     "data": None,
@@ -53,14 +67,14 @@ def create_ticket_service(data,user):
                 description=data.get('description'),
                 issue_type=issue_type,
                 priority=priority,
-                client=user.client,
+                client=client,
                 created_by=user,
                 assigned_to=None,
                 status="OPEN"
                 )
             TicketActivity.objects.create(ticket=ticket,action='CREATED',performed_by=user,description='Ticket created by customer')
             attach_sla_to_ticket(ticket)
-            expiry_time=timezone.now()+timedelta(minutes=10)
+            expiry_time=timezone.now()+timedelta(minutes=2)
             assignments=[
                 TicketAssignment(ticket=ticket,agent=agent,status='PENDING',expires_at=expiry_time)
                 for agent in agents
@@ -73,6 +87,7 @@ def create_ticket_service(data,user):
             }
         
     except Exception as e:
+        logger.exception("Ticket creation failed")
         return {
             'data':None,
             "errors":{'details':str(e)},
@@ -120,27 +135,53 @@ def get_ticket_list_service(request,sort='newest',search='',page=1,per_page=5):
         "status": status.HTTP_200_OK
     }
 
-def get_ticket_detail_service(ticket_id,request):
+def get_ticket_detail_service(ticket_id, request):
     try:
-        ticket=Ticket.objects.filter(id=ticket_id).first()
+        ticket = Ticket.objects.filter(id=ticket_id).first()
+
         if not ticket:
-            return{
-                'data':None,
-                "errors":{'details':'Ticket not found'},
-                'status':status.HTTP_404_NOT_FOUND
+            return {
+                'data': None,
+                "errors": {'details': 'Ticket not found'},
+                'status': status.HTTP_404_NOT_FOUND
             }
-        serializer=TicketSerializer(ticket, context={"request": request})
-        data=serializer.data
+
+        # Only internal staff must be assigned to the ticket
+        if request.user.role != "USER":
+            ticket = Ticket.objects.filter(
+                id=ticket_id,
+                assigned_to=request.user
+            ).first()
+
+            if not ticket:
+                return {
+                    'data': None,
+                    "errors": {'details': "Ticket not assigned to this agent"},
+                    'status': status.HTTP_403_FORBIDDEN
+                }
+
+        # Customer can only view their own tickets
+        else:
+            if ticket.created_by_id != request.user.id:
+                return {
+                    'data': None,
+                    "errors": {'details': "You do not have permission to view this ticket"},
+                    'status': status.HTTP_403_FORBIDDEN
+                }
+
+        serializer = TicketSerializer(ticket, context={"request": request})
+
         return {
-            "data":{'message':data},
-            'errors':{},
-            "status":status.HTTP_200_OK
+            "data": {"message": serializer.data},
+            "errors": {},
+            "status": status.HTTP_200_OK
         }
+
     except Exception as e:
-        return{
-            "data":None,
-            'errors':{'details':str(e)},
-            'status':status.HTTP_400_BAD_REQUEST
+        return {
+            "data": None,
+            'errors': {'details': str(e)},
+            'status': status.HTTP_400_BAD_REQUEST
         }
  
 def close_ticket_service(user,ticket_id):
@@ -210,6 +251,17 @@ def submit_review_service(user,ticket_id,rating,review):
         }
 
     TicketReview.objects.create(ticket=ticket,rating=rating,review=review)
+    send_notification(
+            user_id=ticket.assigned_to_id,
+            notification_type="TICKET_REVIEWED",
+            title="Customer Feedback Received",
+            message=f"Customer rated Ticket #{ticket.ticket_code} with {rating} stars",
+            data={
+                "ticket_id": ticket.id,
+                "ticket_code": ticket.ticket_code,
+                "rating": rating,
+            }
+        )
     return {
             "data": {'message':'Review submitted successfully'},
             "errors": {},
@@ -234,6 +286,13 @@ def reopen_ticket_service(user,ticket_id):
                 }
             ticket.status='IN_PROGRESS'
             ticket.save(update_fields=['status'])
+            send_notification(user_id=ticket.assigned_to_id,
+                    notification_type="TICKET_REOPENED",
+                    title="Ticket Reopened",
+                    message=f"Ticket #{ticket.ticket_code} has been re-opened",
+                    data={"ticket_id": ticket.id,"ticket_code": ticket.ticket_code}   
+                )
+
             TicketActivity.objects.create(
                 ticket=ticket,
                 action="REOPENED",

@@ -10,6 +10,10 @@ from django.conf import settings
 from google.auth.transport import requests
 from google.oauth2 import id_token as google_id_token
 from django.contrib.auth import get_user_model
+from django.db import transaction
+from apps.tickets.models import ClientProfile
+import logging
+logger=logging.getLogger(__name__)
 
 User=get_user_model()
 
@@ -22,8 +26,9 @@ def login_service(user):
             "access": str(refresh.access_token),
             "refresh": str(refresh),
             "role": user.role,
-            "profile_completed": getattr(user, 'profile_completed', False),
-            "approval_status": getattr(user, 'approval_status', 'PENDING'),
+            "user_id":user.id,
+            "profile_completed": getattr(user, 'profile_completed', True),
+            "approval_status": getattr(user, 'approval_status', 'APPROVED'),
         },
         "errors": None,
         "status": status.HTTP_200_OK
@@ -144,9 +149,39 @@ def google_client_auth_service(token,role=None):
                 }
         else:
             if role == UserRole.CLIENT:
-                user, created = User.objects.get_or_create(
-                    email=email,
-                    defaults={"role": UserRole.CLIENT,"approval_status": ApprovalStatus.APPROVED,"profile_completed": False,"is_active": True,"is_verified": True,},)
+                existing_client=ClientProfile.objects.exists()
+                logger.info('The exist client is here %s',existing_client)
+                
+                if existing_client:
+                    return {
+                        'data': {},
+                        'errors': {
+                            'details': "New accounts will be a future feature."
+                        },
+                        'status': status.HTTP_400_BAD_REQUEST
+                    }
+                with transaction.atomic():
+
+                    user, created = User.objects.get_or_create(
+                        email=email,
+                        defaults={
+                            "role": UserRole.CLIENT,
+                            "approval_status": ApprovalStatus.APPROVED,
+                            "profile_completed": False,
+                            "is_active": True,
+                            "is_verified": True,
+                        },
+                    )
+
+                    client_profile, created = ClientProfile.objects.get_or_create(
+                        user=user,
+                        defaults={
+                            "company_name": '',
+                            "billing_email": email,
+                        }
+                    )
+                    ClientProfile.objects.filter(user=user).update(company_name=user.name)
+
             elif role == UserRole.AGENT:
                 user, created = User.objects.get_or_create( email=email, defaults={ "role": UserRole.AGENT, "approval_status": "PENDING",
                                                         "profile_completed": False, "is_active": True, "is_verified": True,},)

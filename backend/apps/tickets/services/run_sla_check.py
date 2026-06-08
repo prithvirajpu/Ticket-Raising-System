@@ -56,7 +56,7 @@ def handle_sla_breach(sla):
             reassign_ticket(ticket,sla)
 
 def reassign_ticket(ticket, sla):
-    from apps.tickets.utils import get_next_available_agent
+    from backend.apps.tickets.utils.next_available_agent import get_next_available_agent
 
     # 🔒 prevent double SLA + auto assignment conflict
     ticket.refresh_from_db()

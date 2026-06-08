@@ -7,7 +7,7 @@ export const createTicket= async(data)=>{
         const response= await api.post('/users/tickets/create/',data)
     return response.data.data
     } catch (error) {
-        console.log("CREATE TICKET FAILED ❌")
+        console.log("CREATE TICKET FAILED ❌",error.response?.data)
         throw error
     }
 }
@@ -263,4 +263,90 @@ export const verifyTicketDetails =async (payload)=>{
         console.log('something wrong with verifyticket')
         throw error.response?.data ||error
     }
+}
+
+export const getSubscriptionPlans= async ()=>{
+    try {
+        const res= await api.get('/clients/subscription/plans/')
+        return res.data.data
+    } catch (error) {
+        console.log('error in fetch plans')
+    }
+}
+
+export const paymentUpdate= async(planId)=>{
+    try {
+        const res= await api.post(`/clients/subscription/demo-payment/`,{plan_id:planId})
+        return res.data.data
+    } catch (error) {
+        console.log('error in demo payment')
+    }
+}
+
+export const slaRulesInAdminSide = async () => {
+    try {
+        const res = await api.get('admins/sla-rules/')
+        return res.data.data
+    } catch (error) {
+        console.log('Error in SLA rules admin:', error)
+        throw error
+    }
+}
+
+export const createSlaRuleInAdminSide = async (data) => {
+    try {
+        const res = await api.post(
+            'admins/sla-rules/',
+            data
+        )
+        return res.data
+    } catch (error) {
+        console.log('Error creating SLA rule:', error)
+        throw error
+    }
+}
+
+export const getUserData = async (page = 1) => {
+    try {
+        const res = await api.get(`/admins/users/?page=${page}`)
+        return res
+    } catch (error) {
+        console.log('Error fetching users:', error)
+        throw error
+    }
+}
+
+export const assignHierarchy = async (payload) => {
+  try {
+    const res = await api.post(
+      "/admins/assign-hierarchy/",
+      payload
+    );
+    return res.data;
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const getAllUsers = async () => {
+  try {
+    const res = await api.get("/admins/users/all/");
+    return res.data.data;
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const getNotifications= async()=>{
+    const res= await api.get('/tickets/notifications/');
+    return res.data.data
+}
+
+export const markNotificationRead= async(Id)=>{
+    const res= await api.patch(`/tickets/notifications/${Id}/read/`)
+    return res.data.data
+}
+export const markAllNotificationsRead= async()=>{
+    const res= await api.put(`/tickets/notifications/mark-all-read/`)
+    return res.data.data
 }

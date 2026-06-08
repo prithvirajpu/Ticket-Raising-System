@@ -1,5 +1,6 @@
 import {BrowserRouter,Routes,Route} from 'react-router-dom'
 import { AuthProvider } from './auth/AuthContext'
+import {CallProvider} from './auth/CallContext'
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import Login from './pages/Login'
@@ -45,11 +46,24 @@ import AgentFakeTicketsPage from './pages/tickets/agent/AgentFakeTicketsPage ';
 import AgentFakeTicketDetail from './pages/tickets/agent/AgentFakeTicketDetail';
 import SSOLoading from './auth/SSOLoading';
 import VerifyTicketPage from './pages/tickets/agent/VerifyTicketPage'
+import SubscriptionPlans from './pages/tickets/client/SubscriptionPlans'
+import SlaRules from './pages/admin/SlaRules'
+import UserManagement from './pages/admin/UserManagement'
+import HierarchyPage from './pages/admin/HierarchyPage'
+import CallAudio from './auth/CallAudio'
+import GlobalCallModal from './auth/GlobalCallModal'
+import NotificationProvider from './auth/NotificationProvider'
+import NotificationsPage from './components/NotificationsPage'
+import SSOErrorPage from './auth/SSOErrorPage'
 
 
 const App = () => {
   return (
     <AuthProvider>
+        <CallProvider>
+            <NotificationProvider>
+            <CallAudio/>
+            <GlobalCallModal/>
         <BrowserRouter>
         <ToastContainer position="top-right" autoClose={2500} hideProgressBar newestOnTop 
         closeOnClick pauseOnHover draggable={false} theme="light" toastStyle={{
@@ -60,6 +74,7 @@ const App = () => {
 
         <Routes>
             <Route path='/sso-loading' element={<SSOLoading />} />
+            <Route path='/sso-error' element={<SSOErrorPage />} />
             <Route path='/signup' element={<StaffSignup/>}/>
             <Route path='/verify-otp' element={<VerifyOtp />} />
             <Route path='/forgot-password' element={<ForgotPassword/>}/>
@@ -69,7 +84,7 @@ const App = () => {
             <Route path='/agent/complete-profile' element={<AgentCompleteProfile/>}/>
             <Route path='/' element={<PublicRoute><Login/></PublicRoute>}/>
             <Route path='/unauthorized' element={<Unauthorized/>} />
-            <Route path='/profile' element={<ProtectedRoute role={['USER','AGENT','TEAM_LEAD','MANAGER','CLIENT']}>
+            <Route path='/profile' element={<ProtectedRoute role={['USER','AGENT','TEAM_LEAD','MANAGER','CLIENT','ADMIN']}>
                 <ProfilePage />
             </ProtectedRoute>} />
 
@@ -81,6 +96,9 @@ const App = () => {
             </ProtectedRoute>} />
             <Route path='/client/upload' element={<ProtectedRoute role={['CLIENT']}>
                 <UploadFile />
+            </ProtectedRoute>} />
+            <Route path='/client/plans' element={<ProtectedRoute role={['CLIENT']}>
+                <SubscriptionPlans />
             </ProtectedRoute>} />
             <Route path='/agent/dashboard' element={<ProtectedRoute role={['AGENT']}>
                 <AgentDashboard />
@@ -134,6 +152,12 @@ const App = () => {
             <Route path='/admin/pending-req' element={<ProtectedRoute role={['ADMIN']}>
                  <PendingUsers />
             </ProtectedRoute>} />
+            <Route path='/admin/sla' element={<ProtectedRoute role={['ADMIN']}>
+                 <SlaRules />
+            </ProtectedRoute>} />
+            <Route path='/admin/user-manage' element={<ProtectedRoute role={['ADMIN']}>
+                 <UserManagement />
+            </ProtectedRoute>} />
             <Route path='/user/create-ticket' element={<ProtectedRoute role={['USER']}>
                 <CreateTicket />
             </ProtectedRoute>} />
@@ -164,9 +188,14 @@ const App = () => {
             <Route path="/agent/tickets/:id/verify" element={<ProtectedRoute role={['AGENT']}>
                 <VerifyTicketPage/>
             </ProtectedRoute>} />
+            <Route path="/notifications" element={<ProtectedRoute role={['AGENT','MANAGER','ADMIN','CLIENT','USER','TEAM_LEAD']}>
+                <NotificationsPage/>
+            </ProtectedRoute>} />
            
         </Routes>
         </BrowserRouter>
+        </NotificationProvider>
+        </CallProvider>
     </AuthProvider>
   )
 }

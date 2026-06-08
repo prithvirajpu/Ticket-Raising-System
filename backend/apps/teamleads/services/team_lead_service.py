@@ -3,7 +3,7 @@ from apps.tickets.models import Ticket
 
 def get_team_lead_tickets_service(user):
     try:
-        tickets=Ticket.objects.filter(assigned_to=user,status='ESCALATED').order_by('-updated_at')
+        tickets=Ticket.objects.filter(assigned_to=user,status__in=['ESCALATED','IN_PROGRESS']).order_by('-updated_at')
         data=[{'id':i.id,
                'ticket_code':i.ticket_code,
                'subject':i.subject,

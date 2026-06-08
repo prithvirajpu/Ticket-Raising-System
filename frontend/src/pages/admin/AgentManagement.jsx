@@ -120,7 +120,7 @@ const AgentManagement = () => {
         </tr>
       ) : (
         agents.map((agent, index) => {
-          const pageSize = 10
+          const pageSize = 5
           const serialNumber =
             (currentPage - 1) * pageSize + index + 1
 

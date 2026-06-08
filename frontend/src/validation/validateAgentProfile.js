@@ -4,6 +4,9 @@ export const validateAgentProfile = (form) => {
   // =====================
   // Phone Validation
   // =====================
+  if (!form.fullName?.trim()) {
+  errors.full_name = "Full name is required";
+}
   if (!form.phone?.trim()) {
     errors.phone = "Phone number is required";
   } else {

@@ -1,23 +1,20 @@
 from rest_framework.views import APIView
-from apps.core_app.permissions import IsAgent
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from apps.core_app.utils import return_response
-from apps.tickets.serializer import TicketSerializer
-from apps.tickets.services import (dashboard_service)
+from apps.tickets.services import (dashboard_service,notification_service,
+                                   escalate_ticket_service,resolve_ticket_service,
+                                   send_message_service,get_messages_service,
+                                   mark_as_read_notification,mark_all_notifications_read_service)
 
 # tickets/views/dev_auth.py
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
-from rest_framework import status
 
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
     
-from rest_framework.generics import CreateAPIView,ListAPIView
-from apps.tickets.serializer import TicketChatSerializer
-from apps.tickets.services import escalate_ticket_service,resolve_ticket_service,send_message_service,get_messages_service
 
 User = get_user_model()
 
@@ -73,7 +70,7 @@ class TicketMessageView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, ticket_id):
-        result = get_messages_service(request.user, ticket_id)
+        result = get_messages_service(request.user, ticket_id,request=request)
         return Response(result)
 
 class ResolveTicketView(APIView):
@@ -88,4 +85,25 @@ class EscalatedTicketView(APIView):
 
     def post(self,request,ticket_id):
         result= escalate_ticket_service(request.user,ticket_id)
+        return return_response(result)
+    
+class NotificationListView(APIView):
+    permission_classes =[IsAuthenticated]
+
+    def get(self,request):
+        result= notification_service(request)
+        return return_response(result)
+    
+class MarkNotificationReadView(APIView):
+    permission_classes= [IsAuthenticated]
+
+    def patch(self,request,notification_id):
+        result= mark_as_read_notification(request,notification_id)
+        return return_response(result)
+    
+class MarkAllNotificationsReadView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        result = mark_all_notifications_read_service(request)
         return return_response(result)

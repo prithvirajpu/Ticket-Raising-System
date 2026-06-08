@@ -62,7 +62,7 @@ class ClientSignupSerializer(serializers.ModelSerializer):
             existing_user.set_password(password)
             existing_user.business_type=validated_data.get('business_type','')
             existing_user.phone=validated_data.get('phone','')
-            existing_user.save()
+            existing_user.save(update_fields=["password","business_type","phone",])
             return existing_user
 
         user = User.objects.create_user(
@@ -71,6 +71,7 @@ class ClientSignupSerializer(serializers.ModelSerializer):
             approval_status=ApprovalStatus.APPROVED,
             is_active=False,
             is_verified=False,
+            profile_completed=True,
             **validated_data
         )
 

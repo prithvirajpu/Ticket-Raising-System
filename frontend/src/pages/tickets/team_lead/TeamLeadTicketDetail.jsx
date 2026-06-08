@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { escalateTicket, getUserTicketDetail, resolveTicket } from "../../../services/ticketService";
 import Loader from "../../../components/modals/Loader";
-import {  useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Send, Phone, User, Clock, AlertCircle, Calendar } from "lucide-react"; // Using Lucide for icons
+import {  replace, useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Send, Phone, User, Clock, AlertCircle, Calendar, CheckCheck,Check, } from "lucide-react"; // Using Lucide for icons
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
 import { getSlaTimer } from "../../../utils/slaTImer";
 import { notifySuccess } from "../../../utils/notify";
 import useChat from "../../../hooks/useChat";
+import OngoingCallModal from "../../../components/modals/OngoingCallModal";
+import { useCall } from "../../../auth/CallContext";
+import CallingModal from "../../../components/modals/CallingModal";
 
 const TeamLeadTicketDetail = () => {
   const { id } = useParams();
@@ -21,8 +24,26 @@ const TeamLeadTicketDetail = () => {
   const [escalateLoading,setEscalateLoading]=useState(false)
   const [escalateModalOpen, setEscalateModalOpen] = useState(false);
 
-  const { messages, newMessage, setNewMessage,
-         handleSendMessage, messageEndRef, handleKeyDown } = useChat(id,ticket?.current_user_id);
+  const {
+    messages,
+    newMessage,
+    setNewMessage,
+    handleSendMessage,
+    messageEndRef,
+    handleKeyDown
+} = useChat(id, ticket?.current_user_id);
+
+const {
+    incomingCall,
+    setIncomingCall,
+    handleCall,
+    handleAccept,
+    handleReject,
+    handleEndCall,
+    callState,
+    remoteAudioRef
+} = useCall();
+
   const currentUserId = Number(ticket?.current_user_id);
 
 
@@ -45,6 +66,7 @@ const TeamLeadTicketDetail = () => {
     try {
       const data = await getUserTicketDetail(id);
       setTicket(data.message);
+      console.log('getuserticketdetail --',data.message)
     } catch (error) {
       console.error(error);
     } finally {
@@ -56,10 +78,11 @@ const TeamLeadTicketDetail = () => {
     setEscalateLoading(true);
     try {
       await escalateTicket(id);
-      await fetchTicket();
-      setEscalateModalOpen(false);
-      navigate('/team-lead/assigned-tickets')
       notifySuccess('Ticket escalated to the Manager')
+      setEscalateModalOpen(false);
+      setTimeout(()=>{
+        navigate('/team-lead/assigned-tickets',{replace:true})
+      },300)
       
     } catch (error) {
       console.log(error);
@@ -76,8 +99,8 @@ const TeamLeadTicketDetail = () => {
     try {
       await resolveTicket(id);
       await fetchTicket();
-      notifySuccess('Ticket marked as Resolved')
       setResolveModalOpen(false)
+      notifySuccess('Ticket marked as Resolved')
     } catch (error) {
       console.error(error);
     }finally{
@@ -90,7 +113,6 @@ const TeamLeadTicketDetail = () => {
   };
 
   if (loading) return <Loader />;
-  if (!ticket) return <p className="p-6">Ticket not found</p>;
 
   return (
      <>
@@ -209,13 +231,22 @@ const TeamLeadTicketDetail = () => {
 
         <div className={`flex items-end gap-3 max-w-[80%] ${isMe ? "flex-row-reverse" : ""}`}>
           <div
-            className={`p-4 rounded-2xl text-sm shadow-sm ${
+            className={`relative p-4 rounded-2xl text-sm shadow-sm ${
               isMe
-                ? "bg-blue-600 text-white rounded-tr-none"
+                ? "bg-[#3f644b] text-white rounded-tr-none"
                 : "bg-gray-200 text-black rounded-tl-none"
             }`}
           >
             {msg.message}
+{isMe && (
+  <span className="absolute bottom-1 right-2">
+    {msg.is_seen ? (
+      <CheckCheck size={14} className="text-sky-300" />
+    ) : (
+      <CheckCheck size={14} className="text-gray-400" />
+    )}
+  </span>
+)}
           </div>
 
           <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center text-white text-xs font-bold">
@@ -249,11 +280,12 @@ const TeamLeadTicketDetail = () => {
                   className="w-full bg-gray-100 rounded-2xl py-4 pl-6 pr-24 focus:outline-none focus:ring-1 focus:ring-gray-300"
                 />
                 <div className="absolute right-4 flex items-center gap-4">
-                  <button className="text-green-500 hover:scale-110 transition-transform">
-                    <Phone size={24} fill="currentColor" stroke="none" className="rotate-[100deg]" />
+                  <button onClick={()=>handleCall(ticket.created_by_id)}
+                  className="text-green-500 hover:scale-110 transition-transform">
+                    <Phone size={20} fill="currentColor" stroke="none" className="rotate-[30deg]" />
                   </button>
                   <button onClick={handleSendMessage} className="text-black hover:translate-x-1 transition-transform">
-                    <Send size={24} />
+                    <Send size={20} />
                   </button>
                 </div>
               </div>
@@ -264,6 +296,7 @@ const TeamLeadTicketDetail = () => {
       </div>
     </div>
     </DashboardLayout>
+    {/* <audio ref={remoteAudioRef} autoPlay playsInline hidden /> */}
     <ConfirmModal
         isOpen={resolveModalOpen}
         title="Resolve Ticket"
@@ -286,6 +319,12 @@ const TeamLeadTicketDetail = () => {
         onConfirm={handleEscalateConfirm}
         onCancel={handleCancelEscalate}
       />
+      <CallingModal
+        isOpen={callState === "calling"}
+        userName={ticket.customer_name}
+        onCancel={handleEndCall}
+      />
+
     </>
   )
 }

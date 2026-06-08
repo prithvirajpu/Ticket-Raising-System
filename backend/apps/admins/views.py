@@ -6,11 +6,12 @@ from apps.core_app.permissions import IsAdmin
 from apps.core_app.constants import ApprovalStatus
 from apps.core_app.utils import return_response
 from apps.core_app.models import AgentApplication
+from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
-from .services import (approve_user_service,reject_user_service,
+from .services import (fetch_users_service,create_sla_rule_service,fetch_sla_rules_service,approve_user_service,reject_user_service,
                        get_agent_application_detail_service,get_client_list_service,
-                       get_agent_list_service,toggle_agent_status_service)
-from .serializers import (UserApprovalSerializer)
+                       get_agent_list_service,toggle_agent_status_service,assign_hierarchy_service,get_all_users_service)
+from .serializers import (UserApprovalSerializer,AssignHierarchySerializer)
 from django.contrib.auth import get_user_model
 import logging
 logger=logging.getLogger(__name__)
@@ -78,3 +79,44 @@ class ToggleAgentStatusView(APIView):
         result=toggle_agent_status_service(agent_id,is_active)
         return return_response(result)
     
+class SLARulesView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def get(self,request):
+        result= fetch_sla_rules_service()
+        return return_response(result)
+    
+    def post(self,request):
+        result= create_sla_rule_service(request)
+        return return_response(result)
+    
+class UserManagementView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        result = fetch_users_service(request)
+        return return_response(result)
+    
+class AssignHierarchyView(APIView):
+    permission_classes = [IsAdmin]
+
+    def post(self, request):
+        serializer = AssignHierarchySerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response({
+                "data": None,
+                "errors": serializer.errors
+            }, status=400)
+
+        result = assign_hierarchy_service(serializer.validated_data)
+
+        return return_response(result)
+    
+class AllUsersView(APIView):
+    permission_classes = [IsAdmin]
+
+    def get(self, request):
+        result = get_all_users_service(request)
+
+        return return_response(result)

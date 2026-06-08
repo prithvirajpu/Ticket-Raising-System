@@ -12,6 +12,7 @@ const AgentCompleteProfile = () => {
   const [resume, setResume] = useState(null);
   const [phone, setPhone] = useState("");
   const [skills, setSkills] = useState("");
+  const [fullName, setFullName] = useState("");
   const [certificates, setCertificates] = useState([]);
   const navigate = useNavigate();
   const { setProfileCompleted,logout } = useAuth();
@@ -19,7 +20,7 @@ const AgentCompleteProfile = () => {
 
  const handleSubmit = async (e) => {
     e.preventDefault();
-    const {isValid,errors:validationErrors}=validateAgentProfile({phone,skills,resume})
+    const {isValid,errors:validationErrors}=validateAgentProfile({fullName,phone,skills,resume})
     if (!isValid){
       setErrors(validationErrors)
       return;
@@ -27,6 +28,7 @@ const AgentCompleteProfile = () => {
     setErrors({});
     setLoading(true);
     const formData = new FormData();
+    formData.append("full_name", fullName);
     formData.append("resume", resume);
     formData.append("phone", phone);
     formData.append("skills", skills);
@@ -37,7 +39,7 @@ const AgentCompleteProfile = () => {
 
     try {
       console.log('in try')
-      const response = await api.put("/agents/agent/profile/update/", formData, {
+      const response = await api.put("/agents/profile/update/", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           "Authorization": `Bearer ${localStorage.getItem("access")}`,
@@ -78,6 +80,21 @@ const AgentCompleteProfile = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5 ml-0.5">
+                Full Name
+              </label>
+              <input
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Enter your full name"
+                className="w-full p-3 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              {errors.full_name && (
+                <p className="mt-1 text-xs text-red-600">{errors.full_name}</p>
+              )}
+            </div>
           {/* Phone Number */}
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1.5 ml-0.5">Phone Number</label>

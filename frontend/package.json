@@ -16,6 +16,7 @@
     "framer-motion": "^12.38.0",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.563.0",
+    "peerjs": "^1.5.5",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.71.1",

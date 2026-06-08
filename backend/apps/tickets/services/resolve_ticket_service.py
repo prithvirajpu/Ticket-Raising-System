@@ -1,7 +1,8 @@
 from django.db import transaction
-from apps.tickets.models import Ticket,TicketAssignment,TicketSLATracking,TicketChatParticipant,TicketActivity
+from apps.tickets.models import Ticket,TicketActivity,Notification
 from rest_framework import status
 from django.utils import timezone
+from apps.tickets.utils import send_notification
 
 
 def resolve_ticket_service(user,ticket_id):
@@ -22,6 +23,15 @@ def resolve_ticket_service(user,ticket_id):
                 }
             ticket.status='RESOLVED'
             ticket.save(update_fields=['status'])
+
+            send_notification(
+                    user_id=ticket.created_by_id,
+                    notification_type="TICKET_RESOLVED",
+                    title="Ticket Resolved",
+                    message=f"Ticket #{ticket.ticket_code} has been resolved",
+                    data={"ticket_id": ticket.id,"ticket_code": ticket.ticket_code}  
+                )
+
             TicketActivity.objects.create(
                 ticket=ticket,
                 action="RESOLVED",

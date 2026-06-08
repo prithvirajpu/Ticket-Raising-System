@@ -1,11 +1,5 @@
 from rest_framework.views import APIView
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.generics import ListAPIView 
-from rest_framework.permissions import IsAuthenticated
-from apps.core_app.permissions import IsAdmin
-from apps.core_app.constants import ApprovalStatus
 from apps.core_app.utils import return_response
-from apps.core_app.models import AgentApplication
 from rest_framework.parsers import MultiPartParser, FormParser
 from .services import (verify_otp_service,agent_signup_service,reset_password_service,resend_otp_service,
                        check_user_email_exists,forgot_password_service,client_signup_service,google_client_auth_service,
@@ -14,7 +8,7 @@ from .serializers import (LoginSerializer,ClientSignupSerializer,
     VerifyOTPSerializer,ForgotPasswordSerializer,ResetPasswordSerializer)
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
-from rest_framework.response import Response
+from django.shortcuts import redirect
 import logging
 logger=logging.getLogger(__name__)
 
@@ -27,16 +21,26 @@ class SSOLoginAPIView(APIView):
         token = request.data.get('token')
         
         result = sso_login_service(request, token)
-        if result["errors"]:
-            return return_response(result)
+        if isinstance(result, HttpResponse):
+            return result
 
-        data = result["data"]
+        data = result.get("data",{})
+        logger.info('user id is : %s',data['user_id'])
 
+        if not data:
+            return HttpResponse(
+                """
+                <script>
+                    window.location.replace("http://localhost:5173/sso-error?code=invalid_login");
+                </script>
+                """
+            )
         sso_loading_url = (
             f"http://localhost:5173/sso-loading"
             f"?access={data['access']}"
             f"&refresh={data['refresh']}"
             f"&role={data['role']}"
+            f"&user_id={data['user_id']}"
             f"&profile_completed={str(data['profile_completed']).lower()}"
             f"&approval_status=APPROVED"
         )

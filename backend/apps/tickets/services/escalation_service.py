@@ -1,6 +1,7 @@
-from apps.tickets.models import Ticket,TicketActivity
+from apps.tickets.models import Ticket,TicketActivity,Notification
 from rest_framework import status
 from django.utils import timezone
+from apps.tickets.utils import send_notification
 
 
 def escalate_ticket_service(user, ticket_id):
@@ -58,6 +59,13 @@ def escalate_ticket_service(user, ticket_id):
             user=next_assignee
         )
     ticket.save(update_fields=["status", "assigned_to"])
+    send_notification(user_id=next_assignee.id,
+            notification_type="TICKET_ESCALATED",
+            title="Ticket Escalated",
+            message=f"Ticket #{ticket.ticket_code} has been escalated to you",
+            data={"ticket_id": ticket.id,"ticket_code": ticket.ticket_code}   
+            )
+
     TicketActivity.objects.create(
         ticket=ticket,
         action="ESCALATED",

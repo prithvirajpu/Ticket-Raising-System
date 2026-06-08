@@ -159,15 +159,15 @@ npm start
 - Password hashing  
 - Protected routes  
 - Secure API endpoints  
+- Real-time updates (WebSockets)  
+- SLA tracking  
 
 ---
 
 ## 🎯 Future Enhancements
 
 - Email notifications  
-- Real-time updates (WebSockets)  
 - File attachment support  
-- SLA tracking  
 - Analytics dashboard  
 - Docker deployment  
 - CI/CD integration  

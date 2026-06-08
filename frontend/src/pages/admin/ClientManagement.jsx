@@ -59,6 +59,7 @@ const ClientManagement = () => {
             <tr className="border-b">
               {/* <th className="text-left p-2">Name</th> */}
               <th className="text-left p-2">Email</th>
+              <th className="text-left p-2">Company Name</th>
               <th className="text-left p-2">Phone</th>
               <th className="text-left p-2">Business Type</th>
               <th className="text-left p-2">Status</th>
@@ -78,6 +79,7 @@ const ClientManagement = () => {
               <tr key={client.id} className="border-b hover:bg-gray-50">
                 {/* <td className="p-2">{client.name}</td> */}
                 <td className="p-2">{client.email}</td>
+                <td className="p-2">{client.client_name || 'N/A'}</td>
                 <td className="p-2">{client.phone}</td>
                 <td className="p-2">{client.business_type}</td>
                 <td className="p-2">

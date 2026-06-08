@@ -1,6 +1,5 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Navbar from '../components/Navbar'
-// import useAgentTimer from '../hooks/useAgentTimer'
 
 const DashboardLayout = ({ title, subtitle, headerAction, children }) => {
 

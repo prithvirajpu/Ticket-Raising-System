@@ -4,8 +4,8 @@ import api from '../../api/axios'
 import { GoogleLogin} from '@react-oauth/google';
 import { useAuth } from "../../auth/AuthContext";
 import { redirectByRole } from "../../auth/roleRedirect";
-import { notifyError,notifySuccess,notifyWarning,notifyInfo } from "../../utils/notify";
 import { validateClientStep } from "../../validation/validateClientStep";
+import {notifyError, notifySuccess} from '../../utils/notify'
 import Loader from '../../components/modals/Loader'
 
 const ClientSignup = () => {
@@ -44,8 +44,8 @@ const handleGoogleSuccess = async (credentialResponse) => {
       navigate(redirectByRole(role));
     }
   } catch (err) {
-    const errorMsg = err.response?.data?.errors || 
-                    err.response?.data?.detail ||
+    console.log(err.response?.data?.errors?.details)
+    const errorMsg = err.response?.data?.errors?.details ||
                     err.response?.data?.non_field_errors?.[0] ||
                     "Google login failed. Please try again.";
     notifyError(errorMsg);
@@ -101,7 +101,7 @@ const handleSubmit = async (e) => {
     const message =
     error?.response?.data?.non_field_errors?.[0] ||
     error?.response?.data?.error ||
-    error?.response?.data?.detail ||
+    error?.response?.data?.errors?.details ||
     "Signup failed. Please try again.";
     notifyError( message);
   }finally{
