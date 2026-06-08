@@ -55,6 +55,8 @@ import GlobalCallModal from './auth/GlobalCallModal'
 import NotificationProvider from './auth/NotificationProvider'
 import NotificationsPage from './components/NotificationsPage'
 import SSOErrorPage from './auth/SSOErrorPage'
+import IntegrationGuide from './pages/tickets/client/IntegrationGuide'
+import AboutTRS from './pages/tickets/AboutTRS'
 
 
 const App = () => {
@@ -87,6 +89,9 @@ const App = () => {
             <Route path='/profile' element={<ProtectedRoute role={['USER','AGENT','TEAM_LEAD','MANAGER','CLIENT','ADMIN']}>
                 <ProfilePage />
             </ProtectedRoute>} />
+            <Route path='/about' element={<ProtectedRoute role={['USER','AGENT','TEAM_LEAD','MANAGER','CLIENT','ADMIN']}>
+                <AboutTRS />
+            </ProtectedRoute>} />
 
             <Route path='/admin/dashboard' element={<ProtectedRoute role={['ADMIN']}>
                 <AdminDashboard />
@@ -99,6 +104,9 @@ const App = () => {
             </ProtectedRoute>} />
             <Route path='/client/plans' element={<ProtectedRoute role={['CLIENT']}>
                 <SubscriptionPlans />
+            </ProtectedRoute>} />
+            <Route path='/client/guideline' element={<ProtectedRoute role={['CLIENT']}>
+                <IntegrationGuide />
             </ProtectedRoute>} />
             <Route path='/agent/dashboard' element={<ProtectedRoute role={['AGENT']}>
                 <AgentDashboard />
@@ -185,7 +193,7 @@ const App = () => {
             <Route path='/agent/fake-tickets/:id' element={<ProtectedRoute role={['AGENT']}>
                 <AgentFakeTicketDetail />
             </ProtectedRoute>} />
-            <Route path="/agent/tickets/:id/verify" element={<ProtectedRoute role={['AGENT']}>
+            <Route path="/tickets/:id/verify" element={<ProtectedRoute role={['AGENT','MANAGER','TEAM_LEAD']}>
                 <VerifyTicketPage/>
             </ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute role={['AGENT','MANAGER','ADMIN','CLIENT','USER','TEAM_LEAD']}>

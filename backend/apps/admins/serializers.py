@@ -27,10 +27,9 @@ class UserManagementSerializer(serializers.ModelSerializer):
         ]
     def get_client_name(self,obj):
         try:
-            return obj.client_profile.company_name
+            return obj.client_user.client_profile.company_name
         except:
             return None
-
 
 class AssignHierarchySerializer(serializers.Serializer):
     user_id = serializers.IntegerField()

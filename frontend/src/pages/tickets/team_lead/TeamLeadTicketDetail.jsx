@@ -267,7 +267,8 @@ const {
                  className="bg-red-600 text-white text-xs px-4 py-1 rounded-lg font-bold">Escalate</button>
                 )}
                 
-                <button className="bg-blue-600 text-white text-xs px-4 py-1 rounded-lg font-bold">Verify</button>
+                <button onClick={() => navigate(`/tickets/${id}/verify`)}
+                 className="bg-blue-600 text-white text-xs px-4 py-1 rounded-lg font-bold">Verify</button>
               </div>
               
               <div className="relative flex items-center">
