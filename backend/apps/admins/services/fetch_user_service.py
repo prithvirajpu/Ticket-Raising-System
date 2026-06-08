@@ -5,6 +5,8 @@ from apps.accounts.models import User
 
 from ..serializers import UserManagementSerializer
 
+import logging
+logger=logging.getLogger(__name__)
 
 def fetch_users_service(request):
 
@@ -27,6 +29,7 @@ def fetch_users_service(request):
             page,
             many=True
         )
+        logger.info('user data %s',serializer.data)
 
         total_users = users.count()
 

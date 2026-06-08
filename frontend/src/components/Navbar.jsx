@@ -64,6 +64,7 @@ const Navbar = () => {
           { label: 'My Tickets', path: '/client/tickets' },
           { label: 'Upload', path: '/client/upload' },
           { label: 'Plans', path: '/client/plans' },
+          { label: 'Guideline', path: '/client/guideline' },
           { label: 'About', path: '/about' },
         ]
     }

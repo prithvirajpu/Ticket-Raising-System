@@ -272,7 +272,8 @@ const {
                 {/* Message Input Area */}
                 <div className="p-6 border-t border-gray-100">
                   <div className="flex justify-end gap-2 mb-4">
-                    <button className="bg-blue-600 text-white text-xs px-4 py-1 rounded-lg font-bold">
+                    <button onClick={() => navigate(`/tickets/${id}/verify`)}
+                     className="bg-blue-600 text-white text-xs px-4 py-1 rounded-lg font-bold">
                       Verify
                     </button>
                   </div>

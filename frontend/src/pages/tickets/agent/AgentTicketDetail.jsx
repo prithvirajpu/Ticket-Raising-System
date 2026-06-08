@@ -265,7 +265,7 @@ const {
                 <button onClick={()=>setEscalateModalOpen(true)} 
                  className="bg-red-600 text-white text-xs px-4 py-1 rounded-lg font-bold">Escalate</button>
               )}
-                <button onClick={()=>navigate(`/agent/tickets/${id}/verify`)}
+                <button onClick={()=>navigate(`/tickets/${id}/verify`)}
                 className="bg-blue-600 text-white text-xs px-4 py-1 rounded-lg font-bold">Verify</button>
               </div>
               
