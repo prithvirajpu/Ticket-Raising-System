@@ -2,7 +2,8 @@ from django.urls import path
 from .views import (
     SendMessageView,ResolveTicketView,NotificationListView,
     TicketMessageView,DashboardView,EscalatedTicketView,
-    MarkAllNotificationsReadView,
+
+    MarkAllNotificationsReadView,TrainingMessagesAPIView,
     MarkNotificationReadView
 
 )
@@ -12,6 +13,8 @@ urlpatterns = [
     path('dashboard/',DashboardView.as_view()),
     path('<int:ticket_id>/send-message/', SendMessageView.as_view()),
     path('<int:ticket_id>/messages/', TicketMessageView.as_view()),
+    #training tickets
+    path('training-tickets/<int:ticket_id>/messages/', TrainingMessagesAPIView.as_view()),
 
     path("<int:ticket_id>/resolve/", ResolveTicketView.as_view()),
     path("<int:ticket_id>/escalate/", EscalatedTicketView.as_view()),

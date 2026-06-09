@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (UserManagementView,SLARulesView,PendingUsersView,AgentApplicationDetailView,ApproveUserView,RejectUserView,
-                    ClientListView,AgentListView,ToggleAgentStatusView,AssignHierarchyView,AllUsersView)
+                    ClientListView,AgentListView,ToggleAgentStatusView,AssignHierarchyView,AllUsersView,HierarchyView)
 
 urlpatterns=[
     path('pending-users/',PendingUsersView.as_view()),
@@ -14,5 +14,7 @@ urlpatterns=[
     path('users/',UserManagementView.as_view()),
     path("assign-hierarchy/", AssignHierarchyView.as_view()),
     path("users/all/", AllUsersView.as_view()),
+    path("hierarchy/", HierarchyView.as_view()),
+
 
 ]

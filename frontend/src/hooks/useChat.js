@@ -88,6 +88,7 @@ const useChat = (ticketId, currentUserId) => {
   const scrollToBottom = () => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+  
   useEffect(() => {
     scrollToBottom();
   }, [messages]);

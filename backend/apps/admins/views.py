@@ -9,7 +9,7 @@ from apps.core_app.models import AgentApplication
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from .services import (fetch_users_service,create_sla_rule_service,fetch_sla_rules_service,approve_user_service,reject_user_service,
-                       get_agent_application_detail_service,get_client_list_service,
+                       get_agent_application_detail_service,get_client_list_service,get_hierarchy_service,
                        get_agent_list_service,toggle_agent_status_service,assign_hierarchy_service,get_all_users_service)
 from .serializers import (UserApprovalSerializer,AssignHierarchySerializer)
 from django.contrib.auth import get_user_model
@@ -120,3 +120,10 @@ class AllUsersView(APIView):
         result = get_all_users_service(request)
 
         return return_response(result)
+    
+class HierarchyView(APIView):
+    permission_classes= [IsAdmin]
+    
+    def get(self,request):
+        result= get_hierarchy_service()
+        return Response(result,status=result['status'])

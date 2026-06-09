@@ -4,95 +4,179 @@ import re
 import json
 from rest_framework import status
 from apps.tickets.models import Ticket,TicketAssignment
+import logging
+logger=logging.getLogger(__name__)
 
 OPENROUTER_API_KEY=os.getenv('OPENROUTER_API_KEY')
-
 def generate_tickets_from_summary(summary, num_tickets=3):
     url = "https://openrouter.ai/api/v1/chat/completions"
-    
+
     payload = {
         "model": "anthropic/claude-3-haiku:2024-11-20",
-        "messages": [{"role": "user", "content": f"""Generate EXACTLY {num_tickets} tickets for: {summary}
+        "response_format": {
+            "type": "json_object"
+        },
+        "messages": [
+            {
+                "role": "user",
+                "content": f"""
 
-CRITICAL: Respond with ONLY valid JSON array. NO prose, NO markdown, NO explanation.
+    You are generating CUSTOMER SUPPORT TRAINING TICKETS.
 
-[
-  {{"title": "Payment Issue", "description": "Cannot process...", "priority": "HIGH", "category": "Payment"}},
-  {{"title": "Login Error", "description": "Cannot login...", "priority": "MEDIUM", "category": "Auth"}}
-]"""}]
+    Business Context:
+    {summary}
+
+    Generate EXACTLY {num_tickets} realistic customer support tickets.
+
+    IMPORTANT RULES
+
+    * Every ticket must represent a real customer problem.
+    * Do NOT generate technical interview questions.
+    * Do NOT generate programming questions.
+    * Do NOT generate chatbot conversations.
+    * Do NOT generate AI assistant requests.
+    * Generate only customer complaints that a support agent would handle.
+
+    Allowed Categories:
+
+    ORDER_ISSUE
+    PAYMENT_ISSUE
+    REFUND_ISSUE
+    DELIVERY_ISSUE
+    WALLET_ISSUE
+    PRODUCT_ISSUE
+
+    Examples:
+
+    DELIVERY_ISSUE
+
+    * Order delayed
+    * Package lost
+    * Tracking not updated
+    * Delivered to wrong address
+
+    PAYMENT_ISSUE
+
+    * Payment failed
+    * Money deducted but order not created
+    * Duplicate charge
+
+    REFUND_ISSUE
+
+    * Refund delayed
+    * Refund never received
+
+    PRODUCT_ISSUE
+
+    * Damaged item
+    * Wrong item delivered
+    * Missing accessories
+    * Wrong size
+
+    WALLET_ISSUE
+
+    * Cashback missing
+    * Wallet balance incorrect
+
+    ORDER_ISSUE
+
+    * Order cancelled unexpectedly
+    * Order stuck in processing
+
+    For each ticket generate:
+
+    title
+    description
+    priority
+    category
+    customer_prompt
+
+    customer_prompt must be written as a CUSTOMER PERSONA.
+
+    Include:
+
+    Customer Name:
+    Personality:
+    Emotional State:
+    Problem:
+    Known Information:
+    Hidden Information:
+    Desired Outcome:
+
+    The customer_prompt will later be given to another AI that will ROLEPLAY the customer.
+
+    The AI customer must:
+
+    * behave like a real customer
+    * stay in character
+    * never act as a support agent
+    * never provide solutions
+    * reveal hidden information only when asked
+
+    Return ONLY valid JSON.
+
+    Required format:
+
+    {{
+    "tickets": [
+    {{
+    "title": "Payment Failed During Checkout",
+    "description": "Customer attempted payment three times but payment failed.",
+    "priority": "HIGH",
+    "category": "PAYMENT_ISSUE",
+    "customer_prompt": "Customer Name: Sarah. Personality: Frustrated. Emotional State: Angry. Problem: Payment failed three times. Known Information: Payment declined on multiple cards. Hidden Information: Needs the order before the weekend. Desired Outcome: Complete the purchase successfully."
+    }}
+    ]
+    }}
+
+    Do not return:
+
+    * explanations
+    * markdown
+    * code blocks
+    * Ticket 1 / Ticket 2 labels
+    * any text outside the JSON
+    """
     }
-    
+    ]
+    }
+
     headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json",
-        "HTTP-Referer": "http://localhost:3000", 
-        "X-Title": "TRS Ticket System"
+    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+    "Content-Type": "application/json",
+    "HTTP-Referer": "http://localhost:3000",
+    "X-Title": "TRS Ticket System"
     }
-    
+
     response = requests.post(url, json=payload, headers=headers)
+
     if response.status_code != 200:
-        raise Exception(f'AI Error: {response.text}')
-    
+        raise Exception(f"AI Error: {response.text}")
+
     data = response.json()
-    content = data['choices'][0]['message']['content']
-    return content
+
+    return data["choices"][0]["message"]["content"]
+
 
 def parse_ai_ticket_response(ai_response):
-    
-    # Strip common prefixes Claude adds
-    clean_response = ai_response.strip()
-    if clean_response.startswith('```json'):
-        json_match = re.search(r'```json\s*(.*?)\s*```', ai_response, re.DOTALL)
-        json_str = json_match.group(1) if json_match else ai_response
-    elif clean_response.startswith('['):
-        json_str = ai_response
-    else:
-        # Extract JSON array from text
-        json_match = re.search(r'\[.*\]', ai_response, re.DOTALL)
-        json_str = json_match.group(0) if json_match else ai_response
-        
-    tickets = json.loads(json_str)
-    
-    # Handle both [{"tickets": [...]}] and [...]
-    if isinstance(tickets, dict) and 'tickets' in tickets:
-        tickets = tickets['tickets']
-    
-    if not isinstance(tickets, list):
-        raise ValueError(f'Expected list, got {type(tickets)}')
-    
+    logger.info("PARSING RESPONSE =====")
+    logger.info(ai_response)
+
+    data = json.loads(ai_response)
+    tickets = data.get("tickets", [])
+
     validated = []
-    for i in tickets:
+
+    for ticket in tickets:
         validated.append({
-            'title': i.get('title', ''),
-            'description': i.get('description', ''),
-            'priority': i.get('priority', 'MEDIUM'),
-            'category': i.get('category', 'General'),
+            "title": ticket.get("title", ""),
+            "description": ticket.get("description", ""),
+            "priority": ticket.get("priority", "MEDIUM").upper(),
+            "category": ticket.get("category", "ORDER_ISSUE"),
+            "customer_prompt": ticket.get("customer_prompt", "")
         })
-    
+
     return validated
-
-def parse_ai_ticket_response(ai_response):
-    json_match = re.search(r'```json\s*(.*?)\s*```', ai_response, re.DOTALL)
-    if json_match:
-        json_str = json_match.group(1)
-    else:
-        json_str = ai_response
-    try:
-        tickets= json.loads(json_str)
-        if not isinstance(tickets,list):
-            raise ValueError('Response is not a list')
-        validated=[]
-        for i in tickets:
-            validated.append({
-                'title':i.get('title',''),
-                'description':i.get('description',''),
-                'priority':i.get('priority',''),
-                'category':i.get('category',''),
-            })
-        return validated
-    except json.JSONDecodeError:
-        raise ValueError('Invalid JSON from AI')
-
 
 def generate_fake_ticket_service(request):
     try:
@@ -115,6 +199,9 @@ def generate_fake_ticket_service(request):
         
         # Generate tickets using AI
         ai_response = generate_tickets_from_summary(summary, count)
+        logger.info("RAW AI RESPONSE =====")
+        logger.info(ai_response)
+        logger.info("=====================")
         tickets_data = parse_ai_ticket_response(ai_response)
         print(len(tickets_data))  # should be 5
         print([t['title'] for t in tickets_data])
@@ -135,11 +222,15 @@ def generate_fake_ticket_service(request):
                 description=t["description"],
                 priority=t["priority"],
                 issue_type=t["category"],
+                ai_customer_prompt=t["customer_prompt"],
                 client_id=client.id,
                 created_by_id=team_lead.id,
-                is_ai_generated=True
+                is_ai_generated=True,
+                is_training_ticket=True
             )
             created_ticket_ids.append(ticket_obj.id)
+            ticket=Ticket.objects.last()
+            logger.info('fake ticket details %s %s',ticket.subject,ticket.ai_customer_prompt)
 
             # ✅ Assign ticket to all agents
             for agent in agents:

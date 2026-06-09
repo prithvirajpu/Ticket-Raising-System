@@ -188,7 +188,14 @@ export const generateFakeTickets= async (summary)=>{
     });
     return res.data.data
     } catch (error) {
-        notifyError('generate ticket--')
+            console.log(error);
+    console.log(error.response);
+    console.log(error.response?.data);
+
+    notifyError(
+        error.response?.data?.errors?.details ||
+        'Failed to generate tickets'
+    );
     }
 }
 
@@ -349,4 +356,22 @@ export const markNotificationRead= async(Id)=>{
 export const markAllNotificationsRead= async()=>{
     const res= await api.put(`/tickets/notifications/mark-all-read/`)
     return res.data.data
+}
+
+export const getHierarchy= async()=>{
+    try {
+        const res= await api.get("/admins/hierarchy/")
+        return res.data       
+    } catch (error) {
+        console.log(error)
+    }
+
+}
+export const getTrainingMessages=async(Id)=>{
+    try {
+        const res= await api.get(`/tickets/training-tickets/${Id}/messages/`)
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+    }
 }

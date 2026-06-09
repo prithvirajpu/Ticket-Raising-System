@@ -6,7 +6,7 @@ from django.urls import path,re_path
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django_asgi_app = get_asgi_application()
 
-from apps.tickets.consumer import ChatConsumer,CallConsumer,NotificationConsumer
+from apps.tickets.consumer import ChatConsumer,CallConsumer,NotificationConsumer,TrainingChatConsumer
 from apps.tickets.middleware import JWTAuthMiddleware
 
 
@@ -18,6 +18,7 @@ application = ProtocolTypeRouter({
             re_path(r"ws/chat/(?P<ticket_id>\d+)/$", ChatConsumer.as_asgi()),
             re_path(r"ws/call/$",CallConsumer.as_asgi()),
             re_path(r"ws/notifications/$",NotificationConsumer.as_asgi()),
+            re_path(r"ws/training-chat/(?P<ticket_id>\d+)/$",TrainingChatConsumer.as_asgi()),
         ])
     ),
 })

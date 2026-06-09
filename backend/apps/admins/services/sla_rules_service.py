@@ -53,14 +53,6 @@ def create_sla_rule_service(request):
         resolution_time_minutes=request.data.get(
             'resolution_time_minutes'
         ),
-        auto_reassign=request.data.get(
-            'auto_reassign',
-            True
-        ),
-        max_reassign_attempts=request.data.get(
-            'max_reassign_attempts',
-            3
-        ),
         is_active=True
     )
 

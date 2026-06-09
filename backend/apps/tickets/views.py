@@ -5,7 +5,8 @@ from apps.core_app.utils import return_response
 from apps.tickets.services import (dashboard_service,notification_service,
                                    escalate_ticket_service,resolve_ticket_service,
                                    send_message_service,get_messages_service,
-                                   mark_as_read_notification,mark_all_notifications_read_service)
+                                   mark_as_read_notification,mark_all_notifications_read_service,
+                                   get_training_messages_service)
 
 # tickets/views/dev_auth.py
 
@@ -106,4 +107,11 @@ class MarkAllNotificationsReadView(APIView):
 
     def put(self, request):
         result = mark_all_notifications_read_service(request)
+        return return_response(result)
+    
+class TrainingMessagesAPIView(APIView):
+    permission_classes= [IsAuthenticated]
+
+    def get(self, request, ticket_id):
+        result = get_training_messages_service(ticket_id)
         return return_response(result)

@@ -4,6 +4,7 @@ import axios from 'axios'
 import { createSlaRuleInAdminSide, getSubscriptionPlans, slaRulesInAdminSide } from '../../services/ticketService'
 import { notifyError, notifySuccess } from '../../utils/notify'
 import HierarchyPage from './HierarchyPage'
+import { Clock, Sliders, ChevronDown, ShieldCheck } from 'lucide-react';
 
 const priorities = ['LOW', 'MEDIUM', 'HIGH']
 
@@ -72,183 +73,160 @@ const SlaRules = () => {
     }
   }
 
+  const getPriorityBadge = (priority) => {
+    switch (priority) {
+      case 'HIGH':
+        return 'bg-red-50 text-red-700 border-red-100';
+      case 'MEDIUM':
+        return 'bg-amber-50 text-amber-700 border-amber-100';
+      default:
+        return 'bg-slate-50 text-slate-700 border-slate-200';
+    }
+  };
+
   return (
     <DashboardLayout
       title="SLA Rules & Hierarchy"
       subtitle="Manage SLA rules based on plans and ticket priorities"
       headerAction={
-        <button className="bg-gray-200 text-black px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-300">
+        <button className="bg-slate-900 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm">
           Manage Rules & Hierarchy
         </button>
       }
     >
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="space-y-8 text-slate-800 antialiased">
+        
+        {/* TOP PANEL SECTION: SLA CONFIGURATIONS GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-        {/* CREATE RULE FORM */}
-
-        <div className="bg-white rounded-2xl shadow p-6">
-
-          <h2 className="text-xl font-bold mb-5">
-            Create SLA Rule
-          </h2>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-
-            <div>
-
-              <label className="block mb-2 text-sm font-medium">
-                Plan 
-              </label>
-
-              <select
-  name="plan_id"
-  value={formData.plan_id}
-  onChange={handleChange}
-  className="w-full border rounded-lg p-3"
-  required
->
-
-  <option value="">
-    Select Subscription Plan
-  </option>
-
-  {plans.map((plan) => (
-
-    <option
-      key={plan.id}
-      value={plan.id}
-    >
-      {plan.name}
-    </option>
-
-  ))}
-
-</select>
-
+          {/* CREATE RULE FORM */}
+          <div className="lg:col-span-4 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-5">
+              <div className="p-2 bg-slate-50 rounded-lg border border-slate-100 text-slate-700">
+                <Sliders className="w-5 h-5" />
+              </div>
+              <h2 className="text-base font-bold text-slate-900">Create SLA Rule</h2>
             </div>
 
-            <div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block mb-1.5 text-xs font-semibold text-slate-700 tracking-wide uppercase">Plan</label>
+                <div className="relative">
+                  <select
+                    name="plan_id"
+                    value={formData.plan_id}
+                    onChange={handleChange}
+                    className="w-full border border-slate-200 rounded-xl p-3 text-sm bg-white focus:ring-4 focus:ring-slate-950/5 focus:border-slate-950 outline-none appearance-none pr-10 transition-all"
+                    required
+                  >
+                    <option value="">Select Subscription Plan</option>
+                    {plans.map((plan) => (
+                      <option key={plan.id} value={plan.id}>
+                        {plan.name}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+              </div>
 
-              <label className="block mb-2 text-sm font-medium">
-                Priority
-              </label>
+              <div>
+                <label className="block mb-1.5 text-xs font-semibold text-slate-700 tracking-wide uppercase">Priority</label>
+                <div className="relative">
+                  <select
+                    name="priority"
+                    value={formData.priority}
+                    onChange={handleChange}
+                    className="w-full border border-slate-200 rounded-xl p-3 text-sm bg-white focus:ring-4 focus:ring-slate-950/5 focus:border-slate-950 outline-none appearance-none pr-10 transition-all"
+                  >
+                    {priorities.map((priority) => (
+                      <option key={priority} value={priority}>
+                        {priority}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+              </div>
 
-              <select
-                name="priority"
-                value={formData.priority}
-                onChange={handleChange}
-                className="w-full border rounded-lg p-3"
+              <div>
+                <label className="block mb-1.5 text-xs font-semibold text-slate-700 tracking-wide uppercase">Resolution Time (Minutes)</label>
+                <input
+                  type="number"
+                  name="resolution_time_minutes"
+                  value={formData.resolution_time_minutes}
+                  onChange={handleChange}
+                  placeholder="Enter resolution time"
+                  className="w-full border border-slate-200 rounded-xl p-3 text-sm bg-white focus:ring-4 focus:ring-slate-950/5 focus:border-slate-950 outline-none transition-all"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-slate-950 text-white py-3 rounded-xl text-sm font-semibold hover:bg-slate-800 transition-all shadow-sm"
               >
+                {loading ? 'Creating...' : 'Create Rule'}
+              </button>
+            </form>
+          </div>
 
-                {priorities.map((priority) => (
-
-                  <option key={priority} value={priority}>
-                    {priority}
-                  </option>
-
-                ))}
-
-              </select>
-
+          {/* RULE LIST */}
+          <div className="lg:col-span-8 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-5">
+              <div className="p-2 bg-slate-50 rounded-lg border border-slate-100 text-slate-700">
+                <Clock className="w-5 h-5" />
+              </div>
+              <h2 className="text-base font-bold text-slate-900">Existing SLA Rules</h2>
             </div>
 
-            <div>
-
-              <label className="block mb-2 text-sm font-medium">
-                Resolution Time (Minutes)
-              </label>
-
-              <input
-                type="number"
-                name="resolution_time_minutes"
-                value={formData.resolution_time_minutes}
-                onChange={handleChange}
-                placeholder="Enter resolution time"
-                className="w-full border rounded-lg p-3"
-                required
-              />
-
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800"
-            >
-              {
-                loading
-                  ? 'Creating...'
-                  : 'Create Rule'
-              }
-            </button>
-
-          </form>
-
-        </div>
-
-        {/* RULE LIST */}
-
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow p-6">
-
-          <h2 className="text-xl font-bold mb-5">
-            Existing SLA Rules
-          </h2>
-
-          <div className="overflow-x-auto">
-
-            <table className="w-full border-collapse">
-
-              <thead>
-
-                <tr className="border-b text-left">
-
-                  <th className="py-3">Plan</th>
-                  <th className="py-3">Priority</th>
-                  <th className="py-3">Resolution</th>
-                  <th className="py-3">Auto assign</th>
-
-                </tr>
-
-              </thead>
-
-              <tbody>
-
-                {rules.map((rule) => (
-
-                  <tr key={rule.id} className="border-b">
-
-                    <td className="py-4">
-                      {rule.plan_name}
-                    </td>
-
-                    <td className="py-4">
-                      {rule.priority}
-                    </td>
-
-                    <td className="py-4">
-                      {rule.resolution_time_minutes} mins
-                    </td>
-
-                    <td className="py-4">
-                        Enabled
-                    </td>
-
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-left text-sm">
+                <thead>
+                  <tr className="border-b border-slate-100 text-[11px] font-bold tracking-wider text-slate-400 uppercase">
+                    <th className="pb-3 font-semibold">Plan</th>
+                    <th className="pb-3 font-semibold">Priority</th>
+                    <th className="pb-3 font-semibold">Resolution</th>
+                    <th className="pb-3 font-semibold text-right">Auto assign</th>
                   </tr>
-
-                ))}
-
-              </tbody>
-
-            </table>
-
+                </thead>
+                <tbody className="divide-y divide-slate-50 font-medium text-slate-700">
+                  {rules.map((rule) => (
+                    <tr key={rule.id} className="hover:bg-slate-50/40 transition-colors">
+                      <td className="py-3.5 font-bold text-slate-900">{rule.plan_name}</td>
+                      <td className="py-3.5">
+                        <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold border ${getPriorityBadge(rule.priority)}`}>
+                          {rule.priority}
+                        </span>
+                      </td>
+                      <td className="py-3.5 text-slate-600 font-mono text-xs">{rule.resolution_time_minutes} mins</td>
+                      <td className="py-3.5 text-right">
+                        <span className="inline-flex items-center gap-1 text-xs text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
+                          <ShieldCheck className="w-3 h-3" /> Enabled
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                  {rules.length === 0 && (
+                    <tr>
+                      <td colSpan="4" className="py-8 text-center text-xs text-slate-400 italic">
+                        No operational parameters configured.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
 
         </div>
 
-      </div>
-      <HierarchyPage/>
+        {/* BOTTOM PANEL SECTION: HIERARCHY MAP (Renders clean Split Panel structure automatically) */}
+        <HierarchyPage />
 
+      </div>
     </DashboardLayout>
   )
 }

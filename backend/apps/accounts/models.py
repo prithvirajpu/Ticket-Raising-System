@@ -21,6 +21,9 @@ class User(AbstractBaseUser,PermissionsMixin):
     is_staff=models.BooleanField(default=False)
     is_verified=models.BooleanField(default=False)
     is_blocked=models.BooleanField(default=False)
+
+    is_certified_agent = models.BooleanField(default=False)
+    training_completed = models.BooleanField(default=False)
     
     created_at=models.DateTimeField(auto_now_add=True)
     profile_completed = models.BooleanField(default=False)
