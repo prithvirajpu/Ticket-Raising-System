@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Loader from "../../../components/modals/Loader";
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import { ArrowLeft, User, Clock, AlertCircle, Send, CheckCheck, HelpCircle } from "lucide-react";
-import { getFakeTicketDetail, getTrainingMessages } from "../../../services/ticketService";
+import { getFakeTicketDetail, getTrainingMessages, retryTraining } from "../../../services/ticketService";
 import { getSlaTimer } from "../../../utils/slaTImer";
 import useTrainingChat from "../../../hooks/useTrainingChat";
 import { useAuth } from "../../../auth/AuthContext";
@@ -15,16 +15,21 @@ const AgentFakeTicketDetail = () => {
   const currentUserId = userId;
 
   const {
-    messages,
+    messages,startResolve,
     newMessage,
     setMessages,
     setNewMessage,
     sendMessage,
+    isResolving,setIsResolving,
     isTyping,
+    socketRef,
+    evaluation,setEvaluation,
+    showRetry,setShowRetry,
   } = useTrainingChat(id, currentUserId);
 
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [evaluating, setEvaluating] = useState(false);
   
   // Localized template container target element
   const chatBottomRef = useRef(null);
@@ -64,6 +69,7 @@ const AgentFakeTicketDetail = () => {
     try {
       const res = await getFakeTicketDetail(id);
       setTicket(res.message);
+      console.log('detail page ',res.data)
     } catch (err) {
       console.error(err);
     } finally {
@@ -77,6 +83,39 @@ const AgentFakeTicketDetail = () => {
       if (newMessage.trim()) sendMessage();
     }
   };
+
+const handleRetry = async () => {
+    await retryTraining(id);
+    setMessages([]);
+    setEvaluation(null);
+    setShowRetry(false);
+    setTicket(prev => ({
+        ...prev,
+        status: "OPEN",
+        training_passed: null,
+    }));
+};
+
+    const handleResolveTicket= async()=>{
+      setShowRetry(false);
+      setIsResolving(true);
+    socketRef.current.send(
+      JSON.stringify({
+        type:'resolve_ticket',
+      })
+    )
+  }
+
+console.log("evaluation received", evaluation);
+console.log("ticket status", ticket?.status);
+const trainingPassed =
+  evaluation?.passed ?? ticket?.training_passed;
+
+const isResolved =
+  ticket?.status === "RESOLVED";
+  console.log(ticket);
+console.log("training_passed", ticket?.training_passed);
+console.log("evaluation", evaluation);
 
   if (loading) return <Loader />;
   if (!ticket) return <p className="p-6">Ticket not found</p>;
@@ -99,9 +138,43 @@ const AgentFakeTicketDetail = () => {
             </h1>
           </div>
 
-          <div className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium text-sm">
-            AI Training Mode
-          </div>
+        <div className="text-white px-2 py-2 rounded-lg font-medium text-sm">
+
+  {/* 1. Not resolved */}
+  {!isResolving && !evaluation && (
+    <button
+      onClick={startResolve}
+      className="bg-green-600 text-white px-4 py-2 rounded-lg"
+    >
+      Mark as Resolved
+    </button>
+  )}
+
+  {/* 2. Waiting for AI */}
+  {isResolving && (
+    <div className="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg">
+      Evaluating AI Score...
+    </div>
+  )}
+
+  {/* 3. Result arrived */}
+  {!isResolving && evaluation?.passed === false && (
+    <button
+      onClick={handleRetry}
+      className="bg-red-600 text-white px-4 py-2 rounded-lg"
+    >
+      Retry Training
+    </button>
+  )}
+
+  {!isResolving && evaluation?.passed === true && (
+    <div className="bg-green-100 text-green-700 px-4 py-2 rounded-lg">
+      Certified ✓
+    </div>
+  )}
+
+</div>
+          
         </div>
 
         {/* Master Content Layout Grid */}
@@ -279,6 +352,25 @@ const AgentFakeTicketDetail = () => {
 
         </div>
       </div>
+
+      {evaluation && (
+  <div className="p-4 border rounded-xl bg-gray-50 mt-4">
+    <h3 className="font-bold text-lg">QA Evaluation Result</h3>
+
+    <p>Score: {evaluation.score}</p>
+
+    <p>
+      Status:{" "}
+      <span className={evaluation.passed ? "text-green-600" : "text-red-600"}>
+        {evaluation.passed ? "PASSED" : "FAILED"}
+      </span>
+    </p>
+
+    <p className="text-sm text-gray-600 mt-2">
+      {evaluation.feedback}
+    </p>
+  </div>
+)}
     </DashboardLayout>
   );
 };

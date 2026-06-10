@@ -9,6 +9,9 @@ const useTrainingChat = (ticketId,currentUserId) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [evaluation, setEvaluation] = useState(null);
+  const [showRetry, setShowRetry] = useState(false);
+  const [isResolving, setIsResolving] = useState(false);
 
   useEffect(() => {
     if (!ticketId) return;
@@ -29,6 +32,13 @@ const useTrainingChat = (ticketId,currentUserId) => {
         setIsTyping(data.is_typing);
         return;
       }
+      if (data.type === "evaluation_result") {
+
+  setEvaluation(data);
+  setIsResolving(false);
+  setShowRetry(data.passed === false);
+}
+  
       setMessages((prev) => [...prev, data]);
     };
 
@@ -54,14 +64,25 @@ const useTrainingChat = (ticketId,currentUserId) => {
     setNewMessage("");
   };
 
+const startResolve = () => {
+  setIsResolving(true);
+
+  socketRef.current.send(
+    JSON.stringify({
+      type: "resolve_ticket",
+    })
+  );
+};
+
 
   return {
-    messages,
-    newMessage,
-    setMessages,
-    setNewMessage,
+    messages,newMessage,startResolve,
+    setMessages,setNewMessage,
     sendMessage,
-    isTyping,
+    setIsResolving,isResolving,
+    isTyping,showRetry,
+    socketRef,setShowRetry,
+    evaluation,setEvaluation,
   };
 };
 

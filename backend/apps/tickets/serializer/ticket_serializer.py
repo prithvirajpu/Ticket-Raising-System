@@ -12,7 +12,7 @@ class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model=Ticket
         fields=['id','ticket_code','subject','description','status','issue_type','priority','created_at','sla','created_by_id','assigned_to_id','current_user_id',
-                 'customer_name','customer_email',]
+                 'customer_name','customer_email','training_score','training_passed','training_feedback']
 
     def get_current_user_id(self, obj):
         request = self.context.get("request")

@@ -11,7 +11,7 @@ from apps.tickets.utils import (
     build_ai_history,
     get_ticket
 )
-from apps.tickets.services import get_ai_customer_reply
+from apps.tickets.services import get_ai_customer_reply,evaluate_agent_service
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +42,8 @@ class TrainingChatConsumer(AsyncWebsocketConsumer):
 
         if data.get("type") == "chat_message":
             await self.handle_chat_message(data)
+        if data.get("type") == "resolve_ticket":
+            await self.handle_resolve_ticket()
 
     async def handle_chat_message(self, data):
         message = data.get("message", "").strip()
@@ -142,4 +144,34 @@ class TrainingChatConsumer(AsyncWebsocketConsumer):
                     "is_typing": event["is_typing"],
                 }
             )
+        )
+
+    async def handle_resolve_ticket(self):
+        ticket= await get_ticket(self.ticket_id)
+
+        await database_sync_to_async(ticket.mark_resolved)()
+        await self.channel_layer.group_send(
+            self.room_group_name,{
+                'type':'ticket_resolved',
+                'message':'Ticket marked as resolved'
+            }
+        )
+        asyncio.create_task(evaluate_agent_service(ticket.id))
+    
+    async def ticket_resolved(self, event):
+        await self.send(
+            text_data=json.dumps({
+                "type": "ticket_resolved",
+                "message": event["message"]
+            })
+        )
+        
+    async def evaluation_result(self, event):
+        await self.send(
+            text_data=json.dumps({
+                "type": "evaluation_result",
+                "score": event["score"],
+                "passed": event["passed"],
+                "feedback": event["feedback"],
+            })
         )

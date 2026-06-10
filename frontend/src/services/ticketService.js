@@ -375,3 +375,11 @@ export const getTrainingMessages=async(Id)=>{
         console.log(error)
     }
 }
+export const retryTraining =async(Id)=>{
+    try {
+        const res= await api.post(`/agents/training/${Id}/retry/`)
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+    }
+}
