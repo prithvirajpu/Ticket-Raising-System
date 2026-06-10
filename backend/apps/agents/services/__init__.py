@@ -5,3 +5,4 @@ from .agent_service import (accept_ticket_service,reject_ticket_service,get_agen
 from .agent_summary_service import agent_summary_service
 from .verify_ticket_service import verify_ticket_service
 from .reset_training_ticket import reset_training_ticket
+from .finalize_training import finalize_training

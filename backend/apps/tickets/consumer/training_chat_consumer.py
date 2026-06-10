@@ -150,6 +150,7 @@ class TrainingChatConsumer(AsyncWebsocketConsumer):
         ticket= await get_ticket(self.ticket_id)
 
         await database_sync_to_async(ticket.mark_resolved)()
+
         await self.channel_layer.group_send(
             self.room_group_name,{
                 'type':'ticket_resolved',

@@ -106,16 +106,18 @@ const handleRetry = async () => {
     )
   }
 
-console.log("evaluation received", evaluation);
-console.log("ticket status", ticket?.status);
-const trainingPassed =
-  evaluation?.passed ?? ticket?.training_passed;
+const isPassed =
+  evaluation?.passed === true || ticket?.training_passed === true;
 
-const isResolved =
-  ticket?.status === "RESOLVED";
-  console.log(ticket);
-console.log("training_passed", ticket?.training_passed);
-console.log("evaluation", evaluation);
+const isFailed =
+  !isPassed &&
+  (evaluation?.passed === false || ticket?.training_passed === false);
+
+const isEvaluating =
+  isResolving && !evaluation;
+
+const isPending =
+  !isResolving && !evaluation && !ticket?.training_passed;
 
   if (loading) return <Loader />;
   if (!ticket) return <p className="p-6">Ticket not found</p>;
@@ -140,39 +142,29 @@ console.log("evaluation", evaluation);
 
         <div className="text-white px-2 py-2 rounded-lg font-medium text-sm">
 
-  {/* 1. Not resolved */}
-  {!isResolving && !evaluation && (
-    <button
-      onClick={startResolve}
-      className="bg-green-600 text-white px-4 py-2 rounded-lg"
-    >
-      Mark as Resolved
-    </button>
-  )}
+ {isPending && (
+  <button onClick={startResolve} className="bg-green-600 px-4 py-2 rounded-lg">
+    Mark as Resolved
+  </button>
+)}
 
-  {/* 2. Waiting for AI */}
-  {isResolving && (
-    <div className="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg">
-      Evaluating AI Score...
-    </div>
-  )}
+{isEvaluating && (
+  <div className="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg">
+    Evaluating AI Score...
+  </div>
+)}
 
-  {/* 3. Result arrived */}
-  {!isResolving && evaluation?.passed === false && (
-    <button
-      onClick={handleRetry}
-      className="bg-red-600 text-white px-4 py-2 rounded-lg"
-    >
-      Retry Training
-    </button>
-  )}
+{isFailed && !isEvaluating && (
+  <button onClick={handleRetry} className="bg-red-600 px-4 py-2 rounded-lg">
+    Retry Training
+  </button>
+)}
 
-  {!isResolving && evaluation?.passed === true && (
-    <div className="bg-green-100 text-green-700 px-4 py-2 rounded-lg">
-      Certified ✓
-    </div>
-  )}
-
+{isPassed && (
+  <div className="bg-green-100 text-green-700 px-4 py-2 rounded-lg">
+    Certified ✓
+  </div>
+)}
 </div>
           
         </div>
