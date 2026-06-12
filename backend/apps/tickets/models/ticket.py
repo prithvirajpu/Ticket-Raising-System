@@ -44,9 +44,6 @@ class Ticket(models.Model):
     is_ai_generated = models.BooleanField(default=False)
 
     is_training_ticket = models.BooleanField(default=False)
-    training_score = models.DecimalField(max_digits=4,decimal_places=2,null=True,blank=True)
-    training_passed = models.BooleanField(default=False,null=True,blank=True)
-    training_feedback = models.TextField(blank=True,null=True)
     ai_customer_prompt = models.TextField(blank=True,null=True)
 
     subject=models.CharField(max_length=255)
@@ -54,9 +51,7 @@ class Ticket(models.Model):
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)
 
-    def mark_resolved(self):
-        self.status = "RESOLVED"
-        self.save()
+
     def __str__(self):
         return self.ticket_code
     

@@ -1,24 +1,24 @@
 from rest_framework import status
 from apps.agents.models import TrainingConversation
-from apps.tickets.models import Ticket
+from apps.tickets.models import TicketAssignment
 
 import logging
 logger=logging.getLogger(__name__)
 
 def reset_training_ticket(request,ticket_id):
     try:
-        ticket= Ticket.objects.get(id=ticket_id)
+        assignment= TicketAssignment.objects.get(ticket_id=ticket_id,agent=request.user)
         
         TrainingConversation.objects.filter(
-            ticket=ticket
+            assignment=assignment
         ).delete()
 
-        ticket.training_score = 0
-        ticket.training_passed = False
-        ticket.training_feedback = ""
-        ticket.status = "OPEN"
+        assignment.training_score = 0
+        assignment.training_passed = False
+        assignment.training_feedback = ""
+        assignment.status = "NOT_STARTED"
 
-        ticket.save()
+        assignment.save()
 
         return {
                 "data": {

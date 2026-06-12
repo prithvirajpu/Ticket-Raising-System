@@ -113,5 +113,5 @@ class TrainingMessagesAPIView(APIView):
     permission_classes= [IsAuthenticated]
 
     def get(self, request, ticket_id):
-        result = get_training_messages_service(ticket_id)
+        result = get_training_messages_service(request,ticket_id)
         return return_response(result)

@@ -1,8 +1,16 @@
 from apps.agents.models import TrainingConversation
+from apps.tickets.models import TicketAssignment
+import logging
 
-def get_training_messages_service(ticket_id):
+logger = logging.getLogger(__name__)
+
+def get_training_messages_service(request,ticket_id):
+    logger.info("ticket_id =%s", ticket_id)
+    logger.info("user =%s", request.user.id)
+    assignment= TicketAssignment.objects.get(ticket_id=ticket_id,agent=request.user)
+
     messages = TrainingConversation.objects.filter(
-        ticket_id=ticket_id
+        assignment=assignment
     ).order_by("created_at")
 
     data = []

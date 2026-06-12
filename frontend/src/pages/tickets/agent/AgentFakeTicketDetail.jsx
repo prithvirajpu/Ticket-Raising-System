@@ -69,7 +69,7 @@ const AgentFakeTicketDetail = () => {
     try {
       const res = await getFakeTicketDetail(id);
       setTicket(res.message);
-      console.log('detail page ',res.data)
+      console.log('detail page ',res)
     } catch (err) {
       console.error(err);
     } finally {
@@ -91,8 +91,8 @@ const handleRetry = async () => {
     setShowRetry(false);
     setTicket(prev => ({
         ...prev,
-        status: "OPEN",
         training_passed: null,
+        ticket:{...prev.ticket,status:'OPEN'},
     }));
 };
 
@@ -136,7 +136,7 @@ const isPending =
               <ArrowLeft size={20} />
             </button>
             <h1 className="text-xl font-bold">
-              Ticket #{ticket?.ticket_code || id}
+              Ticket #{ticket?.ticket?.ticket_code || id}
             </h1>
           </div>
 
@@ -187,7 +187,7 @@ const isPending =
                 </div>
                 <div className="flex items-center gap-2 font-medium capitalize">
                   <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                  {ticket?.status || "In progress"}
+                  {ticket?.ticket?.status || "In progress"}
                 </div>
               </div>
 
@@ -198,7 +198,7 @@ const isPending =
                   Priority
                 </div>
                 <span className="bg-pink-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
-                  {ticket?.priority || "High"}
+                  {ticket?.ticket?.priority || "High"}
                 </span>
               </div>
 
@@ -218,8 +218,8 @@ const isPending =
                   Created
                 </div>
                 <p className="text-sm font-medium">
-                  {ticket?.created_at
-                    ? new Date(ticket.created_at).toLocaleString()
+                  {ticket?.ticket?.created_at
+                    ? new Date(ticket.ticket?.created_at).toLocaleString()
                     : "1/3/2026, 10:30:00 AM"}
                 </p>
               </div>
@@ -242,7 +242,7 @@ const isPending =
               <div className="mx-6 mt-4 flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-2 text-sm">
                 <HelpCircle size={16} className="text-yellow-600 shrink-0" />
                 <span className="font-semibold text-gray-800 shrink-0">Issue:</span>
-                <p className="text-gray-700 truncate">{ticket?.subject}</p>
+                <p className="text-gray-700 truncate">{ticket?.ticket?.subject}</p>
               </div>
 
               {/* Chat Timeline Area */}
