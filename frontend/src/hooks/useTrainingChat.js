@@ -13,6 +13,20 @@ const useTrainingChat = (ticketId,currentUserId) => {
   const [showRetry, setShowRetry] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
 
+
+  useEffect(() => {
+  console.log("EVALUATION STATE CHANGED:", evaluation);
+}, [evaluation]);
+
+  useEffect(() => {
+  console.log("Training hook mounted");
+
+  return () => {
+    console.log("Training hook unmounted");
+  };
+}, []);
+
+
   useEffect(() => {
     if (!ticketId) return;
 

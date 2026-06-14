@@ -19,7 +19,8 @@ def get_next_available_agent(ticket):
 
     agents = User.objects.filter(
         role='AGENT',
-        is_active=True
+        is_active=True,
+        is_certified_agent=True
     ).exclude(
         id=ticket.assigned_to_id
     ).exclude(

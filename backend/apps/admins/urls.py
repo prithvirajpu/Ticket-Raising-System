@@ -16,5 +16,4 @@ urlpatterns=[
     path("users/all/", AllUsersView.as_view()),
     path("hierarchy/", HierarchyView.as_view()),
 
-
 ]

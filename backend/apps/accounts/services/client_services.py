@@ -9,16 +9,6 @@ User=get_user_model()
 
 def client_signup_service(serializer):
     email=serializer.validated_data['email']
-    existing_client=ClientProfile.objects.exists()
-
-    if existing_client:
-        return {
-            'data': {},
-            'errors': {
-                'details': "New accounts will be a future feature."
-            },
-            'status': status.HTTP_400_BAD_REQUEST
-        }
     
     serializer.save()
     EmailOTP.objects.filter(email=email,purpose='SIGNUP').delete()

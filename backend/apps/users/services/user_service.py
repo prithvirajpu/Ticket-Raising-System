@@ -52,7 +52,7 @@ def create_ticket_service(data,user):
                     "errors": {"details": "No team lead assigned to client"},
                     "status": status.HTTP_400_BAD_REQUEST
                 }
-            agents=User.objects.filter(role='AGENT',team_lead=team_lead,is_active=True)
+            agents=User.objects.filter(role='AGENT',team_lead=team_lead,is_active=True,is_certified_agent=True,)
             if not agents.exists():
                 return {
                     "data": None,

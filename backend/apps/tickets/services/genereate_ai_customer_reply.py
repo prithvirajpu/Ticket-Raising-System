@@ -8,8 +8,8 @@ logger = logging.getLogger(__name__)
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
-def get_ai_customer_reply(ticket, history):
-    logger.info('ai customer prompt: %s', ticket.ai_customer_prompt)
+def get_ai_customer_reply(assignement, history):
+    logger.info('ai customer prompt: %s', assignement.ticket.ai_customer_prompt)
 
 
     system_prompt = f"""
@@ -17,7 +17,7 @@ You are roleplaying a customer.
 
 Customer Persona:
 
-{ticket.ai_customer_prompt}
+{assignement.ticket.ai_customer_prompt}
 
 Rules:
 

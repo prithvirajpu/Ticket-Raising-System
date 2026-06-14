@@ -29,7 +29,7 @@ const AgentFakeTicketDetail = () => {
 
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [evaluating, setEvaluating] = useState(false);
+  // const [evaluating, setEvaluating] = useState(false);
   
   // Localized template container target element
   const chatBottomRef = useRef(null);
@@ -38,6 +38,10 @@ const AgentFakeTicketDetail = () => {
     fetchTicket();
     fetchMessages();
   }, [id, currentUserId]);
+
+  useEffect(() => {
+  console.log("COMPONENT RECEIVED EVALUATION:", evaluation);
+}, [evaluation]);
 
   // CRITICAL FIX: Explicitly watch the messages array inside this view context
   useEffect(() => {
@@ -85,7 +89,7 @@ const AgentFakeTicketDetail = () => {
   };
 
 const handleRetry = async () => {
-    await retryTraining(id);
+    await retryTraining(id); 
     setMessages([]);
     setEvaluation(null);
     setShowRetry(false);
@@ -106,18 +110,23 @@ const handleRetry = async () => {
     )
   }
 
-const isPassed =
-  evaluation?.passed === true || ticket?.training_passed === true;
+const trainingPassed =
+  evaluation?.passed ?? ticket?.training_passed;
 
-const isFailed =
-  !isPassed &&
-  (evaluation?.passed === false || ticket?.training_passed === false);
+const isPassed = trainingPassed === true;
 
-const isEvaluating =
-  isResolving && !evaluation;
+const isFailed = trainingPassed === false;
+
+const isEvaluating = isResolving && !evaluation;
 
 const isPending =
-  !isResolving && !evaluation && !ticket?.training_passed;
+  trainingPassed == null && !isEvaluating;
+  console.log({
+  trainingPassed: ticket?.training_passed,
+  evaluation,
+  isPending,
+  isFailed,
+});
 
   if (loading) return <Loader />;
   if (!ticket) return <p className="p-6">Ticket not found</p>;
@@ -168,6 +177,24 @@ const isPending =
 </div>
           
         </div>
+              {evaluation && (
+  <div className="p-4 border rounded-xl bg-gray-50 mt-4">
+    <h3 className="font-bold text-lg">QA Evaluation Result</h3>
+
+    <p>Score: {evaluation.score}</p>
+
+    <p>
+      Status:{" "}
+      <span className={evaluation.passed ? "text-green-600" : "text-red-600"}>
+        {evaluation.passed ? "PASSED" : "FAILED"}
+      </span>
+    </p>
+
+    <p className="text-sm text-gray-600 mt-2">
+      {evaluation.feedback}
+    </p>
+  </div>
+)}
 
         {/* Master Content Layout Grid */}
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8">
@@ -345,24 +372,7 @@ const isPending =
         </div>
       </div>
 
-      {evaluation && (
-  <div className="p-4 border rounded-xl bg-gray-50 mt-4">
-    <h3 className="font-bold text-lg">QA Evaluation Result</h3>
 
-    <p>Score: {evaluation.score}</p>
-
-    <p>
-      Status:{" "}
-      <span className={evaluation.passed ? "text-green-600" : "text-red-600"}>
-        {evaluation.passed ? "PASSED" : "FAILED"}
-      </span>
-    </p>
-
-    <p className="text-sm text-gray-600 mt-2">
-      {evaluation.feedback}
-    </p>
-  </div>
-)}
     </DashboardLayout>
   );
 };

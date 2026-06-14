@@ -350,9 +350,9 @@ useEffect(() => {
                 />
 
                 <div className="absolute right-3 flex items-center gap-2">
-                  <button className="p-2 text-gray-400 hover:text-gray-600">
+                  {/* <button className="p-2 text-gray-400 hover:text-gray-600">
                     <Paperclip size={20} />
-                  </button>
+                  </button> */}
 
                   <button
                     onClick={handleSendMessage}

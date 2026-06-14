@@ -1,18 +1,10 @@
 import json
 import asyncio
-import logging
-
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
-
-from apps.tickets.utils import (
-    save_agent_message,
-    save_ai_message,
-    build_ai_history,mark_training_resolved,
-    get_ticket,get_training_assignment
-)
+from apps.tickets.utils import (save_agent_message,save_ai_message,build_ai_history,mark_training_resolved,get_ticket,get_training_assignment)
 from apps.tickets.services import get_ai_customer_reply,evaluate_agent_service
-
+import logging
 logger = logging.getLogger(__name__)
 
 

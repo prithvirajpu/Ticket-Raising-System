@@ -12,11 +12,16 @@ def reset_training_ticket(request,ticket_id):
         TrainingConversation.objects.filter(
             assignment=assignment
         ).delete()
+        logger.info(
+    "Before reset: passed=%s status=%s",
+    assignment.training_passed,
+    assignment.status,
+)
 
         assignment.training_score = 0
-        assignment.training_passed = False
+        assignment.training_passed = None
         assignment.training_feedback = ""
-        assignment.status = "NOT_STARTED"
+        assignment.training_status = "NOT_STARTED"
 
         assignment.save()
 
