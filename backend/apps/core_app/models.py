@@ -26,7 +26,7 @@ class AgentApplication(models.Model):
     ]
     full_name=models.CharField(max_length=255)
     email=models.EmailField(unique=True)
-    phone=models.CharField(max_length=20,default='0000000000')
+    phone=models.CharField(max_length=20,null=True,blank=True)
     skills=models.TextField()
     resume=models.FileField(upload_to='resumes/',storage=raw_storage)
     password=models.CharField(max_length=255)

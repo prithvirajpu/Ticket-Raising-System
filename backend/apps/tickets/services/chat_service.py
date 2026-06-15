@@ -44,7 +44,7 @@ def send_message_service(user,ticket_id,message):
             message=f"{user.name }: sent you a message",
             data={
                 "ticket_id": ticket.id,
-                "ticket_code": ticket.ticket_code
+                "ticket_code": ticket.ticket_code,
             }
         )
     

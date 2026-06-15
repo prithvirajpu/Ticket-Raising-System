@@ -74,7 +74,7 @@ def create_ticket_service(data,user):
                 )
             TicketActivity.objects.create(ticket=ticket,action='CREATED',performed_by=user,description='Ticket created by customer')
             attach_sla_to_ticket(ticket)
-            expiry_time=timezone.now()+timedelta(minutes=2)
+            expiry_time=timezone.now()+timedelta(minutes=1)
             assignments=[
                 TicketAssignment(ticket=ticket,agent=agent,status='PENDING',expires_at=expiry_time)
                 for agent in agents

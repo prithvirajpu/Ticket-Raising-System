@@ -69,8 +69,7 @@ const NotificationProvider = ({children}) => {
             console.log('maked read')
         } catch (error) {
             console.log(error)
-        }
-        }
+        }}
     }
 
     const handleMarkAllRead = async() => {

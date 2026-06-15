@@ -1,7 +1,8 @@
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from apps.tickets.models import Notification
-
+import logging
+logger = logging.getLogger(__name__)
 
 def send_notification(
     user_id,
@@ -17,7 +18,7 @@ def send_notification(
         message=message,
         data=data or {}
     )
-
+    logger.info('sending WS notification TO %s',user_id)
     channel_layer = get_channel_layer()
 
     async_to_sync(channel_layer.group_send)(

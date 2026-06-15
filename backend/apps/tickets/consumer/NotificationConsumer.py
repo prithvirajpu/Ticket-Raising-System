@@ -32,7 +32,7 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
         )
     
     async def notify(self, event):
-        logger.info('notification event %s',event)
+        logger.info('NOTIFY HANDLER CALLED %s',event)
         await self.send(text_data=json.dumps({
             "type": "notification",
             "id": event["id"],
