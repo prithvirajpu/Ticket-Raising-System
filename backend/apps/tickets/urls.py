@@ -2,9 +2,9 @@ from django.urls import path
 from .views import (
     SendMessageView,ResolveTicketView,NotificationListView,
     TicketMessageView,DashboardView,EscalatedTicketView,
-
+    
     MarkAllNotificationsReadView,TrainingMessagesAPIView,
-    MarkNotificationReadView
+    MarkNotificationReadView,
 
 )
 
@@ -22,4 +22,5 @@ urlpatterns = [
     path('notifications/',NotificationListView.as_view()),
     path('notifications/<int:notification_id>/read/',MarkNotificationReadView.as_view()),
     path('notifications/mark-all-read/',MarkAllNotificationsReadView.as_view()),
+
 ]

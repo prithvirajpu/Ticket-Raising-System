@@ -8,6 +8,8 @@ class ClientProfile(models.Model):
     company_name=models.CharField(max_length=255)
     billing_email=models.EmailField()
 
+    stripe_customer_id = models.CharField(max_length=255,null=True,blank=True)
+
     team_lead=models.ForeignKey(User,on_delete=models.SET_NULL,null=True,blank=True,related_name='clients')
     manager = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='clients_as_manager')
 

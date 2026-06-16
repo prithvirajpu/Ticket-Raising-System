@@ -8,7 +8,10 @@ from apps.core_app.constants import ApprovalStatus
 from apps.core_app.utils import return_response
 from apps.core_app.models import AgentApplication
 from rest_framework.parsers import MultiPartParser, FormParser
-from .services import (handle_demo_payment_service,plan_fetch_service,update_client_profile_service,upload_client_doc_service)
+from .services import (handle_demo_payment_service,plan_fetch_service,
+                       update_client_profile_service,upload_client_doc_service,
+                       current_subscription_service,stripe_checkout_service,
+                       handle_stripe_webhook_service,cancel_subscription_service)
 from ..tickets.serializer import TicketSerializer
 from django.contrib.auth import get_user_model
 
@@ -46,9 +49,31 @@ class SubscriptionPlanView(APIView):
         result=plan_fetch_service(request)
         return return_response(result)
     
-class HandleDemoPaymentView(APIView):
-    permission_classes=[IsAuthenticated]
+class CurrentSubscriptionAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        result = current_subscription_service(request)
+        return return_response(result)
+    
+class CreateCheckoutSessionAPIView(APIView):
+    permission_classes =[IsAuthenticated]
 
     def post(self,request):
-        result= handle_demo_payment_service(request)
+        result= stripe_checkout_service(request)
+        return return_response(result)
+
+class StripeWebhookAPIView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request):
+        result = handle_stripe_webhook_service(request)
+        return return_response(result)
+    
+class CancelSubscriptionAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        result = cancel_subscription_service(request)
         return return_response(result)

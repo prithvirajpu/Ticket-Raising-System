@@ -15,6 +15,7 @@ from rest_framework.permissions import AllowAny
 
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
+
     
 
 User = get_user_model()
@@ -115,3 +116,4 @@ class TrainingMessagesAPIView(APIView):
     def get(self, request, ticket_id):
         result = get_training_messages_service(request,ticket_id)
         return return_response(result)
+    

@@ -7,3 +7,4 @@ from .ClientDocument import ClientDocument,DocumentSummary
 from .chat_models import TicketChat,MessageRead,TicketChatParticipant
 from .ticket_activity import TicketActivity
 from .Notification import Notification
+from .wallets import Wallet,WithdrawalRequest,WalletTransaction,IncentiveCredit

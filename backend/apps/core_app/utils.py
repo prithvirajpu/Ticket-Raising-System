@@ -62,34 +62,23 @@ def return_response(result):
     """
 
     if result is None:
-
         result = {
-
             "data": None,
-
             "errors": {
                 "details": "No data available"
             },
-
             "status": 200
         }
 
     response_data = {
-
         "data": result.get("data", None),
-
         "errors": result.get("errors", None),
     }
-
     if result.get("paginator"):
-
         response_data["paginator"] = result.get(
             "paginator"
         )
-
     return Response(
-
         response_data,
-
         status=result.get("status", 200)
     )

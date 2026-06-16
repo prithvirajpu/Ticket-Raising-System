@@ -281,12 +281,30 @@ export const getSubscriptionPlans= async ()=>{
     }
 }
 
-export const paymentUpdate= async(planId)=>{
+export const getCurrentPlan= async()=>{
     try {
-        const res= await api.post(`/clients/subscription/demo-payment/`,{plan_id:planId})
+        const res= await api.get('/clients/subscription/current/');
         return res.data.data
     } catch (error) {
-        console.log('error in demo payment')
+        notifyError('current subscription plan fetch error')
+    }
+}
+
+export const cancelSubscription=async()=>{
+    try {
+        const res= await api.post('/clients/subscription/cancel/');
+    return res.data.data
+    } catch (error) {
+        notifyError('cancel subscription error ')
+    }
+}
+
+export const createCheckoutSession= async(planId)=>{
+    try {
+        const res= await api.post(`/clients/subscriptions/checkout/`,{plan_id:planId})
+        return res.data.data
+    } catch (error) {
+        console.log('error in payment')
     }
 }
 
