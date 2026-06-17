@@ -1,5 +1,5 @@
 from django.db import models
-from apps.tickets.models import ClientProfile
+from apps.clients.models import ClientProfile
 from apps.accounts.models import User
 
 # Create your models here.

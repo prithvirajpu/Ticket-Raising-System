@@ -1,6 +1,6 @@
 import stripe
 from django.conf import settings
-from apps.tickets.models import SubscriptionPlan
+from apps.clients.models import SubscriptionPlan
 
 from rest_framework import status
 import traceback

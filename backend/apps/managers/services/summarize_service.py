@@ -1,6 +1,6 @@
 from apps.tickets.models import DocumentSummary
 from apps.tickets.models import ClientDocument
-from apps.tickets.models import ClientProfile
+from apps.clients.models import ClientProfile
 from rest_framework import status
 from django.contrib.auth import get_user_model
 User= get_user_model()
@@ -158,7 +158,7 @@ def submit_summary_service(request, doc_id):
 
         doc = ClientDocument.objects.get(id=doc_id)
 
-        from apps.tickets.models import ClientProfile
+        from apps.clients.models import ClientProfile
 
         client_profile = ClientProfile.objects.get(user=doc.client)
         team_lead = client_profile.team_lead

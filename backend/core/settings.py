@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'apps.teamleads',
     'apps.managers',
     'apps.tickets',
+    'apps.payments',
     
 
     'rest_framework',

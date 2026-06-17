@@ -1,7 +1,9 @@
 import stripe
 from django.conf import settings
 from rest_framework import status
-from apps.clients.services.checkoutprocess import process_subscription_updated,process_checkout_completed,process_subscription_canceled
+from apps.clients.services.checkoutprocess import (process_subscription_renewal,process_subscription_updated,
+                                                   process_checkout_completed,process_subscription_canceled,
+                                                   process_payment_failed)
 import logging
 logger = logging.getLogger(__name__)
 
@@ -20,13 +22,12 @@ def handle_stripe_webhook_service(request):
             'status':status.HTTP_400_BAD_REQUEST
         }
     
-    if event['type'] in [
-                'checkout.session.completed',
-                'invoice.payment_succeeded',
-                'customer.subscription.created'
-            ]:
+    if event['type'] =='checkout.session.completed':
         process_checkout_completed(event)
-
+    elif event['type'] == 'invoice.payment_succeeded':
+        process_subscription_renewal(event)
+    elif event['type'] == 'invoice.payment_failed':
+        process_payment_failed(event)
     elif event['type'] == 'customer.subscription.updated':
         process_subscription_updated(event)
     elif event['type'] == 'customer.subscription.deleted':

@@ -2,9 +2,9 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import User
-from apps.tickets.models import Wallet
+from apps.payments.models import Wallet
 
 @receiver(post_save, sender=User)
 def create_wallet(sender, instance, created, **kwargs):
-    if created:
-        Wallet.objects.create(user=instance)
+    if created and instance.role in ['AGENT','TEAM_LEAD','MANAGER']:
+        Wallet.objects.get_or_create(user=instance)

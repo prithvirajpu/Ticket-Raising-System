@@ -2,7 +2,7 @@ from rest_framework import status
 from django.db import transaction
 from django.contrib.auth import get_user_model
 from apps.core_app.models import AgentApplication,AgentCertificate
-from apps.tickets.models import ClientProfile
+from apps.clients.models import ClientProfile
 from apps.core_app.constants import UserRole, ApprovalStatus
 from rest_framework.pagination import PageNumberPagination
 

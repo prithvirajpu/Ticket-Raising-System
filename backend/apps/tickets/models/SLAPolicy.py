@@ -1,5 +1,5 @@
 from django.db import models
-from .SubscriptionPlan import SubscriptionPlan
+from ...clients.models.SubscriptionPlan import SubscriptionPlan
 from .ticket import Ticket
 
 class SLAPolicy(models.Model):

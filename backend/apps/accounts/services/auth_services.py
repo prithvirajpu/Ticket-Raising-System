@@ -11,7 +11,7 @@ from google.auth.transport import requests
 from google.oauth2 import id_token as google_id_token
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from apps.tickets.models import ClientProfile
+from apps.clients.models import ClientProfile
 import logging
 logger=logging.getLogger(__name__)
 

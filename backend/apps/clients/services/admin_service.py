@@ -1,6 +1,6 @@
 from rest_framework import status
 from django.db import transaction
-from apps.tickets.models import ClientProfile
+from apps.clients.models import ClientProfile
 
 def update_client_profile_service(user, data):
 

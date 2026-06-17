@@ -14,7 +14,7 @@ def sso_login_service(request,token):
         email=payload.get('email')
         app_name= payload.get('app_name','Shopkickora')
         name= payload.get('username','User')
-        from apps.tickets.models import ClientProfile
+        from apps.clients.models import ClientProfile
         client_profile=None
         if app_name:
             client_profile = ClientProfile.objects.filter(

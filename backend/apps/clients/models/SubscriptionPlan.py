@@ -17,14 +17,16 @@ class ClientSubscription(models.Model):
     STATUS_FIELDS=[
         ("ACTIVE", "Active"),
         ("CANCEL_SCHEDULED", "Cancel_scheduled"),
+        ("PAST_DUE", "Past Due"),
         ("EXPIRED", "Expired"),
         ("CANCELLED", "Cancelled")
     ]
-    client=models.ForeignKey('tickets.ClientProfile',on_delete=models.CASCADE,related_name="subscriptions")
-    plan =models.ForeignKey('tickets.SubscriptionPlan',on_delete=models.CASCADE)
+    client=models.ForeignKey('clients.ClientProfile',on_delete=models.CASCADE,related_name="subscriptions")
+    plan =models.ForeignKey('clients.SubscriptionPlan',on_delete=models.CASCADE)
 
     stripe_subscription_id = models.CharField(max_length=255,null=True,blank=True,unique=True)
     cancel_at_period_end = models.BooleanField(default=False)
+    current_period_end = models.DateTimeField(null=True, blank=True)
 
     start_date=models.DateField()
     end_date=models.DateField()

@@ -1,5 +1,5 @@
-from apps.tickets.models import ClientSubscription, TicketSLATracking
-from apps.tickets.models import SLAPolicy
+from apps.clients.models import ClientSubscription
+from apps.tickets.models import SLAPolicy,TicketSLATracking
 from datetime import timedelta
 from django.utils import timezone
 

@@ -1,7 +1,8 @@
+import stripe
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta,datetime
 from rest_framework import status
-from apps.tickets.models import ClientSubscription,ClientProfile,SubscriptionPlan
+from apps.clients.models import ClientSubscription,ClientProfile,SubscriptionPlan
 from django.contrib.auth import get_user_model
 
 import logging
@@ -45,8 +46,15 @@ def process_checkout_completed(event):
         client_profile.save()
 
         ClientSubscription.objects.filter(client=client_profile,status='ACTIVE').update(status='EXPIRED')
+        stripe_sub = stripe.Subscription.retrieve(
+            stripe_subscription_id
+        )
+        current_period_end = datetime.fromtimestamp(
+            stripe_sub.current_period_end,
+            tz=timezone.utc
+        )
         start_date = timezone.now().date()
-        end_date = (start_date +timedelta(days=plan.duration_days))
+        end_date = current_period_end.date()
         existing = ClientSubscription.objects.filter(
             stripe_subscription_id=
                 stripe_subscription_id
@@ -60,7 +68,8 @@ def process_checkout_completed(event):
             }
         ClientSubscription.objects.create(client=client_profile,plan=plan,
                                         stripe_subscription_id=stripe_subscription_id,
-                                        start_date=start_date,end_date=end_date,status='ACTIVE')
+                                        start_date=start_date,end_date=end_date,
+                                        current_period_end=current_period_end,status='ACTIVE')
         return {
             "data": {"message":"Subscription activated"},
             "errors": {},
@@ -81,7 +90,6 @@ def process_subscription_canceled(event):
 
         sub = ClientSubscription.objects.filter(
             stripe_subscription_id=stripe_subscription_id,
-            status='ACTIVE'
         ).first()
 
         if not sub:
@@ -89,6 +97,7 @@ def process_subscription_canceled(event):
             return
 
         sub.status = "CANCELLED"
+        sub.cancel_at_period_end= True
         sub.save()
 
         logger.info(f"Subscription cancelled: {stripe_subscription_id}")
@@ -100,12 +109,6 @@ def process_subscription_updated(event):
     try:
         subscription = event['data']['object']
         stripe_subscription_id = subscription['id']
-        logger.info(f"EVENT SUB ID: {stripe_subscription_id}")
-        count = ClientSubscription.objects.filter(
-    stripe_subscription_id=stripe_subscription_id
-).count()
-
-        logger.info(f"DB MATCH COUNT: {count}")
         cancel_at_period_end = getattr(subscription, "cancel_at_period_end", False)
 
         sub = ClientSubscription.objects.filter(
@@ -114,11 +117,16 @@ def process_subscription_updated(event):
 
         if not sub:
             return
-
+        sub.cancel_at_period_end=cancel_at_period_end
+        current_period_end = datetime.fromtimestamp(
+            subscription.current_period_end,
+            tz=timezone.utc
+        )
+        sub.current_period_end = current_period_end
+        sub.end_date = current_period_end.date()
         if cancel_at_period_end:
             sub.status = "CANCEL_SCHEDULED"
         else:
-            # user reactivated subscription
             sub.status = "ACTIVE"
 
         sub.save()
@@ -127,3 +135,67 @@ def process_subscription_updated(event):
 
     except Exception as e:
         logger.exception(f"Subscription update failed: {str(e)}")
+
+
+def process_subscription_renewal(event):
+    try:
+        invoice = event['data']['object']
+
+        stripe_subscription_id = invoice['subscription']
+
+        sub = ClientSubscription.objects.filter(
+            stripe_subscription_id=stripe_subscription_id
+        ).first()
+
+        if not sub:
+            logger.warning(
+                f"Subscription not found: {stripe_subscription_id}"
+            )
+            return
+        stripe_sub = stripe.Subscription.retrieve(
+            stripe_subscription_id
+        )
+        current_period_end = datetime.fromtimestamp(
+            stripe_sub.current_period_end,
+            tz=timezone.utc
+        )
+
+        sub.current_period_end = current_period_end
+        sub.end_date = current_period_end.date()
+        sub.status = "ACTIVE"
+        sub.cancel_at_period_end = False
+        sub.save()
+
+        logger.info(
+            f"Subscription renewed: {stripe_subscription_id}"
+        )
+
+    except Exception as e:
+        logger.exception(
+            f"Renewal webhook failed: {str(e)}"
+        )
+
+def process_payment_failed(event):
+    try:
+        invoice = event['data']['object']
+
+        stripe_subscription_id = invoice['subscription']
+
+        sub = ClientSubscription.objects.filter(
+            stripe_subscription_id=stripe_subscription_id
+        ).first()
+
+        if not sub:
+            return
+
+        sub.status = "PAST_DUE"
+        sub.save()
+
+        logger.warning(
+            f"Payment failed for {stripe_subscription_id}"
+        )
+
+    except Exception as e:
+        logger.exception(
+            f"Payment failed webhook error: {str(e)}"
+        )

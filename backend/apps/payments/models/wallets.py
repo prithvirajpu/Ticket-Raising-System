@@ -14,6 +14,7 @@ class Wallet(models.Model):
 
 class WalletTransaction(models.Model):
     TRANSACTION_TYPES=[
+        ('SALARY', 'Salary'),
         ('INCENTIVE','Incentive'),
         ('BONUS','Bonus'),
         ('WITHDRAWAL','Withdrawal'),
@@ -43,19 +44,3 @@ class WithdrawalRequest(models.Model):
     status= models.CharField(choices=STATUS_CHOICES,max_length=20,default='PENDING')
     remarks = models.TextField(blank=True)
     requested_at= models.DateTimeField(auto_now_add=True)
-
-class IncentiveCredit(models.Model):
-
-    user = models.ForeignKey(User,on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=12,decimal_places=2)
-    month = models.IntegerField()
-    year = models.IntegerField()
-    remarks = models.TextField()
-
-    created_by = models.ForeignKey(User,on_delete=models.SET_NULL,null=True,related_name="incentives_created")
-    transaction = models.OneToOneField('WalletTransaction',on_delete=models.SET_NULL,null=True,blank=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('user', 'month', 'year')

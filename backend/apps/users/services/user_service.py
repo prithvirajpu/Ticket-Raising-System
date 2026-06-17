@@ -1,5 +1,6 @@
 from rest_framework import status
-from apps.tickets.models import Ticket,TicketAssignment,ClientSubscription,TicketSLATracking,TicketReview,TicketActivity,Notification
+from apps.tickets.models import Ticket,TicketAssignment,TicketSLATracking,TicketReview,TicketActivity,Notification
+from apps.clients.models import ClientSubscription
 from apps.tickets.serializer import TicketSerializer,TicketActivitySerializer
 from apps.tickets.utils import send_notification
 from django.db import transaction

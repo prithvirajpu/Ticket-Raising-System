@@ -1,4 +1,4 @@
-from ...tickets.models import SubscriptionPlan,ClientProfile,ClientSubscription
+from apps.clients.models import SubscriptionPlan,ClientProfile,ClientSubscription
 from rest_framework import status
 from datetime import timedelta
 from django.utils import timezone

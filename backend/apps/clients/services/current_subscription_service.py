@@ -1,4 +1,4 @@
-from apps.tickets.models import ClientSubscription
+from apps.clients.models import ClientSubscription
 from rest_framework import status
 
 import logging

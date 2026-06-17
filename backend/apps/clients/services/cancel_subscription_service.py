@@ -1,7 +1,7 @@
 import stripe
 from django.conf import settings
 from rest_framework import status
-from apps.tickets.models import ClientSubscription
+from apps.clients.models import ClientSubscription
 
 import logging
 logger = logging.getLogger(__name__)
