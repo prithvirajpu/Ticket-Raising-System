@@ -40,7 +40,7 @@ def calculate_agent_score(agent,month,year):
     return score
 
 def get_best_agent():
-    agents= User.objects.filter(role='AGENT',is_active=True)
+    agents= User.objects.filter(role='AGENT',is_active=True,is_certified_agent=True)
     best_agent=None
     best_score=-1
 

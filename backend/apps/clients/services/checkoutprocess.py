@@ -9,84 +9,199 @@ import logging
 logger = logging.getLogger(__name__)
 User =get_user_model()
 
+def _get_metadata(obj):
+    """Robust extraction of metadata from Stripe objects."""
+    if not obj:
+        return {}
+    
+    metadata_obj = getattr(obj, 'metadata', None)
+    if metadata_obj is None:
+        return {}
+    
+    if isinstance(metadata_obj, dict):
+        return metadata_obj
+    
+    if hasattr(metadata_obj, '_values'):
+        values = getattr(metadata_obj, '_values', {})
+        if isinstance(values, dict):
+            return values
+    
+    if hasattr(metadata_obj, '_data'):
+        data = getattr(metadata_obj, '_data', {})
+        if isinstance(data, dict):
+            return data
+    
+    try:
+        if hasattr(metadata_obj, 'keys'):
+            return {k: metadata_obj[k] for k in metadata_obj.keys()}
+    except:
+        pass
+    
+    try:
+        import stripe
+        if hasattr(stripe.util, 'convert_to_dict'):
+            converted = stripe.util.convert_to_dict(metadata_obj)
+            if isinstance(converted, dict):
+                return converted
+    except:
+        pass
+    
+    logger.warning(f"Could not extract metadata. Type: {type(metadata_obj)}")
+    return {}
+
+
+def _safe_getattr(obj, attr, default=None):
+    """Robust attribute access for Stripe objects."""
+    if not obj:
+        return default
+    
+    try:
+        # Direct attribute
+        value = getattr(obj, attr, None)
+        if value is not None:
+            return value
+    except:
+        pass
+
+    # Internal _data
+    try:
+        if hasattr(obj, '_data') and attr in obj._data:
+            return obj._data[attr]
+    except:
+        pass
+
+    # Stripe convert_to_dict
+    try:
+        from stripe import util
+        data = util.convert_to_dict(obj)
+        return data.get(attr, default)
+    except:
+        pass
+
+    return default
+    
+    
 def process_checkout_completed(event):
     try:
-        session= event['data']['object']
-        metadata = session["metadata"]
-        logger.info(f"Checkout session: {session}")
-        logger.info(f"Metadata: {metadata}")
-        plan_id = metadata["plan_id"]
-        user_id = metadata["user_id"]
-        stripe_subscription_id = session["subscription"]
-        stripe_customer_id = session["customer"]
+        session = event["data"]["object"]
 
-        user= User.objects.filter(id=user_id).first()
+        logger.info(f"[checkout.session.completed] session_id={session.id}")
 
+        metadata = _get_metadata(session)
+        logger.info(f"✅ Session metadata extracted: {metadata}")
+
+        plan_id = metadata.get("plan_id")
+        user_id = metadata.get("user_id")
+
+        if not user_id or not plan_id:
+            logger.error("Missing metadata in checkout.session.completed")
+            return
+
+        user = User.objects.filter(id=user_id).first()
         if not user:
-            return {
-                'data':None,
-                'errors':{"details":"User not found"},
-                'status':status.HTTP_404_NOT_FOUND
-            }
-        client_profile= ClientProfile.objects.filter(user=user).first()
+            logger.error(f"User not found: {user_id}")
+            return
+
+        client_profile = ClientProfile.objects.filter(user=user).first()
         if not client_profile:
-            return {
-                'data':None,
-                'errors':{"details":"Client profile not found"},
-                'status':status.HTTP_404_NOT_FOUND
-            }
+            logger.error(f"ClientProfile not found for user {user_id}")
+            return
+
+        client_profile.stripe_customer_id = getattr(session, "customer", None)
+        client_profile.save(update_fields=["stripe_customer_id"])
+
+        logger.info(
+            f"[checkout.session.completed] saved stripe_customer_id={client_profile.stripe_customer_id}"
+        )
+
+    except Exception as e:
+        logger.exception(f"checkout.session.completed failed: {str(e)}")
+
+
+def process_subscription_created(event):
+    try:
+        subscription = event["data"]["object"]
+        sub_id = _safe_getattr(subscription, "id")
+        customer_id = _safe_getattr(subscription, "customer")
+
+        logger.info(f"[subscription.created] id={sub_id}")
+
+        metadata = _get_metadata(subscription)
+        logger.info(f"✅ Subscription metadata: {metadata}")
+
+        plan_id = metadata.get("plan_id")
+        user_id = metadata.get("user_id")
+
+        if not sub_id:
+            logger.error("Missing subscription id")
+            return
+
+        if not user_id or not plan_id:
+            logger.error(f"❌ Missing metadata. Got: {metadata}")
+            return
+
+        user = User.objects.filter(id=user_id).first()
+        if not user:
+            logger.error(f"User not found: {user_id}")
+            return
+
+        client_profile = ClientProfile.objects.filter(user=user).first()
+        if not client_profile:
+            logger.error(f"ClientProfile not found: {user_id}")
+            return
+
         plan = SubscriptionPlan.objects.filter(id=plan_id).first()
         if not plan:
-            return {
-                'data':None,
-                'errors':{"details":"Plan not found"},
-                'status':status.HTTP_404_NOT_FOUND
-            }
-        client_profile.stripe_customer_id = stripe_customer_id
-        client_profile.save()
+            logger.error(f"Plan not found: {plan_id}")
+            return
 
-        ClientSubscription.objects.filter(client=client_profile,status='ACTIVE').update(status='EXPIRED')
-        stripe_sub = stripe.Subscription.retrieve(
-            stripe_subscription_id
-        )
-        current_period_end = datetime.fromtimestamp(
-            stripe_sub.current_period_end,
-            tz=timezone.utc
-        )
-        start_date = timezone.now().date()
-        end_date = current_period_end.date()
-        existing = ClientSubscription.objects.filter(
-            stripe_subscription_id=
-                stripe_subscription_id
-        ).exists()
+        # Update customer ID
+        if customer_id:
+            client_profile.stripe_customer_id = customer_id
+            client_profile.save(update_fields=["stripe_customer_id"])
 
-        if existing:
-            return {
-                "data": {"message":"Already processed"},
-                "errors": {},
-                "status": status.HTTP_200_OK
+        # === RETRIEVE SUBSCRIPTION ===
+        stripe_sub = stripe.Subscription.retrieve(sub_id)
+        
+        # Strongest possible extraction of current_period_end
+        current_period_end_ts = _safe_getattr(stripe_sub, 'current_period_end')
+        
+        if current_period_end_ts is None:
+            # Extra fallback
+            if hasattr(stripe_sub, '_data'):
+                current_period_end_ts = stripe_sub._data.get('current_period_end')
+        
+        if current_period_end_ts is None:
+            logger.error("❌ Could not get current_period_end. Please check Stripe response.")
+            # Emergency fallback - use 30 days from now
+            current_period_end = timezone.now() + timedelta(days=30)
+        else:
+            current_period_end = datetime.fromtimestamp(
+                current_period_end_ts, tz=timezone.utc
+            )
+
+        # Create or update the record
+        obj, created = ClientSubscription.objects.update_or_create(
+            stripe_subscription_id=sub_id,
+            defaults={
+                "client": client_profile,
+                "plan": plan,
+                "start_date": timezone.now().date(),
+                "end_date": current_period_end.date(),
+                "current_period_end": current_period_end,
+                "status": "ACTIVE",
             }
-        ClientSubscription.objects.create(client=client_profile,plan=plan,
-                                        stripe_subscription_id=stripe_subscription_id,
-                                        start_date=start_date,end_date=end_date,
-                                        current_period_end=current_period_end,status='ACTIVE')
-        return {
-            "data": {"message":"Subscription activated"},
-            "errors": {},
-            "status": status.HTTP_200_OK
-        }
+        )
+
+        logger.info(f"[subscription.created] ✅ SUCCESS - Saved subscription id={sub_id} | Created: {created}")
+
     except Exception as e:
-        logger.exception("Webhook processing failed")
-        return {
-            "data": None,
-            "errors": {"details": str(e)},
-            "status": 500
-        }
-    
+        logger.exception(f"subscription.created failed: {str(e)}")
+
 def process_subscription_canceled(event):
     try:
         subscription = event['data']['object']
-        stripe_subscription_id = subscription['id']
+        stripe_subscription_id = getattr(subscription, "id", None)
 
         sub = ClientSubscription.objects.filter(
             stripe_subscription_id=stripe_subscription_id,
@@ -106,11 +221,17 @@ def process_subscription_canceled(event):
         logger.exception(f"Cancel webhook failed: {str(e)}")
 
 def process_subscription_updated(event):
+    logger.info("SUBSCRIPTION UPDATED WEBHOOK RECEIVED")
     try:
         subscription = event['data']['object']
-        stripe_subscription_id = subscription['id']
+        stripe_subscription_id  = getattr(subscription, "id", None)
         cancel_at_period_end = getattr(subscription, "cancel_at_period_end", False)
 
+        logger.info(
+    f"subscription.updated received "
+    f"id={subscription.id} "
+    f"cancel_at_period_end={cancel_at_period_end}"
+)
         sub = ClientSubscription.objects.filter(
             stripe_subscription_id=stripe_subscription_id
         ).first()
@@ -118,19 +239,18 @@ def process_subscription_updated(event):
         if not sub:
             return
         sub.cancel_at_period_end=cancel_at_period_end
-        current_period_end = datetime.fromtimestamp(
-            subscription.current_period_end,
-            tz=timezone.utc
-        )
-        sub.current_period_end = current_period_end
-        sub.end_date = current_period_end.date()
+
         if cancel_at_period_end:
             sub.status = "CANCEL_SCHEDULED"
         else:
             sub.status = "ACTIVE"
 
         sub.save()
-
+        logger.info(
+                f"Updating DB record "
+                f"{stripe_subscription_id}"
+            )
+        sub.save()
         logger.info(f"Subscription updated: {stripe_subscription_id}")
 
     except Exception as e:
@@ -141,7 +261,7 @@ def process_subscription_renewal(event):
     try:
         invoice = event['data']['object']
 
-        stripe_subscription_id = invoice['subscription']
+        stripe_subscription_id = getattr(invoice,'subscription',None)
 
         sub = ClientSubscription.objects.filter(
             stripe_subscription_id=stripe_subscription_id
@@ -179,7 +299,7 @@ def process_payment_failed(event):
     try:
         invoice = event['data']['object']
 
-        stripe_subscription_id = invoice['subscription']
+        stripe_subscription_id = getattr(invoice,'subscription',None)
 
         sub = ClientSubscription.objects.filter(
             stripe_subscription_id=stripe_subscription_id

@@ -1,6 +1,5 @@
 import { ServerCog } from 'lucide-react'
 import api from '../api/axios'
-import { notifyError } from '../utils/notify'
 
 export const createTicket= async(data)=>{
     try {
@@ -176,7 +175,7 @@ export const getDashboard=async (role)=>{
         const res= await api.get('/tickets/dashboard/')
         return res.data.data
     } catch (error) {
-        notifyError('something went wrong')
+        console.log('something went wrong')
     }
 }
 
@@ -192,7 +191,7 @@ export const generateFakeTickets= async (summary)=>{
     console.log(error.response);
     console.log(error.response?.data);
 
-    notifyError(
+    console.log(
         error.response?.data?.errors?.details ||
         'Failed to generate tickets'
     );
@@ -204,7 +203,7 @@ export const getAgentFakeTickets= async()=>{
         const res= await api.get('/agents/fake-tickets/');
     return res.data.data
     } catch (error) {
-        notifyError('fake ticket fetch error')
+        console.log('fake ticket fetch error')
     }
 }
 
@@ -214,7 +213,7 @@ export const getFakeTicketDetail = async(id)=>{
         console.log(res.data.data.message)
     return res.data.data
     } catch (error) {
-        notifyError('fake ticket detail page error')
+        console.log('fake ticket detail page error')
     }
 }
 
@@ -286,7 +285,8 @@ export const getCurrentPlan= async()=>{
         const res= await api.get('/clients/subscription/current/');
         return res.data.data
     } catch (error) {
-        notifyError('current subscription plan fetch error')
+        console.log('current subscription plan fetch error')
+        throw error
     }
 }
 
@@ -295,7 +295,7 @@ export const cancelSubscription=async()=>{
         const res= await api.post('/clients/subscription/cancel/');
     return res.data.data
     } catch (error) {
-        notifyError('cancel subscription error ')
+        console.log('cancel subscription error ')
     }
 }
 
@@ -305,6 +305,7 @@ export const createCheckoutSession= async(planId)=>{
         return res.data.data
     } catch (error) {
         console.log('error in payment')
+        throw error
     }
 }
 

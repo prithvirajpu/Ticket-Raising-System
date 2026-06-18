@@ -57,6 +57,8 @@ import NotificationsPage from './components/NotificationsPage'
 import SSOErrorPage from './auth/SSOErrorPage'
 import IntegrationGuide from './pages/tickets/client/IntegrationGuide'
 import AboutTRS from './pages/tickets/AboutTRS'
+import SubscriptionSuccess from './pages/tickets/client/SubscriptionSuccess'
+import SubscriptionFailed from './pages/tickets/client/SubscriptionFailed'
 
 
 const App = () => {
@@ -104,6 +106,12 @@ const App = () => {
             </ProtectedRoute>} />
             <Route path='/client/plans' element={<ProtectedRoute role={['CLIENT']}>
                 <SubscriptionPlans />
+            </ProtectedRoute>} />
+            <Route path='/subscription-success' element={<ProtectedRoute role={['CLIENT']}>
+                <SubscriptionSuccess />
+            </ProtectedRoute>} />
+            <Route path='/subscription-cancel' element={<ProtectedRoute role={['CLIENT']}>
+                <SubscriptionFailed />
             </ProtectedRoute>} />
             <Route path='/client/guideline' element={<ProtectedRoute role={['CLIENT']}>
                 <IntegrationGuide />

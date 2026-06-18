@@ -1,6 +1,6 @@
 import stripe
 from django.conf import settings
-from apps.clients.models import SubscriptionPlan
+from apps.clients.models import SubscriptionPlan,ClientSubscription,ClientProfile
 
 from rest_framework import status
 import traceback
@@ -27,6 +27,30 @@ def stripe_checkout_service(request):
                 },
                 "status": status.HTTP_404_NOT_FOUND
             }
+        client_profile = ClientProfile.objects.filter(
+                user=request.user
+            ).first()
+        if not client_profile:
+            return {
+                "data": None,
+                "errors": {
+                    "details": "Client profile not found"
+                },
+                "status": status.HTTP_404_NOT_FOUND
+            }
+        existing_subscription = ClientSubscription.objects.filter(
+                client=client_profile,
+                status__in=["ACTIVE", "CANCEL_SCHEDULED"]
+            ).exists()
+        if existing_subscription:
+            return {
+                "data": None,
+                "errors": {
+                    "details": "You already have an active subscription"
+                },
+                "status": status.HTTP_400_BAD_REQUEST
+            }
+
         if not plan.stripe_price_id:
             return {
                 'data':None,
@@ -48,7 +72,13 @@ def stripe_checkout_service(request):
             cancel_url="http://localhost:5173/subscription-cancel",
             metadata={
                 'plan_id':str(plan.id),
-                'user_id':str(request.user.id),}
+                'user_id':str(request.user.id),},
+            subscription_data={
+                "metadata": {
+                    'plan_id': str(plan.id),
+                    'user_id': str(request.user.id),
+                }
+            }
             )
         return {
             'data':{'checkout_url':session.url},

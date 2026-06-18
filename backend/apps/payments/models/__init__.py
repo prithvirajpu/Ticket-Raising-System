@@ -1,2 +1,2 @@
-from .wallets import Wallet,WithdrawalRequest,WalletTransaction,IncentiveCredit
+from .wallets import Wallet,WithdrawalRequest,WalletTransaction
 from .salary_payout import SalaryPayout

@@ -11,10 +11,8 @@ def current_subscription_service(request):
         ClientSubscription.objects
         .filter(
             client=client,
-            status='ACTIVE'
-        )
-        .select_related('plan')
-        .first()
+            status__in=['CANCEL_SCHEDULED','ACTIVE']
+        ).select_related('plan').first()
     )
     logger.info('subsctiprion plan %s',subscription)
     if not subscription:
@@ -34,6 +32,7 @@ def current_subscription_service(request):
             "start_date": subscription.start_date,
             "end_date": subscription.end_date,
             'cancel_at_period_end':subscription.cancel_at_period_end,
+            "cancel_scheduled_date":subscription.current_period_end.date() if subscription.current_period_end else None,
         },
         "errors": {},
         "status": status.HTTP_200_OK

@@ -1,7 +1,7 @@
 @echo off
 cd /d C:\TRS\backend
 
-docker start trs-redis
+docker start redis-trs
 
 call venv\Scripts\activate
 

@@ -3,7 +3,7 @@ from django.conf import settings
 from rest_framework import status
 from apps.clients.services.checkoutprocess import (process_subscription_renewal,process_subscription_updated,
                                                    process_checkout_completed,process_subscription_canceled,
-                                                   process_payment_failed)
+                                                   process_payment_failed,process_subscription_created)
 import logging
 logger = logging.getLogger(__name__)
 
@@ -24,6 +24,8 @@ def handle_stripe_webhook_service(request):
     
     if event['type'] =='checkout.session.completed':
         process_checkout_completed(event)
+    if event['type'] =='customer.subscription.created':
+        process_subscription_created(event)
     elif event['type'] == 'invoice.payment_succeeded':
         process_subscription_renewal(event)
     elif event['type'] == 'invoice.payment_failed':

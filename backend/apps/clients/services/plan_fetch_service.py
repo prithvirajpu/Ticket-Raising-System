@@ -6,7 +6,7 @@ from django.utils import timezone
 def plan_fetch_service(request):
     plans=SubscriptionPlan.objects.all().values(
             'id','name', 'price', 'duration_days', 'max_agents', 'max_tickets'
-        )
+        ).order_by('price')
     return {
         'data':{'message':list(plans)},
         'errors':{},
