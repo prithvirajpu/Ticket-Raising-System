@@ -1,6 +1,5 @@
 import jwt
 from rest_framework import status
-from django.conf import settings
 from django.shortcuts import redirect
 from django.contrib.auth import get_user_model
 User=get_user_model()
@@ -10,16 +9,30 @@ from datetime import datetime
 
 def sso_login_service(request,token):
     try:
-        payload=jwt.decode(token,settings.SSO_SHARED_SECRET,algorithms=['HS256'])
-        email=payload.get('email')
-        app_name= payload.get('app_name','Shopkickora')
-        name= payload.get('username','User')
+        unverified_payload = jwt.decode(
+            token,
+            options={"verify_signature": False}
+        )
+
+        email = unverified_payload.get("email")
+        app_name = unverified_payload.get("app_name", "Shopkickora")
+        name = unverified_payload.get("username", "User")
+
         from apps.clients.models import ClientProfile
-        client_profile=None
-        if app_name:
-            client_profile = ClientProfile.objects.filter(
-                company_name__iexact=app_name
-            ).first()
+
+        client_profile = ClientProfile.objects.filter(
+            company_name__iexact=app_name
+        ).first()
+        if not client_profile:
+            return{
+                 "data": None,
+                "errors": {"details": "Invalid client"},
+                "status": status.HTTP_400_BAD_REQUEST
+            }
+        payload=jwt.decode(token,client_profile.sso_shared_secret,algorithms=['HS256'])
+        email = payload.get("email")
+        name = payload.get("username", "User")
+        
         user=User.objects.filter(email=email).first()
         if user:
             if user.role !='USER':

@@ -94,7 +94,7 @@ class VerifyTicketAPIView(APIView):
     permission_classes= [IsAuthenticated]
 
     def post(self,request):
-        result= verify_ticket_service(request.data)
+        result= verify_ticket_service(request.user,request.data)
         return return_response(result)
     
 class RetryTrainingAPIView(APIView):

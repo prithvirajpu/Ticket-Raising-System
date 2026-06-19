@@ -271,6 +271,28 @@ export const verifyTicketDetails =async (payload)=>{
     }
 }
 
+export const getIntegrationKeys = async ()=>{
+    try {
+        const res= await api.get("/clients/integration-keys/");
+        return res.data.data
+    } catch (error) {
+        console.log('integration key error')
+        console.log(error?.response?.data?.errors?.details)
+        throw error
+    }
+}
+
+export const regenerateIntegrationKeys = async ()=>{
+    try {
+        const res= await api.patch("/clients/integration/keys/regenerate/");
+        return res.data.data
+    } catch (error) {
+        console.log('regenerate key error')
+        console.log(error?.response?.data?.errors?.details)
+        throw error
+    }
+}
+
 export const getSubscriptionPlans= async ()=>{
     try {
         const res= await api.get('/clients/subscription/plans/')
