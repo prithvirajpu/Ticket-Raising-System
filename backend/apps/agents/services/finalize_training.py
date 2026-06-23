@@ -8,12 +8,10 @@ def finalize_training(user_id):
 
         user = User.objects.get(id=user_id)
 
-        user.training_completed = True
         user.is_certified_agent = True
 
         user.save(
             update_fields=[
-                "training_completed",
                 "is_certified_agent",
             ]
         )

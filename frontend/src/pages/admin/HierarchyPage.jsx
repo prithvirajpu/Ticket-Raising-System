@@ -6,7 +6,7 @@ import {
   Building2, 
   ShieldAlert, 
   Users, 
-  Headphones, 
+  Headphones,
   ChevronDown, 
   UserPlus,
   Network,

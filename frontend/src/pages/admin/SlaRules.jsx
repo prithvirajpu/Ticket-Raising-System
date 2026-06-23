@@ -51,7 +51,7 @@ const SlaRules = () => {
     try {
       setLoading(true)
       const res = await createSlaRuleInAdminSide(formData)
-      notifySuccess(res.message)
+      notifySuccess(res.data.message)
 
       setFormData({
         plan_id: '',

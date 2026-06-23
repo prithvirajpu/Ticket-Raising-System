@@ -36,7 +36,7 @@ def create_ticket_service(data,user):
         }
     client = client_user.client_profile
     
-    subscription=ClientSubscription.objects.filter(client=client,status='ACTIVE').first()
+    subscription=ClientSubscription.objects.filter(client=client,status__in=['CANCEL_SCHEDULED','ACTIVE']).first()
     if not subscription:
         return {
             "data":None,
