@@ -5,6 +5,7 @@ import ProfilePage from "../pages/tickets/user/ProfilePage";
 import AboutTRS from "../pages/tickets/AboutTRS";
 import NotificationsPage from "../components/NotificationsPage";
 import VerifyTicketPage from "../pages/tickets/agent/VerifyTicketPage";
+import WalletPage from "../pages/tickets/WalletPage";
 
 const roles = [
   "USER",
@@ -20,6 +21,8 @@ const commonRoutes = (
     <Route path="/profile" element={<ProtectedRoute role={roles}><ProfilePage /></ProtectedRoute>} />
 
     <Route path="/about" element={<ProtectedRoute role={roles}><AboutTRS /></ProtectedRoute>} />
+
+    <Route path="/wallet" element={<ProtectedRoute role={roles}><WalletPage /></ProtectedRoute>} />
 
     <Route path="/notifications" element={<ProtectedRoute role={roles}><NotificationsPage /></ProtectedRoute>} />
 

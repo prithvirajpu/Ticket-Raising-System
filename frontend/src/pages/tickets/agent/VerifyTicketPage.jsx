@@ -299,7 +299,7 @@ const VerifyTicketPage = () => {
                         </p>
 
                         <p className="font-semibold">
-                            ₹{verifiedData.order.total_amount}
+                            ${verifiedData.order.total_amount}
                         </p>
                     </div>
 
@@ -383,7 +383,7 @@ const VerifyTicketPage = () => {
                                             </p>
 
                                             <p className="text-sm text-gray-500">
-                                                ₹{item.price}
+                                                ${item.price}
                                             </p>
 
                                         </div>
@@ -446,7 +446,7 @@ const VerifyTicketPage = () => {
                     </p>
 
                     <p className="font-semibold">
-                        ₹{verifiedData.payment_details.total_amount}
+                        ${verifiedData.payment_details.total_amount}
                     </p>
                 </div>
 
@@ -517,7 +517,7 @@ const VerifyTicketPage = () => {
                     </p>
 
                     <p className="text-2xl font-bold">
-                        ₹{verifiedData.wallet.balance}
+                        ${verifiedData.wallet.balance}
                     </p>
 
                 </div>
@@ -556,7 +556,7 @@ const VerifyTicketPage = () => {
                                         <div className="text-right">
 
                                             <p className="font-bold">
-                                                ₹{txn.amount}
+                                                ${txn.amount}
                                             </p>
 
                                             <p className="text-xs text-gray-500">

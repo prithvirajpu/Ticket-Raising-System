@@ -24,6 +24,7 @@ const Navbar = () => {
           { label: 'Clients', path: '/admin/client-manage' }, // Shortened for middle breakpoints
           { label: 'Users', path: '/admin/user-manage' },     // Shortened for middle breakpoints
           { label: 'SLA', path: '/admin/sla' },               // Shortened for middle breakpoints
+          { label: 'Wallet', path: '/admin/wallet-system' },               // Shortened for middle breakpoints
           { label: 'About', path: '/about' },
         ]
       case 'AGENT':
@@ -33,6 +34,7 @@ const Navbar = () => {
           { label: 'Assigned', path: '/agent/assigned-tickets' },
           { label: 'Summary', path: '/agent/summary' },
           { label: 'Practice', path: '/agent/practice' },
+          { label: 'Wallet', path: '/wallet' },
           { label: 'About', path: '/about' },
         ]
       case 'TEAM_LEAD':
@@ -40,6 +42,7 @@ const Navbar = () => {
           { label: 'Dashboard', path: '/team-lead/dashboard' },
           { label: 'Team Tickets', path: '/team-lead/assigned-tickets' },
           { label: 'Summary', path: '/team-lead/summaries' },
+          { label: 'Wallet', path: '/wallet' },
           { label: 'About', path: '/about' },
         ]
       case 'MANAGER':
@@ -47,6 +50,7 @@ const Navbar = () => {
           { label: 'Dashboard', path: '/manager/dashboard' },
           { label: 'Manage Tickets', path: '/tickets/manager/tickets' },
           { label: 'Clients', path: '/manager/clients' },
+          { label: 'Wallet', path: '/wallet' },
           { label: 'About', path: '/about' },
         ]
       case 'USER':
@@ -59,7 +63,6 @@ const Navbar = () => {
       default:
         return [
           { label: 'Dashboard', path: '/client/dashboard' },
-          { label: 'My Tickets', path: '/client/tickets' },
           { label: 'Upload', path: '/client/upload' },
           { label: 'Plans', path: '/client/plans' },
           { label: 'Guideline', path: '/client/guideline' },

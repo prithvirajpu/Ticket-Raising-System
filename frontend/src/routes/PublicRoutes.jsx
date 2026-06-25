@@ -12,10 +12,12 @@ import Unauthorized from "../pages/Unauthorized";
 import PublicRoute from "../auth/PublicRoute";
 import SSOLoading from '../auth/SSOLoading';
 import SSOErrorPage from "../auth/SSOErrorPage";
+import ConnectSuccess from "../pages/tickets/ConnectSuccess";
 
 const publicRoutes = (
     <>
         <Route path="/" element={<PublicRoute><Login/></PublicRoute>} />
+        <Route path="/connect-success" element={<ConnectSuccess />} />
         <Route path="/sso-loading" element={<SSOLoading />} />
         <Route path="/sso-error" element={<SSOErrorPage />} />
         <Route path="/signup" element={<StaffSignup />} />

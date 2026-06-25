@@ -182,7 +182,7 @@ const SubscriptionPlans = () => {
                                     </h2>
                                     
                                     <div className="flex items-baseline gap-1 my-4">
-                                        <span className="text-4xl font-extrabold text-gray-900 tracking-tight">₹{plan.price}</span>
+                                        <span className="text-4xl font-extrabold text-gray-900 tracking-tight">${plan.price}</span>
                                         <span className="text-gray-400 text-sm font-medium">/{plan.duration_days} Days</span>
                                     </div>
 

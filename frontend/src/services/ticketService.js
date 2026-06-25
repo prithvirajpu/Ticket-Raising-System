@@ -424,3 +424,66 @@ export const retryTraining =async(Id)=>{
         console.log(error)
     }
 }
+export const connectStripe =async()=>{
+    try {
+        const res= await api.post(`/payments/connect-account/`)
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+    }
+}
+export const getWalletMoney =async()=>{
+    try {
+        const res= await api.get(`/payments/wallet/`)
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+    }
+}
+export const getWalletTransactions =async()=>{
+    try {
+        const res= await api.get(`/payments/wallet/transactions/`)
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+    }
+}
+export const createWithdrawRequest =async(amount)=>{
+    try {
+        const res= await api.post(`/payments/withdraw/`,amount)
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+    }
+}
+export const getWithdrawRequests =async()=>{
+    try {
+        const res= await api.get(`/admins/wallet/requests/`)
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+        console.log(error?.response?.data?.errors)
+    }
+}
+
+export const approveWithdrawal = async(id)=>{
+    try {
+        const res = await api.post(
+        `/admins/wallet/requests/${id}/approve/`
+    )
+    return res.data.data
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const rejectWithdrawal = async(id)=>{
+    try {
+        const res = await api.post(
+        `/admins/wallet/requests/${id}/reject/`
+    )
+    return res.data.data
+    } catch (error) {
+        console.log(error)
+    }
+}

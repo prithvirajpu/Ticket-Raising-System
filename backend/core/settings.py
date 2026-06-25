@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 from datetime import timedelta
+from celery.schedules import crontab
 from dotenv import load_dotenv
 import dj_database_url
 
@@ -216,6 +217,11 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.tickets.tasks.auto_assign_task",
         "schedule": 60.0,
     },
+    'monthly-salary-distribution':{
+        'task':'apps.payments.tasks.monthly_salary_distribution_task',
+        # 'schedule': crontab(day_of_month=2, hour=0,minute=0)
+        'schedule':60.0,
+    }
 }
 
 CHANNEL_LAYERS = {

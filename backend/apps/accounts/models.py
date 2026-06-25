@@ -7,6 +7,7 @@ from .manager import UserManager
 
 class User(AbstractBaseUser,PermissionsMixin):
     objects=UserManager()
+
     email=models.EmailField(unique=True)
     name=models.CharField(max_length=100)
     phone=models.CharField(max_length=15,null=True,blank=True)
@@ -22,6 +23,7 @@ class User(AbstractBaseUser,PermissionsMixin):
     is_verified=models.BooleanField(default=False)
 
     is_certified_agent = models.BooleanField(default=False)
+    stripe_connect_account_id = models.CharField(max_length=255,null=True,blank=True)
     
     created_at=models.DateTimeField(auto_now_add=True)
     profile_completed = models.BooleanField(default=False)

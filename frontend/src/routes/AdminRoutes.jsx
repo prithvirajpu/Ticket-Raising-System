@@ -9,6 +9,7 @@ import PendingUsers from "../pages/admin/PendingUsers";
 import SlaRules from "../pages/admin/SlaRules";
 import UserManagement from "../pages/admin/UserManagement";
 import HierarchyPage from "../pages/admin/HierarchyPage";
+import WithdrawalRequestsPage from "../pages/admin/WithdrawalRequestsPage";
 
 const adminRoutes = (
   <>
@@ -27,6 +28,8 @@ const adminRoutes = (
     <Route path="/admin/user-manage" element={<ProtectedRoute role={["ADMIN"]}><UserManagement /></ProtectedRoute>} />
 
     <Route path="/admin/hierarchy" element={<ProtectedRoute role={["ADMIN"]}><HierarchyPage /></ProtectedRoute>} />
+
+    <Route path="/admin/wallet-system" element={<ProtectedRoute role={["ADMIN"]}><WithdrawalRequestsPage /></ProtectedRoute>} />
   </>
 );
 

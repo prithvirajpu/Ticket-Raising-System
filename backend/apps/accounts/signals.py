@@ -6,5 +6,5 @@ from apps.payments.models import Wallet
 
 @receiver(post_save, sender=User)
 def create_wallet(sender, instance, created, **kwargs):
-    if created and instance.role in ['AGENT','TEAM_LEAD','MANAGER']:
+    if created and instance.role in ['AGENT','TEAM_LEAD','MANAGER','ADMIN']:
         Wallet.objects.get_or_create(user=instance)

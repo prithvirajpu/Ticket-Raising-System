@@ -55,14 +55,14 @@ def get_best_agent():
             best_agent=agent
     return best_agent
 
-def reward_best_agent():
+def reward_best_agent(incentive_amount):
     best_agent=get_best_agent()
 
     if not best_agent:
         return
     credit_wallet(
         user=best_agent,
-        amount=Decimal('1000.00'),
+        amount=incentive_amount,
         transaction_type='INCENTIVE',
         description='Best Agent of the Month'
     )

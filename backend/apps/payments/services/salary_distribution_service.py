@@ -5,11 +5,13 @@ from apps.payments.models import SalaryPayout
 from django.contrib.auth import get_user_model
 from .wallet_credit_service import credit_wallet
 from .incentive_service import reward_best_agent
+from django.db import transaction
 import logging
 logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
+@transaction.atomic
 def get_monthly_revenue():
     active_subscriptions = ClientSubscription.objects.filter(
         status="ACTIVE"
@@ -26,9 +28,11 @@ def calculate_salary_pools(revenue):
         "agent_pool": revenue * Decimal("0.25"),
         "tl_pool": revenue * Decimal("0.18"),
         "manager_pool": revenue * Decimal("0.10"),
-        "company_pool": revenue * Decimal("0.47")
+        "company_pool": revenue * Decimal("0.42"),
+        'incentive_pool':revenue * Decimal('0.05')
     }
 
+@transaction.atomic
 def distribute_monthly_salary():
     current_date= timezone.now()
     month=current_date.month
@@ -37,8 +41,8 @@ def distribute_monthly_salary():
         month=month,year=year
     ).exists()
     if already_paid:
-        raise Exception(f'Salary already distributed for {month}/{year}')
-
+        logger.info('salary already paid for %s%s',month,year)
+        return{'message':'already distributed'}
     revenue = get_monthly_revenue()
     pools = calculate_salary_pools(revenue)
 
@@ -57,10 +61,19 @@ def distribute_monthly_salary():
         role="MANAGER",
         is_active=True
     )
+    admin = User.objects.filter(role="ADMIN").first()
 
     agent_count = agents.count()
     tl_count = tls.count()
     manager_count = managers.count()
+
+    if admin:
+        credit_wallet(
+            user=admin,
+            amount=pools["company_pool"],
+            transaction_type="BONUS",
+            description="Company revenue share"
+            )
 
     if agent_count:
         agent_share = round(pools["agent_pool"] / agent_count,2)
@@ -70,7 +83,7 @@ def distribute_monthly_salary():
                 user=agent,
                 amount=agent_share,
                 transaction_type="SALARY",
-                description="Monthly salary distribution"
+                description="Revenue Share Distribution for agent"
             )
 
     if tl_count:
@@ -81,7 +94,7 @@ def distribute_monthly_salary():
                 user=tl,
                 amount=tl_share,
                 transaction_type="SALARY",
-                description="Monthly salary distribution"
+                description="Revenue Share Distribution for TL"
             )
 
     if manager_count:
@@ -92,9 +105,9 @@ def distribute_monthly_salary():
                 user=manager,
                 amount=manager_share,
                 transaction_type="SALARY",
-                description="Monthly salary distribution"
+                description="Revenue Share Distribution for Manager"
             )
-    reward_best_agent()
+    reward_best_agent(pools['incentive_pool'])
     SalaryPayout.objects.create(month=month,year=year)
 
     return {

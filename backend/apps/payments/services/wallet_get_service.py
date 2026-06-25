@@ -25,7 +25,7 @@ def get_wallet_transactions_service(user):
             'errors':{'details':'Wallet not found'},
             'status': status.HTTP_404_NOT_FOUND
         }
-    order_result=wallet.transactions.order_by('created_at')
+    order_result=wallet.transactions.order_by('-created_at')
     if order_result is None:
         return {
             'data':None,

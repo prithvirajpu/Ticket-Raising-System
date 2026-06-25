@@ -25,7 +25,7 @@ const ClientDashboard = () => {
         />
         <StatsCard 
           label="Monthly Cost" 
-          value="₹4999/mo" 
+          value="$4999/mo" 
           subtext="Next billing: Feb 1" 
           icon={DollarSign} 
           iconColor="text-green-500"
