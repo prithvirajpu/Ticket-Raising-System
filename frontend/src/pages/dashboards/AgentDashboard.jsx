@@ -2,8 +2,7 @@ import DashboardLayout from '../../layouts/DashboardLayout'
 import StatsCard from '../../components/StatsCard'
 import { Ticket, Info, History, CheckCircle, Star, Settings } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { getDashboard } from '../../services/ticketService'
-// import useAgentTimer from '../../hooks/useAgentTimer'
+import { getAgentDashboard } from '../../services/ticketService'
 
 const AgentDashboard = () => {
   // const seconds= useAgentTimer()
@@ -17,7 +16,7 @@ const AgentDashboard = () => {
     const fetchData= async()=>{
       try {
         setLoading(true)
-        const res= await getDashboard();
+        const res= await getAgentDashboard();
         setData(res.message)
       } catch (error) {
         console.log('dashboard fetch error',error)
@@ -25,16 +24,6 @@ const AgentDashboard = () => {
         setLoading(false)
       }
     }
-
-  //   const formatTime = (secs) => {
-  //   const h = Math.floor(secs / 3600);
-  //   const m = Math.floor((secs % 3600) / 60);
-  //   const s = secs % 60;
-
-  //   return `${h.toString().padStart(2, '0')}h ${m
-  //     .toString()
-  //     .padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
-  // };
 
   return (
    <DashboardLayout 

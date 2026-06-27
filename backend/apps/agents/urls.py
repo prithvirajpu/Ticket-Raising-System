@@ -2,13 +2,15 @@ from django.urls import path
 from .views import (UpdateAgentProfileView,    AgentTicketRequestsView,
     AgentOngoingTicketsView,AcceptTicketView,RejectTicketView,
     AgentTicketDetailView,AgentSummaryView,AgentFakeTicketsView,
-    AgentFakeTicketDetailView,VerifyTicketAPIView,RetryTrainingAPIView)
+    AgentFakeTicketDetailView,VerifyTicketAPIView,RetryTrainingAPIView,
+    AgentDashboardView)
 import logging
 logger=logging.getLogger(__name__)
 
 logger.info("RetryTrainingAPIView =%s", RetryTrainingAPIView)
 
 urlpatterns=[
+    path('dashboard/',AgentDashboardView.as_view()),
     path("profile/update/", UpdateAgentProfileView.as_view()),
     
     path('requests/', AgentTicketRequestsView.as_view()),

@@ -5,7 +5,9 @@ import ProfilePage from "../pages/tickets/user/ProfilePage";
 import AboutTRS from "../pages/tickets/AboutTRS";
 import NotificationsPage from "../components/NotificationsPage";
 import VerifyTicketPage from "../pages/tickets/agent/VerifyTicketPage";
-import WalletPage from "../pages/tickets/WalletPage";
+import { lazy, Suspense } from "react";
+import Loader from "../components/modals/Loader";
+const WalletPage=lazy(()=>import("../pages/tickets/WalletPage"));
 
 const roles = [
   "USER",
@@ -22,7 +24,9 @@ const commonRoutes = (
 
     <Route path="/about" element={<ProtectedRoute role={roles}><AboutTRS /></ProtectedRoute>} />
 
-    <Route path="/wallet" element={<ProtectedRoute role={roles}><WalletPage /></ProtectedRoute>} />
+    <Route path="/wallet" element={<ProtectedRoute role={roles}>
+      <Suspense fallback={<Loader />}><WalletPage /></Suspense>
+      </ProtectedRoute>} />
 
     <Route path="/notifications" element={<ProtectedRoute role={roles}><NotificationsPage /></ProtectedRoute>} />
 

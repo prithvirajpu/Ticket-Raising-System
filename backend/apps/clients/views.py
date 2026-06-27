@@ -12,7 +12,7 @@ from .services import (plan_fetch_service,get_client_integration_keys,
                        update_client_profile_service,upload_client_doc_service,
                        current_subscription_service,stripe_checkout_service,
                        handle_stripe_webhook_service,cancel_subscription_service,
-                       regenerate_client_keys_service)
+                       regenerate_client_keys_service,get_client_dashboard)
 from ..tickets.serializer import TicketSerializer
 from django.contrib.auth import get_user_model
 
@@ -91,4 +91,11 @@ class RegenerateClientKeysAPIView(APIView):
 
     def patch(self, request):
         result = regenerate_client_keys_service(request.user)
+        return return_response(result)
+    
+class ClientDashboardAPIView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def get(self,request):
+        result=get_client_dashboard(request.user)
         return return_response(result)

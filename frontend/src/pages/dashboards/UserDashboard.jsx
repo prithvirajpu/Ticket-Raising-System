@@ -10,7 +10,7 @@ import {
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { Link, useNavigate } from 'react-router-dom';
 import StatsCard from '../../components/StatsCard';
-import { getDashboard } from '../../services/ticketService';
+import { getUserDashboard } from '../../services/ticketService';
 
 
 const UserDashboard = () => {
@@ -23,7 +23,7 @@ const UserDashboard = () => {
 
     const fetchData=async()=>{
       try {
-        const res= await getDashboard();
+        const res= await getUserDashboard();
         setData(res.message)
       } catch (error) {
         console.log(error)

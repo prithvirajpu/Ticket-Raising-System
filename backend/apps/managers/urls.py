@@ -1,8 +1,11 @@
 from django.urls import path
-from .views import (ManagerTicketsView,ClientListWithDocsView,ClientDocumentsView,SummarizeDocumentView,SubmitSummaryView)
+from .views import (ManagerDashboardView,ManagerTicketsView,
+                    ClientListWithDocsView,ClientDocumentsView,
+                    SummarizeDocumentView,SubmitSummaryView)
 
 
 urlpatterns=[
+    path('dashboard/', ManagerDashboardView.as_view()),
     path('tickets/', ManagerTicketsView.as_view()),
     path('clients-docs/', ClientListWithDocsView.as_view()),
     path('clients-docs/<int:client_id>/', ClientDocumentsView.as_view()),

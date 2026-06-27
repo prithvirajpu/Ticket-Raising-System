@@ -6,10 +6,12 @@ from .views import (
     TicketCloseView,
     SubmitReviewView,
     UserProfileView,TicketTimelineView,
-    UpdateProfileView,ReopenTicketView
+    UpdateProfileView,ReopenTicketView,
+    UserDashboardView
 )
 
 urlpatterns = [
+    path("dashboard/", UserDashboardView.as_view()),
     path("tickets/create/", CreateTicketView.as_view()),
     path("tickets/list/", TicketListView.as_view()),
     path("details/<int:ticket_id>/", TicketDetailView.as_view()),

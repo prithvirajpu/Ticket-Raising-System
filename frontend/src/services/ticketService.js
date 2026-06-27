@@ -1,5 +1,6 @@
 import { ServerCog } from 'lucide-react'
 import api from '../api/axios'
+import { notifyError } from '../utils/notify'
 
 export const createTicket= async(data)=>{
     try {
@@ -170,9 +171,17 @@ export const getAgentSummary=async ()=>{
     }
 }
 
-export const getDashboard=async (role)=>{
+export const getAgentDashboard=async (role)=>{
     try {
-        const res= await api.get('/tickets/dashboard/')
+        const res= await api.get('/agents/dashboard/')
+        return res.data.data
+    } catch (error) {
+        console.log('something went wrong')
+    }
+}
+export const getUserDashboard=async (role)=>{
+    try {
+        const res= await api.get('/users/dashboard/')
         return res.data.data
     } catch (error) {
         console.log('something went wrong')
@@ -454,6 +463,7 @@ export const createWithdrawRequest =async(amount)=>{
         return res.data.data
     } catch (error) {
         console.log(error)
+        notifyError(error?.response?.data?.errors?.details)
     }
 }
 export const getWithdrawRequests =async()=>{
@@ -485,5 +495,31 @@ export const rejectWithdrawal = async(id)=>{
     return res.data.data
     } catch (error) {
         console.log(error)
+    }
+}
+export const getClientDashboard = async()=>{
+    try {
+        const res = await api.get(`/clients/dashboard/`)
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+    }
+}
+export const getTLDashboard = async()=>{
+    try {
+        const res = await api.get(`/team-leads/dashboard/`)
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+        throw error.response.data.errors.details
+    }
+}
+export const getManagerDashboard = async()=>{
+    try {
+        const res = await api.get(`/managers/dashboard/`)
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+        throw error.response.data.errors.details
     }
 }

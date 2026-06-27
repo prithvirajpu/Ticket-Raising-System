@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     SendMessageView,ResolveTicketView,NotificationListView,
-    TicketMessageView,DashboardView,EscalatedTicketView,
+    TicketMessageView,EscalatedTicketView,
     
     MarkAllNotificationsReadView,TrainingMessagesAPIView,
     MarkNotificationReadView,
@@ -10,7 +10,6 @@ from .views import (
 
 urlpatterns = [
     # chat
-    path('dashboard/',DashboardView.as_view()),
     path('<int:ticket_id>/send-message/', SendMessageView.as_view()),
     path('<int:ticket_id>/messages/', TicketMessageView.as_view()),
     #training tickets

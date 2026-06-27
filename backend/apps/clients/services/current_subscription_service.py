@@ -1,10 +1,16 @@
 from apps.clients.models import ClientSubscription
 from rest_framework import status
+from django.core.cache import cache
 
 import logging
 logger = logging.getLogger(__name__)
 
 def current_subscription_service(request):
+    cache_key = f"curr_sub_plan_{request.user.id}"
+    cached_data = cache.get(cache_key)
+
+    if cached_data:
+        return cached_data
     client = request.user.client_profile
 
     subscription = (
@@ -24,7 +30,7 @@ def current_subscription_service(request):
             "status": status.HTTP_404_NOT_FOUND
         }
 
-    return {
+    result= {
         "data": {
             "id": subscription.id,
             "plan_name": subscription.plan.name,
@@ -37,3 +43,5 @@ def current_subscription_service(request):
         "errors": {},
         "status": status.HTTP_200_OK
     }
+    cache.set(cache_key, result, timeout=60)
+    return result

@@ -8,3 +8,4 @@ from .cancel_subscription_service import cancel_subscription_service
 from .checkoutprocess import process_checkout_completed
 from .get_client_integration_keys import get_client_integration_keys
 from .regenerate_client_keys import regenerate_client_keys_service
+from .client_dashboard_service import get_client_dashboard

@@ -2,6 +2,7 @@ from django.utils import timezone
 from apps.payments.services import debit_wallet
 from apps.payments.models import WithdrawalRequest
 from rest_framework import status
+from django.db import transaction
 from apps.payments.services import send_stripe_transfer
 import logging
 logger=logging.getLogger(__name__)
@@ -40,30 +41,31 @@ def approve_withdrawal(withdrawal_id, admin):
         }
     
     try:
-        transfer= send_stripe_transfer(request_obj.user,request_obj.amount)
+        with transaction.atomic():
+            transfer= send_stripe_transfer(request_obj.user,request_obj.amount)
 
-        debit_wallet(
-            user=request_obj.user,
-            amount=request_obj.amount,
-            transaction_type="WITHDRAWAL",
-            description="Withdrawal approved",
-            created_by=admin,
-        )
+            debit_wallet(
+                user=request_obj.user,
+                amount=request_obj.amount,
+                transaction_type="WITHDRAWAL",
+                description="Withdrawal approved",
+                created_by=admin,
+            )
 
-        request_obj.status = "APPROVED"
-        request_obj.remarks = "Approved by admin"
-        request_obj.approved_by = admin
-        request_obj.approved_at = timezone.now()
-        request_obj.stripe_transfer_id = transfer.id
+            request_obj.status = "APPROVED"
+            request_obj.remarks = "Approved by admin"
+            request_obj.approved_by = admin
+            request_obj.approved_at = timezone.now()
+            request_obj.stripe_transfer_id = transfer.id
 
-        request_obj.save()
-        return {
-            "data": {
-                "message": "Withdrawal approved successfully"
-            },
-            "errors": {},
-            "status": status.HTTP_200_OK
-        }
+            request_obj.save()
+            return {
+                "data": {
+                    "message": "Withdrawal approved successfully"
+                },
+                "errors": {},
+                "status": status.HTTP_200_OK
+            }
     except Exception as e:
         logger.exception(f"Stripe transfer failed: {str(e)}")
         
@@ -84,13 +86,13 @@ def reject_withdrawal(withdrawal_id):
 
     if not request_obj:
         raise Exception("Withdrawal request not found")
+    with transaction.atomic():
+        request_obj.status = "REJECTED"
+        request_obj.remarks = "Admin rejected the request"
+        request_obj.save()
 
-    request_obj.status = "REJECTED"
-    request_obj.remarks = "Admin rejected the request"
-    request_obj.save()
-
-    return {
-        'data':{'message':'Rejected succesfully'},
-        'errors':{},
-        'status':status.HTTP_200_OK
-    }
+        return {
+            'data':{'message':'Rejected succesfully'},
+            'errors':{},
+            'status':status.HTTP_200_OK
+        }

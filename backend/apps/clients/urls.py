@@ -3,7 +3,7 @@ from .views import (CurrentSubscriptionAPIView,SubscriptionPlanView,
                     UpdateClientProfileView, UploadDocView,
                     CreateCheckoutSessionAPIView,StripeWebhookAPIView,
                     CancelSubscriptionAPIView,ClientIntegrationKeysAPIView,
-                    RegenerateClientKeysAPIView)
+                    RegenerateClientKeysAPIView,ClientDashboardAPIView)
 
 urlpatterns=[
     path("profile/update/", UpdateClientProfileView.as_view()),
@@ -16,4 +16,6 @@ urlpatterns=[
     path('subscriptions/checkout/',CreateCheckoutSessionAPIView.as_view()),
     path('stripe/webhook/',StripeWebhookAPIView.as_view()),
     path('subscription/cancel/',CancelSubscriptionAPIView.as_view()),
+    path('dashboard/',ClientDashboardAPIView.as_view()),
+
 ]

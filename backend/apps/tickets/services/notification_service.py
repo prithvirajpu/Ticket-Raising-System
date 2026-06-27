@@ -2,23 +2,31 @@ from apps.tickets.models import Notification
 from ..serializer import NotificationSerializer
 from rest_framework import status
 from django.db import transaction
-
+from django.core.cache import cache
 
 import logging
 logger= logging.getLogger(__name__)
 
 def notification_service(request):
+    cache_key = f"notification_{request.user.id}"
+    cached_data = cache.get(cache_key)
+
+    if cached_data:
+        return cached_data
+    
     notifications=Notification.objects.filter(
         user=request.user
     ).order_by('-created_at')
     serializer= NotificationSerializer(notifications,many=True)
     unread_count= notifications.filter(is_read=False).count()
     logger.info('the notification serializer data %s',serializer.data)
-    return {
+    result= {
         'data':{'serializer':serializer.data,'unread_count':unread_count},
         'errors':{},
         'status':status.HTTP_200_OK
     } 
+    cache.set(cache_key, result, timeout=60)
+    return result
 
 def mark_as_read_notification(request,notification_id):
     with transaction.atomic():

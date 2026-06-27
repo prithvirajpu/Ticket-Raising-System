@@ -10,7 +10,7 @@ from apps.core_app.models import AgentApplication
 from rest_framework.parsers import MultiPartParser, FormParser
 from .services import (update_agent_profile_service,get_agent_ticket_requests_service,get_agent_ongoing_tickets_service,get_agent_ticket_detail_service,
                        agent_summary_service,fetch_fake_tickets_service,get_fake_ticket_detail_service,accept_ticket_service,reject_ticket_service,
-                       verify_ticket_service,reset_training_ticket
+                       verify_ticket_service,reset_training_ticket,agent_dashboard
 )
 from django.contrib.auth import get_user_model
 import logging
@@ -103,4 +103,11 @@ class RetryTrainingAPIView(APIView):
     def post(self,request,ticket_id):
         logger.info('RETRY HIT--%s')
         result=reset_training_ticket(request,ticket_id)
+        return return_response(result)
+    
+class AgentDashboardView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def get(self,request):
+        result=agent_dashboard(request.user)
         return return_response(result)

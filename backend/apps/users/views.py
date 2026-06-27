@@ -3,8 +3,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from apps.core_app.utils import return_response
 from ..tickets.serializer import TicketSerializer
-from .services import (create_ticket_service,get_ticket_list_service,get_ticket_detail_service,close_ticket_service,get_profile_service,update_profile_service,
-                       submit_review_service,reopen_ticket_service,timeline_service)
+from .services import (create_ticket_service,get_ticket_list_service,get_ticket_detail_service,
+                       close_ticket_service,get_profile_service,update_profile_service,
+                       submit_review_service,reopen_ticket_service,timeline_service,
+                       user_dashboard)
 
 import logging
 logger= logging.getLogger(__name__)
@@ -84,4 +86,11 @@ class TicketTimelineView(APIView):
 
     def get(self,request,ticket_id):
         result=timeline_service(ticket_id)
+        return return_response(result)
+    
+class UserDashboardView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def get(self,request):
+        result=user_dashboard(request.user)
         return return_response(result)
