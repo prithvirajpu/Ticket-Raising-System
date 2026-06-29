@@ -14,9 +14,19 @@ const NotificationProvider = ({children}) => {
         const ws= new WebSocket(`ws://localhost:8000/ws/notifications/?token=${accessToken}`)
 
         ws.onmessage=(event)=>{
-            console.log('notification data in front',event.data)
             const data= JSON.parse(event.data);
-            setNotifications(prev => [data,...prev]);
+            console.log('notification WS',data)
+            setNotifications(prev => {
+        const existing = prev.find(n => n.id === data.id);
+
+        if (existing) {
+            return prev.map(n =>
+                n.id === data.id ? data : n
+            );
+        }
+
+        return [data, ...prev];
+    });
             
         }
         ws.onopen = () => {
@@ -48,7 +58,6 @@ const NotificationProvider = ({children}) => {
     const loadNotifications=async()=>{
         try {
             const res= await getNotifications();
-            console.log(res)
             setNotifications(res.serializer)
         } catch (error) {
             console.log(error)

@@ -33,7 +33,6 @@ const useChat = (ticketId, currentUserId) => {
 
     socketRef.current.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log("WS data", data);
 
       if (data.type === "chat_message") {
         setMessages((prev) => [
@@ -56,7 +55,6 @@ const useChat = (ticketId, currentUserId) => {
 
       if (data.type === "messages_read") {
         const { message_ids, reader_id } = data;
-        console.log("read event", data);
 
         // only apply if OTHER user read it
         if (Number(reader_id) === Number(currentUserId)) return;
@@ -109,10 +107,6 @@ const useChat = (ticketId, currentUserId) => {
         created_at: m.created_at,
         is_seen: m.is_seen,
       }));
-      console.log("normalized", normalized);
-      console.log("another data", normalized[normalized.length - 1]);
-      console.log("another data2", normalized[normalized.length - 2]);
-
       setMessages(normalized);
       scrollToBottom();
       console.log("WS state before mark read:", socketRef.current?.readyState);

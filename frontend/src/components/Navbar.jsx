@@ -20,11 +20,11 @@ const Navbar = () => {
       case 'ADMIN':
         return [
           { label: 'Dashboard', path: '/admin/dashboard' },
-          { label: 'Agents', path: '/admin/agent-manage' }, // Shortened for middle breakpoints
-          { label: 'Clients', path: '/admin/client-manage' }, // Shortened for middle breakpoints
-          { label: 'Users', path: '/admin/user-manage' },     // Shortened for middle breakpoints
-          { label: 'SLA', path: '/admin/sla' },               // Shortened for middle breakpoints
-          { label: 'Wallet', path: '/admin/wallet-system' },               // Shortened for middle breakpoints
+          { label: 'Agents', path: '/admin/agent-manage' },
+          { label: 'Clients', path: '/admin/client-manage' },
+          { label: 'Users', path: '/admin/user-manage' },
+          { label: 'SLA', path: '/admin/sla' },
+          { label: 'Wallet', path: '/admin/wallet-system' },
           { label: 'About', path: '/about' },
         ]
       case 'AGENT':
@@ -76,11 +76,9 @@ const Navbar = () => {
 
   return (
     <header className="w-full bg-white border-b border-gray-200 sticky top-0 z-50">
-      {/* Changed md:px-4 to safe padding distributions */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         
         {/* Left Section: Logo and Desktop Nav */}
-        {/* Added min-w-0 layout rendering safeguards */}
         <div className="flex items-center gap-4 lg:gap-8 min-w-0 flex-1">
           <Link to="/" className="flex items-center gap-2 flex-shrink-0" onClick={closeMobileMenu}>
             <div className="bg-green-100 p-1 rounded">
@@ -89,13 +87,13 @@ const Navbar = () => {
             <span className="font-bold text-xl tracking-tight text-[#0f172a] hidden sm:block">TicketFlow</span>
           </Link>
 
-          {/* Desktop Nav: Dynamically adjusts gaps and hides extra elements between 768px-1024px */}
-          <nav className="hidden md:flex items-center gap-2 lg:gap-6 min-w-0 overflow-x-auto no-scrollbar py-1">
+          {/* CHANGED: Swapped md:flex to lg:flex, removed overflow properties since it won't drop into horizontal scrolling anymore */}
+          <nav className="hidden lg:flex items-center gap-4 min-w-0 py-1">
             {navItems.map((item) => (
               <Link
                 key={item.label}
                 to={item.path}
-                className={`text-xs lg:text-sm font-semibold transition-colors whitespace-nowrap px-2 py-1 rounded-md ${
+                className={`text-sm font-semibold transition-colors whitespace-nowrap px-2 py-1 rounded-md ${
                   location.pathname === item.path
                     ? 'text-black bg-gray-50'
                     : 'text-gray-500 hover:text-black hover:bg-gray-50/50'
@@ -131,13 +129,14 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Only Actions */}
-          <div className="hidden md:flex items-center border-l border-gray-200 pl-2 lg:pl-4">
+          {/* CHANGED: Swapped hidden md:flex to hidden lg:flex */}
+          <div className="hidden lg:flex items-center border-l border-gray-200 pl-4">
             <button
               onClick={() => setIsModalOpen(true)}
               className="text-gray-500 hover:text-red-600 transition-colors p-1.5 rounded-full hover:bg-gray-50"
               title="Logout"
             >
-              <LogOut className="w-4 h-4 lg:w-5 h-5" />
+              <LogOut className="w-5 h-5" />
             </button>
           </div>
 
@@ -150,7 +149,6 @@ const Navbar = () => {
             >
               <User className="w-3.5 h-3.5 text-gray-600" />
             </Link>
-            {/* Hidden completely between 768px and 1024px to claim horizontal real estate space */}
             <Link to='/profile' className="hidden lg:block" onClick={closeMobileMenu}>
               <span className="text-sm font-medium text-gray-700 capitalize">
                 {userRole?.toLowerCase() || 'Company'}
@@ -159,8 +157,9 @@ const Navbar = () => {
           </div>
 
           {/* Mobile Menu Toggle Button */}
+          {/* CHANGED: Swapped md:hidden to lg:hidden to keep it visible up to 1024px */}
           <button 
-            className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+            className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -169,8 +168,9 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Navigation Dropdown */}
+      {/* CHANGED: Changed container checks from md:hidden to lg:hidden */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-gray-200 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="lg:hidden bg-white border-b border-gray-200 animate-in fade-in slide-in-from-top-2 duration-200">
           <nav className="flex flex-col px-4 pt-2 pb-6 space-y-1">
             {navItems.map((item) => (
               <Link

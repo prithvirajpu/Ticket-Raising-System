@@ -75,9 +75,7 @@ useEffect(() => {
   console.log("TicketDetail incomingCall:", incomingCall);
 }, [incomingCall]);
 
-  useEffect(() => {
-    console.log("FULL TICKET:", ticket);
-  }, [ticket]);
+
   const handleConfirmReopen = async () => {
     setReopenLoading(true);
     try {

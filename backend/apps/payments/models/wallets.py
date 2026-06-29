@@ -18,6 +18,7 @@ class WalletTransaction(models.Model):
         ('INCENTIVE','Incentive'),
         ('BONUS','Bonus'),
         ('WITHDRAWAL','Withdrawal'),
+        ('PENALTY', 'Penalty'),
         ('ADJUSTMENT','Adjustment'),
     ]
     wallet= models.ForeignKey(Wallet,on_delete=models.CASCADE,related_name='transactions')

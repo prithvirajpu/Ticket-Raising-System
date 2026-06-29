@@ -141,7 +141,6 @@ const handleClick = async (notification) => {
                                     : "bg-white hover:bg-slate-50"
                             }`}
                         >
-                            {console.log(notification)}
                             {/* Icon Wrapper */}
                             <div className="flex-shrink-0">
                                 {getIcon(notification.notification_type)}

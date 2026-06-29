@@ -2,10 +2,12 @@ from rest_framework import status
 from apps.tickets.models import Ticket,TicketAssignment,TicketSLATracking,TicketChatParticipant,TicketActivity
 from django.db import transaction
 from django.utils import timezone
+from decimal import Decimal
 from django.db.models import Q
 from apps.tickets.serializer import AgentTicketRequestSerializer,TicketSerializer
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
+from apps.payments.services import debit_wallet
 
 User=get_user_model()
 
@@ -100,6 +102,13 @@ def reject_ticket_service(ticket_id,user,reason):
             assignment.status='REJECTED'
             assignment.rejection_reason=reason
             assignment.save()
+            debit_wallet(
+                user=user,
+                amount=Decimal("10.00"),
+                transaction_type='PENALTY',
+                description=f'Penalty for rejecting ticket{assignment.ticket.ticket_code}',
+                created_by=None,
+            )
         return {
             'data':{"message":'Ticket rejected'},
             'errors':None,
