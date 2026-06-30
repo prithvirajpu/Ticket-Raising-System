@@ -7,7 +7,10 @@ from django.db.models import Q
 from apps.tickets.serializer import AgentTicketRequestSerializer,TicketSerializer
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
-from apps.payments.services import debit_wallet
+from apps.payments.services import debit_wallet,credit_wallet
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 User=get_user_model()
 
@@ -109,6 +112,15 @@ def reject_ticket_service(ticket_id,user,reason):
                 description=f'Penalty for rejecting ticket{assignment.ticket.ticket_code}',
                 created_by=None,
             )
+            admin= User.objects.filter(role='ADMIN',is_superuser= True).first()
+            if admin:
+                credit_wallet(
+                    user=admin,
+                    amount=Decimal('10.00'),
+                    transaction_type='ADJUSTMENT',
+                    description=f'Penalty collected from {user.email} for rejecting ticket',
+                    created_by=None
+                )
         return {
             'data':{"message":'Ticket rejected'},
             'errors':None,

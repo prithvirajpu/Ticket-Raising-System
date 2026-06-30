@@ -1,6 +1,9 @@
 from decimal import Decimal
 from rest_framework import status
 from apps.payments.models import Wallet, WithdrawalRequest
+from apps.tickets.utils import send_notification
+from django.contrib.auth import get_user_model
+User=get_user_model()
 
 def create_withdrawal_request(user, amount):
 
@@ -32,10 +35,27 @@ def create_withdrawal_request(user, amount):
         }
 
     if wallet.balance < amount:
-        raise Exception("Insufficient balance")
-    WithdrawalRequest.objects.create(
+        return {
+        "data": None,
+        "errors": {"details": "Insufficient wallet balance"},
+        "status": status.HTTP_400_BAD_REQUEST,
+    }
+    withdrawal=WithdrawalRequest.objects.create(
         user=user,
         amount=amount,
+    )
+    admin=User.objects.filter(role='ADMIN',is_superuser=True).first()
+    send_notification(
+        user_id=admin.id,
+        notification_type='WITHDRAWAL_REQUEST',
+        title='Withdrawal Request',
+        message=f'{user.name} requested a withdrawal of ${amount}.',
+        data={
+            "withdrawal_id": withdrawal.id,
+            "amount": str(amount),
+            "user_id": user.id,
+            "redirect_to": "/admin/wallet-system"
+        }
     )
 
     return {

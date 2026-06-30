@@ -3,7 +3,7 @@ from django.utils.timezone import now
 from channels.generic.websocket import AsyncWebsocketConsumer
 from apps.tickets.services import send_message_service
 from channels.db import database_sync_to_async
-from apps.tickets.services import  mark_messages_read_service,mark_chat_notifications_read
+from apps.tickets.services import  mark_messages_read_service
 import logging
 import time
 

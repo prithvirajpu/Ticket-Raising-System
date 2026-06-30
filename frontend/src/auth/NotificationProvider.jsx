@@ -1,6 +1,7 @@
 import { createContext,useContext,useEffect,useState } from "react"
 import { useAuth } from "./AuthContext"
 import { getNotifications, markAllNotificationsRead, markNotificationRead } from "../services/ticketService"
+import { notifySuccess } from "../utils/notify"
 
 const NotificationContext= createContext()
 const NotificationProvider = ({children}) => {
@@ -16,6 +17,7 @@ const NotificationProvider = ({children}) => {
         ws.onmessage=(event)=>{
             const data= JSON.parse(event.data);
             console.log('notification WS',data)
+            notifySuccess('You have a new notification')
             setNotifications(prev => {
         const existing = prev.find(n => n.id === data.id);
 

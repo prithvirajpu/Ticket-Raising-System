@@ -523,3 +523,22 @@ export const getManagerDashboard = async()=>{
         throw error.response.data.errors.details
     }
 }
+export const getAdminWalletTransactions = async()=>{
+    try {
+        const res = await api.get(`/admins/wallet-transactions/`)
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+        throw error.response.data.errors.details
+    }
+}
+export const getAdminDashboard = async(period='7d')=>{
+    try {
+        const res = await api.get(`/admins/dashboard/?period=${period}`)
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+        throw error
+    }
+}
+

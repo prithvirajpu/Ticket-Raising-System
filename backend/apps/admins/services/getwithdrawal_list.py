@@ -1,5 +1,6 @@
-from apps.payments.models import WithdrawalRequest
+from apps.payments.models import WithdrawalRequest,WalletTransaction
 from apps.payments.serializer.withdrawal_serializer import withdrawal_serializer
+from apps.admins.serializers.AdminWalletTransactionSerializer import AdminWalletTransactionSerializer
 from rest_framework import status
 
 def getwithdrawal_list(user):
@@ -7,6 +8,16 @@ def getwithdrawal_list(user):
         'user'
     ).filter(status='PENDING').order_by('-requested_at')
     serializer= withdrawal_serializer(data,many=True)
+    return {
+        'data':{'message':serializer.data},
+        'errors':{},
+        'status':status.HTTP_200_OK
+    }
+
+def admin_wallet_transaction_service(request):
+    queryset= WalletTransaction.objects.select_related('wallet__user').order_by('-created_at')
+
+    serializer= AdminWalletTransactionSerializer(queryset,many=True)
     return {
         'data':{'message':serializer.data},
         'errors':{},

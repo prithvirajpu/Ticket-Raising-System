@@ -63,6 +63,12 @@ const NotificationPage = ({ isOpen, onClose }) => {
                     <MessageSquare size={16} />
                 </div>
             );
+        case "WITHDRAWAL_REQUEST":
+            return (
+                <div className="p-2 bg-violet-50 rounded-lg text-violet-600 border border-violet-100">
+                    <UserPlus size={16} />
+                </div>
+            );
         default:
             return (
                 <div className="p-2 bg-slate-50 rounded-lg text-slate-600 border border-slate-100">

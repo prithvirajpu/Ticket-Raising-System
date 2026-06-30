@@ -2,7 +2,7 @@ import React, { Suspense, useEffect, useState } from "react";
 import { connectStripe, createWithdrawRequest, getWalletMoney, getWalletTransactions, } from "../../services/ticketService";
 import DashboardLayout from '../../layouts/DashboardLayout'
 import { notifySuccess } from "../../utils/notify";
-import { Wallet, DollarSign, CreditCard, ArrowUpRight, History, Calendar, FileText, ArrowDownLeft, Landmark } from "lucide-react";
+import { Wallet, DollarSign, CreditCard, ArrowUpRight, History, Calendar, FileText, ArrowDownLeft, Landmark, AlertTriangle } from "lucide-react";
 import { lazy } from "react";
 import Loader from '../../components/modals/Loader'
 const ConfirmModal= lazy(()=>import('../../components/modals/ConfirmModal'))
@@ -171,57 +171,66 @@ const WalletPage = () => {
 
               <tbody className="divide-y divide-slate-100 font-medium text-slate-700 text-sm">
                 {transactions.length > 0 ? (
-                  transactions.map((item, index) => (
-                    <tr key={item.id} className="hover:bg-slate-50/40 transition-colors group">
-                      {/* Index */}
-                      <td className="p-4 font-mono text-xs text-slate-400">{index + 1}</td>
+                  transactions.map((item, index) => {
+                    const isDeduction = item.transaction_type === "WITHDRAWAL" || item.transaction_type === "PENALTY";
+                    
+                    return (
+                      <tr key={item.id} className="hover:bg-slate-50/40 transition-colors group">
+                        {/* Index */}
+                        <td className="p-4 font-mono text-xs text-slate-400">{index + 1}</td>
 
-                      {/* Type Badge */}
-                      <td className="p-4">
-                        {item.transaction_type === "SALARY" && (
-                          <span className="inline-flex items-center gap-1 text-xs text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/40">
-                            <ArrowDownLeft className="w-3 h-3 text-emerald-500" /> {item.transaction_type}
-                          </span>
-                        )}
-                        {item.transaction_type === "INCENTIVE" && (
-                          <span className="inline-flex items-center gap-1 text-xs text-indigo-700 font-bold bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-200/40">
-                            <ArrowDownLeft className="w-3 h-3 text-indigo-500" /> {item.transaction_type}
-                          </span>
-                        )}
-                        {item.transaction_type === "WITHDRAWAL" && (
-                          <span className="inline-flex items-center gap-1 text-xs text-rose-700 font-bold bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200/40">
-                            <ArrowUpRight className="w-3 h-3 text-rose-500" /> {item.transaction_type}
-                          </span>
-                        )}
-                        {item.transaction_type !== "SALARY" && item.transaction_type !== "INCENTIVE" && item.transaction_type !== "WITHDRAWAL" && (
-                          <span className="inline-flex items-center gap-1 text-xs text-slate-600 font-bold bg-slate-50 px-2.5 py-1 rounded-full border border-slate-200/40">
-                            {item.transaction_type}
-                          </span>
-                        )}
-                      </td>
+                        {/* Type Badge */}
+                        <td className="p-4">
+                          {item.transaction_type === "SALARY" && (
+                            <span className="inline-flex items-center gap-1 text-xs text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/40">
+                              <ArrowDownLeft className="w-3 h-3 text-emerald-500" /> {item.transaction_type}
+                            </span>
+                          )}
+                          {item.transaction_type === "INCENTIVE" && (
+                            <span className="inline-flex items-center gap-1 text-xs text-indigo-700 font-bold bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-200/40">
+                              <ArrowDownLeft className="w-3 h-3 text-indigo-500" /> {item.transaction_type}
+                            </span>
+                          )}
+                          {item.transaction_type === "WITHDRAWAL" && (
+                            <span className="inline-flex items-center gap-1 text-xs text-rose-700 font-bold bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200/40">
+                              <ArrowUpRight className="w-3 h-3 text-rose-500" /> {item.transaction_type}
+                            </span>
+                          )}
+                          {item.transaction_type === "PENALTY" && (
+                            <span className="inline-flex items-center gap-1 text-xs text-red-700 font-bold bg-red-50 px-2.5 py-1 rounded-full border border-red-200/40">
+                              <AlertTriangle className="w-3 h-3 text-red-500" /> {item.transaction_type}
+                            </span>
+                          )}
+                          {item.transaction_type !== "SALARY" && item.transaction_type !== "INCENTIVE" && item.transaction_type !== "WITHDRAWAL" && item.transaction_type !== "PENALTY" && (
+                            <span className="inline-flex items-center gap-1 text-xs text-slate-600 font-bold bg-slate-50 px-2.5 py-1 rounded-full border border-slate-200/40">
+                              {item.transaction_type}
+                            </span>
+                          )}
+                        </td>
 
-                      {/* Amount */}
-                      <td className={`p-4 font-bold font-mono tracking-tight ${item.transaction_type === "WITHDRAWAL" ? "text-rose-600" : "text-emerald-600"}`}>
-                        <span>{item.transaction_type === "WITHDRAWAL" ? "-" : "+"}${item.amount}</span>
-                      </td>
+                        {/* Amount */}
+                        <td className={`p-4 font-bold font-mono tracking-tight ${isDeduction ? "text-rose-600" : "text-emerald-600"}`}>
+                          <span>{isDeduction ? "-" : "+"}${item.amount}</span>
+                        </td>
 
-                      {/* Description */}
-                      <td className="p-4 text-slate-600 font-normal">
-                        <div className="flex items-center gap-1.5 max-w-xs md:max-w-md truncate">
-                          <FileText className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span className="truncate">{item.description}</span>
-                        </div>
-                      </td>
+                        {/* Description */}
+                        <td className="p-4 text-slate-600 font-normal">
+                          <div className="flex items-center gap-1.5 max-w-xs md:max-w-md truncate">
+                            <FileText className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <span className="truncate">{item.description}</span>
+                          </div>
+                        </td>
 
-                      {/* Date */}
-                      <td className="p-4 text-slate-500 font-normal text-xs">
-                        <div className="flex items-center gap-1.5">
-                          <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                          <span>{new Date(item.created_at).toLocaleDateString()}</span>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                        {/* Date */}
+                        <td className="p-4 text-slate-500 font-normal text-xs">
+                          <div className="flex items-center gap-1.5">
+                            <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                            <span>{new Date(item.created_at).toLocaleDateString()}</span>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 ) : (
                   <tr>
                     <td colSpan="5" className="text-center py-12 px-4 text-slate-400 italic">
