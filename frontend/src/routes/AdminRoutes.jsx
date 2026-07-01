@@ -11,6 +11,7 @@ import UserManagement from "../pages/admin/UserManagement";
 import HierarchyPage from "../pages/admin/HierarchyPage";
 import WithdrawalRequestsPage from "../pages/admin/WithdrawalRequestsPage";
 import WalletTransactionsPage from "../pages/admin/WalletTransactionsPage";
+import AdminRevenue from "../pages/admin/AdminRevenue";
 
 const adminRoutes = (
   <>
@@ -33,6 +34,8 @@ const adminRoutes = (
     <Route path="/admin/wallet-requests" element={<ProtectedRoute role={["ADMIN"]}><WithdrawalRequestsPage /></ProtectedRoute>} />
 
     <Route path="/admin/wallet-transactions" element={<ProtectedRoute role={["ADMIN"]}><WalletTransactionsPage /></ProtectedRoute>} />
+
+    <Route path="/admin/finance" element={<ProtectedRoute role={["ADMIN"]}><AdminRevenue /></ProtectedRoute>} />
   </>
 );
 

@@ -7,12 +7,14 @@ from apps.core_app.constants import ApprovalStatus
 from apps.core_app.utils import return_response
 from apps.core_app.models import AgentApplication
 from rest_framework.response import Response
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 from rest_framework.parsers import MultiPartParser, FormParser
 from apps.admins.services import (fetch_users_service,create_sla_rule_service,fetch_sla_rules_service,approve_user_service,reject_user_service,
                        get_agent_application_detail_service,get_client_list_service,get_hierarchy_service,
                        get_agent_list_service,toggle_agent_status_service,assign_hierarchy_service,get_all_users_service,
                        getwithdrawal_list,approve_withdrawal,reject_withdrawal,admin_wallet_transaction_service,
-                       admin_dashboard_service)
+                       admin_dashboard_service,admin_finance_service)
 from apps.admins.serializers import (UserApprovalSerializer,AssignHierarchySerializer)
 from django.contrib.auth import get_user_model
 import logging
@@ -158,9 +160,19 @@ class AdminWalletTransactionAPIView(APIView):
         result=admin_wallet_transaction_service(request)
         return return_response(result) 
     
+@method_decorator(cache_page(timeout=60), name="get")
 class AdminDashboardAPIView(APIView):
     permission_classes = [IsAdmin]
 
     def get(self,request):
         result= admin_dashboard_service(request)
+        return return_response(result)
+    
+@method_decorator(cache_page(timeout=60), name="get")
+class AdminFinanceAPIView(APIView):
+    permission_classes = [IsAdmin]
+
+    def get(self, request):
+        logger.warning('db hit')
+        result = admin_finance_service(request)
         return return_response(result)

@@ -466,10 +466,13 @@ export const createWithdrawRequest =async(amount)=>{
         notifyError(error?.response?.data?.errors?.details)
     }
 }
-export const getWithdrawRequests =async()=>{
+export const getWithdrawRequests =async(page=1)=>{
     try {
-        const res= await api.get(`/admins/wallet/requests/`)
-        return res.data.data
+        const res= await api.get(`/admins/wallet/requests/?page${page}`)
+        return {
+           message: res.data.data.message,
+            paginator: res.data.paginator,
+        }
     } catch (error) {
         console.log(error)
         console.log(error?.response?.data?.errors)
@@ -523,18 +526,35 @@ export const getManagerDashboard = async()=>{
         throw error.response.data.errors.details
     }
 }
-export const getAdminWalletTransactions = async()=>{
+export const getAdminWalletTransactions = async(page=1)=>{
     try {
-        const res = await api.get(`/admins/wallet-transactions/`)
-        return res.data.data
+        const res = await api.get(`/admins/wallet-transactions/?page=${page}`)
+        return {
+            message: res.data.data.message,
+            paginator: res.data.paginator,
+        }
     } catch (error) {
         console.log(error)
-        throw error.response.data.errors.details
+        throw error
     }
 }
 export const getAdminDashboard = async(period='7d')=>{
     try {
         const res = await api.get(`/admins/dashboard/?period=${period}`)
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+        throw error
+    }
+}
+export const getRevenueDashboard  = async(salaryPage, subscriptionPage)=>{
+    try {
+        const res = await api.get(`/admins/finance/`,{
+            params:{
+                salary_page: salaryPage,
+                subscription_page: subscriptionPage,
+            }
+        })
         return res.data.data
     } catch (error) {
         console.log(error)

@@ -19,7 +19,6 @@ def notification_service(request):
     ).order_by('-created_at')
     serializer= NotificationSerializer(notifications,many=True)
     unread_count= notifications.filter(is_read=False).count()
-    logger.info('the notification serializer data %s',serializer.data)
     result= {
         'data':{'serializer':serializer.data,'unread_count':unread_count},
         'errors':{},

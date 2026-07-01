@@ -25,6 +25,7 @@ const Navbar = () => {
           { label: 'Users', path: '/admin/user-manage' },
           { label: 'SLA', path: '/admin/sla' },
           { label: 'Wallet', path: '/admin/wallet-transactions' },
+          { label: 'Revenue', path: '/admin/finance' },
           { label: 'About', path: '/about' },
         ]
       case 'AGENT':
