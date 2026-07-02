@@ -90,12 +90,16 @@ export const escalateTicket=async(id)=>{
 }
 
 export const getProfile=async()=>{
-    const res= await api.get('/users/profile')
+    const res= await api.get('/users/profile/')
     return res.data.data
 }
 
 export const updateProfile= async (data)=>{
     const res = await api.put('/users/profile/update/',data)
+    return res.data.data
+}
+export const updateClientProfile= async (data)=>{
+    const res = await api.put('/clients/profile/update/',data)
     return res.data.data
 }
 
@@ -110,16 +114,12 @@ export const getManagerTickets=async ()=>{
 }
 
 export const uploadDocument= async (formData)=>{
-    try {
-        const res = await api.post ('/clients/upload/',formData,{
-            headers:{
-                'Content-Type':'multipart/form-data'
-            }
-        });
-        return res.data.data
-    } catch (error) {
-        console.log(error)
-    }
+    const res = await api.post ('/clients/upload/',formData,{
+        headers:{
+            'Content-Type':'multipart/form-data'
+        }
+    });
+    return res.data.data
 }
 
 export const getClientsWithDocs=async()=>{
@@ -562,3 +562,10 @@ export const getRevenueDashboard  = async(salaryPage, subscriptionPage)=>{
     }
 }
 
+export const updateAppUrl = async (appUrl) => {
+    const response = await api.patch("/clients/app-url/", {
+        app_url: appUrl,
+    });
+
+    return response.data;
+};

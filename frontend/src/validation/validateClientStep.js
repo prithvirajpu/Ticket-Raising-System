@@ -7,11 +7,11 @@ export const validateClientStep = (step, form) => {
   if (step === 1) {
 
     // Company Name
-    if (!form.companyName?.trim()) {
-      errors.companyName = "Company name is required";
-    } else if (form.companyName.trim().length < 2) {
-      errors.companyName = "Company name must be at least 2 characters";
-    }
+    // if (!form.companyName?.trim()) {
+    //   errors.companyName = "Company name is required";
+    // } else if (form.companyName.trim().length < 2) {
+    //   errors.companyName = "Company name must be at least 2 characters";
+    // }
 
     // Email
     if (!form.email?.trim()) {

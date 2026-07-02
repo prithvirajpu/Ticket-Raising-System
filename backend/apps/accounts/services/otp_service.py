@@ -79,7 +79,7 @@ def _handle_signup(email, otp_obj):
         return {
             "data": None,
             "errors": {"email": "User not found"},
-            "status": status.HTTP_404_NOT_FOUND
+            "status": status.HTTP_400_BAD_REQUEST
         }
 
     user.is_verified = True

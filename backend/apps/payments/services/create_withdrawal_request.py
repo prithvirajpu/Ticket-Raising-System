@@ -54,7 +54,7 @@ def create_withdrawal_request(user, amount):
             "withdrawal_id": withdrawal.id,
             "amount": str(amount),
             "user_id": user.id,
-            "redirect_to": "/admin/wallet-system"
+            "redirect_to": "/admin/wallet-transactions"
         }
     )
 

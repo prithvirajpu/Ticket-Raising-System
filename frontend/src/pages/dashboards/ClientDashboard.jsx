@@ -35,7 +35,7 @@ const ClientDashboard = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatsCard
             label="Current Plan"
-            value={data.current_plan || "-"}
+            value={data.current_plan || "N/A"}
             subtext="Active subscription"
             icon={TrendingUp}
             iconColor="text-indigo-500"

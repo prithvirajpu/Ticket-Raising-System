@@ -149,17 +149,6 @@ def google_client_auth_service(token,role=None):
                 }
         else:
             if role == UserRole.CLIENT:
-                existing_client=ClientProfile.objects.exists()
-                logger.info('The exist client is here %s',existing_client)
-                
-                if existing_client:
-                    return {
-                        'data': {},
-                        'errors': {
-                            'details': "New accounts will be a future feature."
-                        },
-                        'status': status.HTTP_400_BAD_REQUEST
-                    }
                 with transaction.atomic():
 
                     user, created = User.objects.get_or_create(

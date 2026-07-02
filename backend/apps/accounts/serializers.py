@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate
 from rest_framework import serializers
 from .models import User
+from apps.clients.models import ClientProfile
 from apps.core_app.constants import ApprovalStatus,UserRole
 from apps.core_app.models import AgentApplication,AgentCertificate
 from django.contrib.auth.hashers import make_password,check_password
@@ -65,17 +66,23 @@ class ClientSignupSerializer(serializers.ModelSerializer):
             existing_user.save(update_fields=["password","business_type","phone",])
             return existing_user
 
-        user = User.objects.create_user(
-            password=password,
-            role=UserRole.CLIENT,
-            approval_status=ApprovalStatus.APPROVED,
-            is_active=False,
-            is_verified=False,
-            profile_completed=True,
-            **validated_data
-        )
+        with transaction.atomic():
+            user = User.objects.create_user(
+                password=password,
+                role=UserRole.CLIENT,
+                approval_status=ApprovalStatus.APPROVED,
+                is_active=False,
+                is_verified=False,
+                profile_completed=True,
+                **validated_data
+            )
+            ClientProfile.objects.create(
+            user=user,
+            company_name="",
+            billing_email=user.email,
+            )
 
-        return user
+            return user
 
 class AgentSignupSerializer(serializers.ModelSerializer):
     password=serializers.CharField(write_only=True)

@@ -10,7 +10,6 @@ logger=logging.getLogger(__name__)
 def get_hierarchy_service():
 
     try:
-
         client = ClientProfile.objects.select_related(
             "manager",
             "team_lead"

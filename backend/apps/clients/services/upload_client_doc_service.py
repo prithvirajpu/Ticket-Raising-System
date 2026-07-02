@@ -1,12 +1,28 @@
 from apps.tickets.models import ClientDocument
+from apps.clients.models import ClientSubscription,ClientProfile
 from rest_framework import status
 
 import cloudinary.uploader
 
 def upload_client_doc_service(user, files):
+    client_profile = ClientProfile.objects.filter(user=user).first()
+    if not client_profile:
+        return {
+            "data": None,
+            "errors": {"details": "Client profile not found."},
+            "status": status.HTTP_404_NOT_FOUND,
+        }
+    sub= ClientSubscription.objects.filter(client=client_profile,status__in=['ACTIVE','CANCEL_SCHEDULED']).first()
+    if not sub:
+        return {
+            "data": None,
+            "errors": {
+                "details": "You need an active subscription to upload documents."
+            },
+            "status": status.HTTP_403_FORBIDDEN
+        }
     try:
         client_doc = ClientDocument.objects.filter(client=user).first()
-
         guidelines = files.get("guidelines_doc")
         faq = files.get("faq_doc")
         extra = files.get("extra_doc")

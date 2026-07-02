@@ -43,6 +43,14 @@ def verify_ticket_service(user, data):
                 "errors": {"details": "Client API key missing"},
                 "status": status.HTTP_400_BAD_REQUEST
             }
+        VERIFY_ENDPOINT = "/api/support/verify/"
+        verify_url = f"{client.app_url.rstrip('/')}{VERIFY_ENDPOINT}"
+        if not client.app_url:
+            return {
+                "data": None,
+                "errors": {"details": "Client app URL is missing"},
+                "status": status.HTTP_400_BAD_REQUEST
+            }
 
         # 4. Call external verification service
         headers = {
@@ -50,7 +58,7 @@ def verify_ticket_service(user, data):
         }
 
         response = requests.post(
-            "http://127.0.0.1:8001/api/support/verify/",
+            verify_url,
             json=data,
             headers=headers,
             timeout=10

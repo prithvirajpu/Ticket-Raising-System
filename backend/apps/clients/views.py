@@ -12,7 +12,8 @@ from .services import (plan_fetch_service,get_client_integration_keys,
                        update_client_profile_service,upload_client_doc_service,
                        current_subscription_service,stripe_checkout_service,
                        handle_stripe_webhook_service,cancel_subscription_service,
-                       regenerate_client_keys_service,get_client_dashboard)
+                       regenerate_client_keys_service,get_client_dashboard,
+                       update_app_url_service)
 from ..tickets.serializer import TicketSerializer
 from django.contrib.auth import get_user_model
 
@@ -97,5 +98,13 @@ class ClientDashboardAPIView(APIView):
     permission_classes=[IsAuthenticated]
 
     def get(self,request):
+        logger.info('client dashboard hit')
         result=get_client_dashboard(request.user)
+        return return_response(result)
+    
+class UpdateAppUrlView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def patch(self,request):
+        result= update_app_url_service(request.user,request.data)
         return return_response(result)

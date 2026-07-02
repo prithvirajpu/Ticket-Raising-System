@@ -3,6 +3,7 @@ import DashboardLayout from "../../../layouts/DashboardLayout";
 import { getIntegrationKeys, regenerateIntegrationKeys } from "../../../services/ticketService";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
 import { notifySuccess } from "../../../utils/notify";
+import AppUrlForm from "../../../components/AppUrlForm"; // <-- Imported your component here
 
 const IntegrationGuide = () => {
   const [keys, setKeys] = useState({
@@ -115,11 +116,16 @@ const IntegrationGuide = () => {
               <h2 className="text-2xl font-bold tracking-tight text-slate-900 mb-4 pb-2 border-b border-slate-200">
                 Endpoint Configuration
               </h2>
-              <div className="bg-slate-900 rounded-xl p-4 font-mono text-sm shadow-md flex items-center gap-3 border border-slate-800">
+              <div className="bg-slate-900 rounded-xl p-4 font-mono text-sm shadow-md flex items-center gap-3 border border-slate-800 mb-4">
                 <span className="bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded text-xs font-bold tracking-wide">
                   POST
                 </span>
                 <span className="text-slate-200">/api/support/verify/</span>
+              </div>
+
+              {/* Your Component Rendered Here */}
+              <div className="mt-4">
+                <AppUrlForm />
               </div>
             </section>
 

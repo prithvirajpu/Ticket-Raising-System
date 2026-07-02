@@ -19,7 +19,7 @@ def get_client_dashboard(user):
         return {
             "data": None,
             "errors": {"details": "Client not found"},
-            "status": status.HTTP_404_NOT_FOUND
+            "status": status.HTTP_400_BAD_REQUEST
         }
     subscription= ClientSubscription.objects.filter(client=client,status__in=['ACTIVE','CANCEL_SCHEDULED']).select_related(
         'plan').first()

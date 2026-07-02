@@ -85,7 +85,6 @@ const ClientManagement = () => {
               <thead>
                 <tr className="bg-slate-50/70 border-b border-slate-200/60 text-[11px] font-bold tracking-wider text-slate-400 uppercase">
                   <th className="p-4 font-semibold w-16">Idx</th>
-                  <th className="p-4 font-semibold">Company Name</th>
                   <th className="p-4 font-semibold">Email Address</th>
                   <th className="p-4 font-semibold">Contact Info</th>
                   <th className="p-4 font-semibold">Business Classification</th>

@@ -1,4 +1,4 @@
-import { Bell, CheckCircle, AlertTriangle, X, PhoneMissed, MessageSquare, RefreshCw, UserPlus, Star } from "lucide-react";
+import { Bell, CheckCircle, FileText, AlertTriangle, X, PhoneMissed, MessageSquare, RefreshCw, UserPlus, Star } from "lucide-react";
 import { useNotifications } from "../auth/NotificationProvider";
 import { useState } from "react";
 import {formatDistanceToNow} from 'date-fns'
@@ -67,6 +67,12 @@ const NotificationPage = ({ isOpen, onClose }) => {
             return (
                 <div className="p-2 bg-violet-50 rounded-lg text-violet-600 border border-violet-100">
                     <UserPlus size={16} />
+                </div>
+            );
+        case "PRACTICE_TICKET":
+            return (
+                <div className="p-2 bg-blue-50 rounded-lg text-blue-600 border border-blue-100">
+                    <FileText size={16} />
                 </div>
             );
         default:

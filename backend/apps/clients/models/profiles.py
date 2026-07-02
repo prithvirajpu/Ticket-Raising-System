@@ -15,6 +15,7 @@ class ClientProfile(models.Model):
 
     sso_shared_secret= models.CharField(max_length=128,unique=True,null=True,blank=True)
     internal_api_key=models.CharField(max_length=128,unique=True,null=True,blank=True)
+    app_url = models.URLField()
 
     created_at=models.DateTimeField(auto_now_add=True)
 

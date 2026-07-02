@@ -13,10 +13,15 @@ def sso_login_service(request,token):
             token,
             options={"verify_signature": False}
         )
-
-        email = unverified_payload.get("email")
         app_name = unverified_payload.get("app_name", "Shopkickora")
-        name = unverified_payload.get("username", "User")
+        if not app_name:
+            return {
+                "data": None,
+                "errors": {
+                    "details": "Missing app name."
+                },
+                "status": status.HTTP_400_BAD_REQUEST
+            }
 
         from apps.clients.models import ClientProfile
 
@@ -31,6 +36,14 @@ def sso_login_service(request,token):
             }
         payload=jwt.decode(token,client_profile.sso_shared_secret,algorithms=['HS256'])
         email = payload.get("email")
+        if not email:
+            return {
+                "data": None,
+                "errors": {
+                    "details": "Missing Email."
+                },
+                "status": status.HTTP_400_BAD_REQUEST
+            }
         name = payload.get("username", "User")
         
         user=User.objects.filter(email=email).first()
@@ -41,7 +54,7 @@ def sso_login_service(request,token):
             user = User.objects.create(
                 email=email,
                 name=name,
-                role=payload.get("role", "USER"),
+                role= "USER",
                 profile_completed=payload.get(
                     "is_profile_completed",
                     True
