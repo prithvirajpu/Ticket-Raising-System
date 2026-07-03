@@ -25,7 +25,7 @@ const CompleteProfile = () => {
   setErrors(validationErrors);
   try {
     await api.put("/clients/profile/update/", {
-      company_name: companyName,
+      name: companyName,
       business_type: businessType,
       phone: phone,
     });

@@ -160,7 +160,7 @@ def resend_otp_service(email,purpose):
     EmailOTP.objects.filter(email=email,purpose=purpose).delete()
     new_otp = generate_otp()
     EmailOTP.objects.create(email=email, otp=new_otp,purpose=purpose)
-    expiry_time=timezone.now()+timedelta(minutes=1)
+    expiry_time=timezone.now()+timedelta(minutes=2)
     
     try:
         send_otp_email(email, new_otp)

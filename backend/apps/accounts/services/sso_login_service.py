@@ -5,6 +5,8 @@ from django.contrib.auth import get_user_model
 User=get_user_model()
 from .auth_services import login_service
 from datetime import datetime
+import logging
+logger=logging.getLogger(__name__)
 
 
 def sso_login_service(request,token):
@@ -14,6 +16,7 @@ def sso_login_service(request,token):
             options={"verify_signature": False}
         )
         app_name = unverified_payload.get("app_name", "Shopkickora")
+        print("APP NAME:", app_name)
         if not app_name:
             return {
                 "data": None,
@@ -69,7 +72,8 @@ def sso_login_service(request,token):
                 user=user,
                 client_profile=client_profile
             )
-        return login_service(user)
+        print("CLIENTuser created or fetched")
+        return login_service(user,client_profile)
     except jwt.ExpiredSignatureError as e:
         return {
             'data':None,
@@ -83,6 +87,7 @@ def sso_login_service(request,token):
             'status':status.HTTP_400_BAD_REQUEST
         }
     except Exception as e:
+        logger.exception(e)
         return {
             'data':None,
             'errors':{"details":str(e)},

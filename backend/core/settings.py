@@ -218,7 +218,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     'monthly-salary-distribution':{
         'task':'apps.payments.tasks.monthly_salary_distribution_task',
-        # 'schedule': crontab(day_of_month=2, hour=0,minute=0)
+        # 'schedule': crontab(day_of_month=1, hour=0,minute=0)
         'schedule':60.0,
     }
 }

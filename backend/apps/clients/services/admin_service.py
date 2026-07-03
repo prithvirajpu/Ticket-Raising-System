@@ -5,6 +5,7 @@ from apps.clients.models import ClientProfile
 def update_client_profile_service(user, data):
     name = data.get("name")
     phone = data.get("phone")
+    print(name,phone)
 
     if not name or not phone:
         return {

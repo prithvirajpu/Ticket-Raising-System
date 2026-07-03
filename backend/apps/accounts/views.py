@@ -1,4 +1,5 @@
 from rest_framework.views import APIView
+from rest_framework.response import Response
 from apps.core_app.utils import return_response
 from rest_framework.parsers import MultiPartParser, FormParser
 from .services import (verify_otp_service,agent_signup_service,reset_password_service,resend_otp_service,
@@ -23,10 +24,9 @@ class SSOLoginAPIView(APIView):
         result = sso_login_service(request, token)
         if isinstance(result, HttpResponse):
             return result
+        print(f'result here : {result}')   
 
         data = result.get("data",{})
-        logger.info('user id is : %s',data['user_id'])
-
         if not data:
             return HttpResponse(
                 """

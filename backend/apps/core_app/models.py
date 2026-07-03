@@ -34,7 +34,6 @@ class AgentApplication(models.Model):
     is_active=models.BooleanField(default=False)
     email_verified=models.BooleanField(default=False)
     applied_at=models.DateTimeField(auto_now_add=True)
-    reviewed_at=models.DateTimeField(null=True,blank=True)
 
     def __str__(self):
         return self.full_name

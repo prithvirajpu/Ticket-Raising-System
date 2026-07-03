@@ -44,6 +44,7 @@ const WalletPage = () => {
       setModalLoading(true);
       await createWithdrawRequest({ amount: withdrawAmount })
       setWithdrawAmount('')
+      notifySuccess('Withdraw request successfully submitted')
       await fetchWalletMoney();
     } catch (error) {
       console.error(error);

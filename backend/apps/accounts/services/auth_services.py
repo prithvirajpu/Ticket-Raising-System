@@ -17,9 +17,11 @@ logger=logging.getLogger(__name__)
 
 User=get_user_model()
 
-def login_service(user):
+def login_service(user,client_profile=None):
 
     refresh = RefreshToken.for_user(user)
+    if client_profile:
+        refresh["client_id"] = client_profile.id
 
     return {
         "data": {

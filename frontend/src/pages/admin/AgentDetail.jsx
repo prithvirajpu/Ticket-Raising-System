@@ -110,17 +110,6 @@ const AgentDetail = () => {
                   </label>
                   <p className="text-slate-800 font-semibold text-sm">{agent.phone || "Unspecified"}</p>
                 </div>
-                
-                {agent.reviewed_at && (
-                  <div>
-                    <label className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">
-                      <Calendar className="w-3 h-3" /> Verification Date
-                    </label>
-                    <p className="text-slate-800 font-semibold text-sm">
-                      {new Date(agent.reviewed_at).toLocaleDateString(undefined, { dateStyle: 'medium' })}
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
 

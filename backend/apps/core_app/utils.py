@@ -10,9 +10,6 @@ User = get_user_model()
 def generate_otp():
     return str(random.randint(100000,999999))
 
-from django.core.mail import send_mail
-from django.conf import settings
-
 def send_otp_email(email, otp):
     subject = "Your Verification Code - Action Required"
 

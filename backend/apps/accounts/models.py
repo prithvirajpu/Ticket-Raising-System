@@ -23,6 +23,7 @@ class User(AbstractBaseUser,PermissionsMixin):
     is_verified=models.BooleanField(default=False)
 
     is_certified_agent = models.BooleanField(default=False)
+    certified_at = models.DateTimeField(null=True, blank=True)
     stripe_connect_account_id = models.CharField(max_length=255,null=True,blank=True)
     
     created_at=models.DateTimeField(auto_now_add=True)

@@ -1,6 +1,7 @@
 from rest_framework import status
 from apps.tickets.models import Ticket,TicketAssignment,TicketSLATracking,TicketReview,TicketActivity,Notification
 from apps.clients.models import ClientSubscription
+from apps.users.models import ClientUser
 from apps.tickets.serializer import TicketSerializer,TicketActivitySerializer
 from apps.tickets.utils import send_notification
 from django.db import transaction
@@ -22,19 +23,25 @@ ISSUE_PRIORITY_MAP = {
     "PRODUCT_ISSUE": "LOW",
     "ACCOUNT_ISSUE": "HIGH",
 }
-def create_ticket_service(data,user):
+def create_ticket_service(data,user,client_id):
+    logger.info("client_id from JWT = %s", client_id)
     from .attach_sla_to_ticket import attach_sla_to_ticket
-    client_user = getattr(user, "client_user", None)
+    client_user = ClientUser.objects.filter(
+            user=user,
+            client_profile_id=client_id
+        ).first()
+    logger.info("client_user = %s", client_user)
 
     if not client_user:
         return {
             "data": None,
             "errors": {
-                "details": "User not linked to any client"
+                "details": "User not linked to this client"
             },
-            "status": status.HTTP_400_BAD_REQUEST
+            "status": status.HTTP_403_FORBIDDEN
         }
     client = client_user.client_profile
+    logger.info("client = %s", client)
     
     subscription=ClientSubscription.objects.filter(client=client,status__in=['CANCEL_SCHEDULED','ACTIVE']).first()
     if not subscription:
@@ -43,6 +50,7 @@ def create_ticket_service(data,user):
             "errors":{'details':'No active subscription'},
             'status':status.HTTP_403_FORBIDDEN
         }
+    logger.info("subscription = %s", subscription)
 
     try:
         with transaction.atomic(): 
@@ -95,10 +103,12 @@ def create_ticket_service(data,user):
             "status":status.HTTP_400_BAD_REQUEST
         }
 
-def get_ticket_list_service(request,sort='newest',search='',page=1,per_page=5):
-    tickets = Ticket.objects.filter(created_by=request.user).select_related()
+def get_ticket_list_service(request,client_id,sort='newest',search='',page=1,per_page=5):
+    tickets = Ticket.objects.filter(created_by=request.user,client_id=client_id).select_related()
     if search:
-        tickets=tickets.filter(Q(subject__icontains=search) | Q(ticket_code__icontains=search) | Q(description__icontains=search))
+        tickets=tickets.filter(Q(subject__icontains=search) | 
+                               Q(ticket_code__icontains=search) | 
+                               Q(description__icontains=search))
 
     if sort=='oldest': 
             tickets=tickets.order_by('created_at')

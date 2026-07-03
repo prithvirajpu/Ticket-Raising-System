@@ -15,8 +15,7 @@ class CreateTicketView(APIView):
     permission_classes=[IsAuthenticated]
 
     def post(self,request):
-        logger.info("REQUEST USER ID :%s", request.user.id)
-        logger.info("REQUEST USER EMAIL :%s", request.user.email)
+        client_id = request.auth.get("client_id")
         serializer=TicketSerializer(data=request.data)
         if not serializer.is_valid():
             logger.info('validated errors %s', serializer.errors)
@@ -26,7 +25,7 @@ class CreateTicketView(APIView):
                 "status":400
             })
         logger.info('validated data %s',serializer.validated_data)
-        result=create_ticket_service(serializer.validated_data,request.user)
+        result=create_ticket_service(serializer.validated_data,request.user,client_id)
 
         return return_response(result)
     
@@ -37,7 +36,8 @@ class TicketListView(APIView):
         search=request.query_params.get('search','')
         sort=request.query_params.get('sort','newest')
         page = int(request.query_params.get('page', 1))
-        result=get_ticket_list_service(request,sort,search,page)
+        client_id = request.auth["client_id"]
+        result=get_ticket_list_service(request,client_id,sort,search,page)
         return return_response(result)
     
 class TicketDetailView(APIView):
@@ -92,5 +92,6 @@ class UserDashboardView(APIView):
     permission_classes=[IsAuthenticated]
 
     def get(self,request):
-        result=user_dashboard(request.user)
+        client_id = request.auth.get("client_id")
+        result = user_dashboard(request.user, client_id)
         return return_response(result)
