@@ -1,7 +1,7 @@
 from rest_framework import status
 
 from apps.accounts.models import User
-from apps.tickets.models import ClientProfile
+from apps.clients.models import ClientProfile
 from apps.users.models import ClientUser
 from apps.core_app.constants import UserRole
 import logging
@@ -10,7 +10,6 @@ logger=logging.getLogger(__name__)
 def get_hierarchy_service():
 
     try:
-
         client = ClientProfile.objects.select_related(
             "manager",
             "team_lead"

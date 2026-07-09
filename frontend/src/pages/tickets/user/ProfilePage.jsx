@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
-import { getProfile, updateProfile } from '../../../services/ticketService';
+import { getProfile, updateClientProfile, updateProfile } from '../../../services/ticketService';
 import Loader from '../../../components/modals/Loader';
 import EditProfileModal from '../../../components/modals/EditProfileModal';
+import { useAuth } from '../../../auth/AuthContext';
+import { notifySuccess } from '../../../utils/notify';
 
 const ProfilePage = () => {
+    const { userRole } = useAuth();
     const [profile, setProfile] = useState({ name: '', phone: '', email: '' });
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -32,13 +35,21 @@ const ProfilePage = () => {
     };
 
     const handleUpdate = async (updatedData) => {
+        console.log('updated data',updatedData)
         setSaving(true);
         try {
-            await updateProfile(updatedData);
+            if (userRole === "CLIENT") {
+                await updateClientProfile(updatedData);
+                notifySuccess('Profile updated successfully')
+            } else {
+                await updateProfile(updatedData);
+                notifySuccess('Profile updated successfully')
+            }
+
             setProfile(updatedData);
             setIsModalOpen(false);
         } catch (error) {
-            console.error(error);
+            console.error(error?.response?.data.errors?.details);
         } finally {
             setSaving(false);
         }

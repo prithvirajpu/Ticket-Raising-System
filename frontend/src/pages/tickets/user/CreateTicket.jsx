@@ -42,7 +42,7 @@ const CreateTicket = () => {
       navigate("/user/tickets");
       notifySuccess("Ticket created successfully !");
     } catch (error) {
-      setError(error.response?.data?.details || "something went wrong");
+      setError(error.response?.data?.errors?.details || "something went wrong");
     } finally {
       setLoading(false);
     }

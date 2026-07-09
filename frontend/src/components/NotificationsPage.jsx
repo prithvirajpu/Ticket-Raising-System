@@ -1,7 +1,14 @@
-import { Bell, CheckCircle, AlertTriangle, X, PhoneMissed, MessageSquare, RefreshCw, UserPlus, Star } from "lucide-react";
+import { Bell, CheckCircle, FileText, AlertTriangle, X, PhoneMissed, MessageSquare, RefreshCw, UserPlus, Star } from "lucide-react";
 import { useNotifications } from "../auth/NotificationProvider";
 import { useState } from "react";
+import {formatDistanceToNow} from 'date-fns'
+import {useNavigate} from 'react-router-dom'
 
+export const formatNotificationTime=(date)=>{
+    return formatDistanceToNow(new Date(date),{
+        addSuffix:true
+    })
+}
 const NotificationPage = ({ isOpen, onClose }) => {
     const { 
         notifications, 
@@ -9,6 +16,8 @@ const NotificationPage = ({ isOpen, onClose }) => {
         handleNotificationClick, 
         handleMarkAllRead 
     } = useNotifications();
+    const navigate= useNavigate()
+
 
     const getIcon = (type) => {
     switch (type) {
@@ -48,16 +57,22 @@ const NotificationPage = ({ isOpen, onClose }) => {
                     <RefreshCw size={16} />
                 </div>
             );
-        // case "WELCOME_ACCOUNT_CREATED":
-        //     return (
-        //         <div className="p-2 bg-purple-50 rounded-lg text-purple-600 border border-purple-100">
-        //             <UserPlus size={16} />
-        //         </div>
-        //     );
         case "CHAT_MESSAGE":
             return (
                 <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600 border border-indigo-100">
                     <MessageSquare size={16} />
+                </div>
+            );
+        case "WITHDRAWAL_REQUEST":
+            return (
+                <div className="p-2 bg-violet-50 rounded-lg text-violet-600 border border-violet-100">
+                    <UserPlus size={16} />
+                </div>
+            );
+        case "PRACTICE_TICKET":
+            return (
+                <div className="p-2 bg-blue-50 rounded-lg text-blue-600 border border-blue-100">
+                    <FileText size={16} />
                 </div>
             );
         default:
@@ -66,6 +81,14 @@ const NotificationPage = ({ isOpen, onClose }) => {
                     <Bell size={16} />
                 </div>
             );
+    }
+};
+const handleClick = async (notification) => {
+    await handleNotificationClick(notification);
+
+    if (notification.data?.redirect_to) {
+        navigate(notification.data.redirect_to);
+        onClose();
     }
 };
 
@@ -123,14 +146,13 @@ const NotificationPage = ({ isOpen, onClose }) => {
                         
                         <div
                             key={notification.id}
-                            onClick={() => handleNotificationClick(notification)}
+                            onClick={() => handleClick(notification)}
                             className={`p-4 transition-all duration-200 cursor-pointer flex gap-3 items-start select-none ${
                                 !notification.is_read
                                     ? "bg-blue-50/40 hover:bg-blue-50/70"
                                     : "bg-white hover:bg-slate-50"
                             }`}
                         >
-                            {console.log(notification)}
                             {/* Icon Wrapper */}
                             <div className="flex-shrink-0">
                                 {getIcon(notification.notification_type)}
@@ -166,7 +188,7 @@ const NotificationPage = ({ isOpen, onClose }) => {
                                         </span>
                                     )}
                                     <span className="text-[11px] text-slate-400">
-                                        {notification.created_at}
+                                        {formatNotificationTime(notification.created_at)}
                                     </span>
                                 </div>
                             </div>

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Loader from "../../../components/modals/Loader";
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import { ArrowLeft, User, Clock, AlertCircle, Send, CheckCheck, HelpCircle } from "lucide-react";
-import { getFakeTicketDetail, getTrainingMessages } from "../../../services/ticketService";
+import { getFakeTicketDetail, getTrainingMessages, retryTraining } from "../../../services/ticketService";
 import { getSlaTimer } from "../../../utils/slaTImer";
 import useTrainingChat from "../../../hooks/useTrainingChat";
 import { useAuth } from "../../../auth/AuthContext";
@@ -15,16 +15,21 @@ const AgentFakeTicketDetail = () => {
   const currentUserId = userId;
 
   const {
-    messages,
+    messages,startResolve,
     newMessage,
     setMessages,
     setNewMessage,
     sendMessage,
+    isResolving,setIsResolving,
     isTyping,
+    socketRef,
+    evaluation,setEvaluation,
+    showRetry,setShowRetry,
   } = useTrainingChat(id, currentUserId);
 
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
+  // const [evaluating, setEvaluating] = useState(false);
   
   // Localized template container target element
   const chatBottomRef = useRef(null);
@@ -33,6 +38,10 @@ const AgentFakeTicketDetail = () => {
     fetchTicket();
     fetchMessages();
   }, [id, currentUserId]);
+
+  useEffect(() => {
+  console.log("COMPONENT RECEIVED EVALUATION:", evaluation);
+}, [evaluation]);
 
   // CRITICAL FIX: Explicitly watch the messages array inside this view context
   useEffect(() => {
@@ -64,6 +73,7 @@ const AgentFakeTicketDetail = () => {
     try {
       const res = await getFakeTicketDetail(id);
       setTicket(res.message);
+      console.log('detail page ',res)
     } catch (err) {
       console.error(err);
     } finally {
@@ -77,6 +87,46 @@ const AgentFakeTicketDetail = () => {
       if (newMessage.trim()) sendMessage();
     }
   };
+
+const handleRetry = async () => {
+    await retryTraining(id); 
+    setMessages([]);
+    setEvaluation(null);
+    setShowRetry(false);
+    setTicket(prev => ({
+        ...prev,
+        training_passed: null,
+        ticket:{...prev.ticket,status:'OPEN'},
+    }));
+};
+
+    const handleResolveTicket= async()=>{
+      setShowRetry(false);
+      setIsResolving(true);
+    socketRef.current.send(
+      JSON.stringify({
+        type:'resolve_ticket',
+      })
+    )
+  }
+
+const trainingPassed =
+  evaluation?.passed ?? ticket?.training_passed;
+
+const isPassed = trainingPassed === true;
+
+const isFailed = trainingPassed === false;
+
+const isEvaluating = isResolving && !evaluation;
+
+const isPending =
+  trainingPassed == null && !isEvaluating;
+  console.log({
+  trainingPassed: ticket?.training_passed,
+  evaluation,
+  isPending,
+  isFailed,
+});
 
   if (loading) return <Loader />;
   if (!ticket) return <p className="p-6">Ticket not found</p>;
@@ -95,14 +145,56 @@ const AgentFakeTicketDetail = () => {
               <ArrowLeft size={20} />
             </button>
             <h1 className="text-xl font-bold">
-              Ticket #{ticket?.ticket_code || id}
+              Ticket #{ticket?.ticket?.ticket_code || id}
             </h1>
           </div>
 
-          <div className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium text-sm">
-            AI Training Mode
-          </div>
+        <div className="text-white px-2 py-2 rounded-lg font-medium text-sm">
+
+ {isPending && (
+  <button onClick={startResolve} className="bg-green-600 px-4 py-2 rounded-lg">
+    Mark as Resolved
+  </button>
+)}
+
+{isEvaluating && (
+  <div className="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg">
+    Evaluating AI Score...
+  </div>
+)}
+
+{isFailed && !isEvaluating && (
+  <button onClick={handleRetry} className="bg-red-600 px-4 py-2 rounded-lg">
+    Retry Training
+  </button>
+)}
+
+{isPassed && (
+  <div className="bg-green-100 text-green-700 px-4 py-2 rounded-lg">
+    Certified ✓
+  </div>
+)}
+</div>
+          
         </div>
+              {evaluation && (
+  <div className="p-4 border rounded-xl bg-gray-50 mt-4">
+    <h3 className="font-bold text-lg">QA Evaluation Result</h3>
+
+    <p>Score: {evaluation.score}</p>
+
+    <p>
+      Status:{" "}
+      <span className={evaluation.passed ? "text-green-600" : "text-red-600"}>
+        {evaluation.passed ? "PASSED" : "FAILED"}
+      </span>
+    </p>
+
+    <p className="text-sm text-gray-600 mt-2">
+      {evaluation.feedback}
+    </p>
+  </div>
+)}
 
         {/* Master Content Layout Grid */}
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8">
@@ -122,7 +214,7 @@ const AgentFakeTicketDetail = () => {
                 </div>
                 <div className="flex items-center gap-2 font-medium capitalize">
                   <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                  {ticket?.status || "In progress"}
+                  {ticket?.ticket?.status || "In progress"}
                 </div>
               </div>
 
@@ -133,7 +225,7 @@ const AgentFakeTicketDetail = () => {
                   Priority
                 </div>
                 <span className="bg-pink-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
-                  {ticket?.priority || "High"}
+                  {ticket?.ticket?.priority || "High"}
                 </span>
               </div>
 
@@ -153,8 +245,8 @@ const AgentFakeTicketDetail = () => {
                   Created
                 </div>
                 <p className="text-sm font-medium">
-                  {ticket?.created_at
-                    ? new Date(ticket.created_at).toLocaleString()
+                  {ticket?.ticket?.created_at
+                    ? new Date(ticket.ticket?.created_at).toLocaleString()
                     : "1/3/2026, 10:30:00 AM"}
                 </p>
               </div>
@@ -177,7 +269,7 @@ const AgentFakeTicketDetail = () => {
               <div className="mx-6 mt-4 flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-2 text-sm">
                 <HelpCircle size={16} className="text-yellow-600 shrink-0" />
                 <span className="font-semibold text-gray-800 shrink-0">Issue:</span>
-                <p className="text-gray-700 truncate">{ticket?.subject}</p>
+                <p className="text-gray-700 truncate">{ticket?.ticket?.subject}</p>
               </div>
 
               {/* Chat Timeline Area */}
@@ -279,6 +371,8 @@ const AgentFakeTicketDetail = () => {
 
         </div>
       </div>
+
+
     </DashboardLayout>
   );
 };

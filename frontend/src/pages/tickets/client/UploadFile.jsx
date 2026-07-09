@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Upload, FileText, CheckCircle2, Loader2 } from 'lucide-react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { uploadDocument } from '../../../services/ticketService';
-import { notifySuccess } from '../../../utils/notify';
+import { notifyInfo, notifySuccess } from '../../../utils/notify';
 
 const UploadFile = () => {
     const [files, setFiles] = useState({
@@ -25,7 +25,7 @@ const UploadFile = () => {
 
     // ✅ REQUIRED VALIDATION
     if (!files.guidelines_doc || !files.faq_doc) {
-        alert("Company Overview and FAQs are required");
+        notifyInfo("Company Overview and FAQs are required");
         return;
     }
 
@@ -44,7 +44,10 @@ const UploadFile = () => {
         extra_doc: null
     });
     } catch (error) {
-        console.error(error);
+        notifyInfo(
+        error.response?.data?.errors?.details ||
+        "Failed to upload documents."
+    );
     } finally {
         setLoading(false);
     }

@@ -2,9 +2,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from apps.core_app.utils import return_response
 from .services import (get_manager_tickets_service,get_clients_with_documents,get_client_documents,summarize_document_service,submit_summary_service,
-                       )
-
-# Create your views here.
+                       manager_dashboard_service,)
+import logging
+logger=logging.getLogger(__name__)
 
 class ManagerTicketsView(APIView):
     permission_classes=[IsAuthenticated]
@@ -41,3 +41,9 @@ class SubmitSummaryView(APIView):
         result= submit_summary_service(request,doc_id)
         return return_response(result)
     
+class ManagerDashboardView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        result = manager_dashboard_service(request.user)
+        return return_response(result)

@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from apps.core_app.utils import return_response
-from apps.tickets.services import (dashboard_service,notification_service,
+from apps.tickets.services import (notification_service,
                                    escalate_ticket_service,resolve_ticket_service,
                                    send_message_service,get_messages_service,
                                    mark_as_read_notification,mark_all_notifications_read_service,
@@ -15,6 +15,7 @@ from rest_framework.permissions import AllowAny
 
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
+
     
 
 User = get_user_model()
@@ -42,17 +43,6 @@ def dev_login(request):
         "email": user.email
     })
 
-    
-class DashboardView(APIView):
-    permission_classes=[IsAuthenticated]
-
-    def get(self,request):
-        role=request.user.role
-        result=dashboard_service(request,role)
-        return return_response(result)
-
-
-
 class SendMessageView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -64,7 +54,6 @@ class SendMessageView(APIView):
             ticket_id=ticket_id,
             message=message
         )
-
         return Response(result)
 
 class TicketMessageView(APIView):
@@ -113,5 +102,6 @@ class TrainingMessagesAPIView(APIView):
     permission_classes= [IsAuthenticated]
 
     def get(self, request, ticket_id):
-        result = get_training_messages_service(ticket_id)
+        result = get_training_messages_service(request,ticket_id)
         return return_response(result)
+    

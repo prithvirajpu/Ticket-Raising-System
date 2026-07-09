@@ -7,9 +7,10 @@ from .manager import UserManager
 
 class User(AbstractBaseUser,PermissionsMixin):
     objects=UserManager()
+
     email=models.EmailField(unique=True)
     name=models.CharField(max_length=100)
-    phone=models.CharField(max_length=15,default='0000000000')
+    phone=models.CharField(max_length=15,null=True,blank=True)
     business_type=models.CharField(max_length=50,blank=True)
     role=models.CharField(max_length=50,
                           choices=[(i,i)for i in vars(UserRole).values() if isinstance(i,str)],
@@ -20,10 +21,10 @@ class User(AbstractBaseUser,PermissionsMixin):
     is_active=models.BooleanField(default=False)
     is_staff=models.BooleanField(default=False)
     is_verified=models.BooleanField(default=False)
-    is_blocked=models.BooleanField(default=False)
 
     is_certified_agent = models.BooleanField(default=False)
-    training_completed = models.BooleanField(default=False)
+    certified_at = models.DateTimeField(null=True, blank=True)
+    stripe_connect_account_id = models.CharField(max_length=255,null=True,blank=True)
     
     created_at=models.DateTimeField(auto_now_add=True)
     profile_completed = models.BooleanField(default=False)
@@ -36,6 +37,8 @@ class User(AbstractBaseUser,PermissionsMixin):
 
     def __str__(self):
         return self.email
+    
+
     
 class PasswordResetToken(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE)

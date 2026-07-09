@@ -7,11 +7,15 @@ from apps.core_app.constants import ApprovalStatus
 from apps.core_app.utils import return_response
 from apps.core_app.models import AgentApplication
 from rest_framework.response import Response
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 from rest_framework.parsers import MultiPartParser, FormParser
-from .services import (fetch_users_service,create_sla_rule_service,fetch_sla_rules_service,approve_user_service,reject_user_service,
+from apps.admins.services import (fetch_users_service,create_sla_rule_service,fetch_sla_rules_service,approve_user_service,reject_user_service,
                        get_agent_application_detail_service,get_client_list_service,get_hierarchy_service,
-                       get_agent_list_service,toggle_agent_status_service,assign_hierarchy_service,get_all_users_service)
-from .serializers import (UserApprovalSerializer,AssignHierarchySerializer)
+                       get_agent_list_service,toggle_agent_status_service,assign_hierarchy_service,get_all_users_service,
+                       getwithdrawal_list,approve_withdrawal,reject_withdrawal,admin_wallet_transaction_service,
+                       admin_dashboard_service,admin_finance_service,export_finance_csv,export_dashboard_csv)
+from apps.admins.serializers import (UserApprovalSerializer,AssignHierarchySerializer)
 from django.contrib.auth import get_user_model
 import logging
 logger=logging.getLogger(__name__)
@@ -127,3 +131,62 @@ class HierarchyView(APIView):
     def get(self,request):
         result= get_hierarchy_service()
         return Response(result,status=result['status'])
+    
+class WithdrawRequestView(APIView):
+    permission_classes =[IsAdmin]
+
+    def get(self,request):
+        result= getwithdrawal_list(request)
+        return return_response(result)
+    
+class ApproveWithdrawalView(APIView):
+    permission_classes = [IsAdmin]
+
+    def post(self, request, pk):
+        result = approve_withdrawal(pk,request.user)
+        return return_response(result)
+    
+class RejectWithdrawalView(APIView):
+    permission_classes = [IsAdmin]
+
+    def post(self, request, pk):
+        result = reject_withdrawal(pk)
+        return return_response(result)
+    
+class AdminWalletTransactionAPIView(APIView):
+    permission_classes =[IsAdmin]
+
+    def get(self,request):
+        result=admin_wallet_transaction_service(request)
+        return return_response(result) 
+    
+@method_decorator(cache_page(timeout=60), name="get")
+class AdminDashboardAPIView(APIView):
+    permission_classes = [IsAdmin]
+
+    def get(self,request):
+        result= admin_dashboard_service(request)
+        return return_response(result)
+    
+@method_decorator(cache_page(timeout=60), name="get")
+class AdminFinanceAPIView(APIView):
+    permission_classes = [IsAdmin]
+
+    def get(self, request):
+        logger.warning('db hit')
+        result = admin_finance_service(request)
+        return return_response(result)
+    
+class FinanceReportCSVView(APIView):
+    # permission_classes = [IsAdmin]
+
+    def get(self, request):
+        print("CSV endpoint called")
+        return export_finance_csv()
+    
+class DashboardReportCSVView(APIView):
+    permission_classes = [IsAdmin]
+
+    def get(self, request):
+        period = request.GET.get("period", "7d")
+        return export_dashboard_csv(period)

@@ -1,13 +1,13 @@
 from apps.tickets.models import TicketAssignment
-from apps.tickets.serializer import TicketSerializer
+from apps.tickets.serializer import TicketSerializer,TicketAssignmentSerializer
 from rest_framework import status
 
 def fetch_fake_tickets_service(user):
     try:
-        assignments= TicketAssignment.objects.filter(agent=user,ticket__is_ai_generated=True).select_related('ticket').order_by('-created_at')
+        assignments= (TicketAssignment.objects.filter(agent=user,ticket__is_ai_generated=True).select_related('ticket').order_by('-created_at'))
 
-        tickets=[ i.ticket for i in assignments]
-        serialized_data= TicketSerializer(tickets,many=True).data
+        serialized_data=TicketAssignmentSerializer(assignments,many=True).data
+        
         return {
             'data':{'message':serialized_data},
             'errors':{},
@@ -30,7 +30,7 @@ def get_fake_ticket_detail_service(agent,id):
                 'errors':{'details':'Ticket not found'},
                 'status':status.HTTP_400_BAD_REQUEST
             }
-        valid_data=TicketSerializer(assignment.ticket).data
+        valid_data=TicketAssignmentSerializer(assignment).data
         return {
             'data':{'message':valid_data},
                 'errors':{},

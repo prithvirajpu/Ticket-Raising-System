@@ -1,6 +1,7 @@
 import { createContext,useContext,useEffect,useState } from "react"
 import { useAuth } from "./AuthContext"
 import { getNotifications, markAllNotificationsRead, markNotificationRead } from "../services/ticketService"
+import { notifySuccess } from "../utils/notify"
 
 const NotificationContext= createContext()
 const NotificationProvider = ({children}) => {
@@ -14,9 +15,20 @@ const NotificationProvider = ({children}) => {
         const ws= new WebSocket(`ws://localhost:8000/ws/notifications/?token=${accessToken}`)
 
         ws.onmessage=(event)=>{
-            console.log('notification data in front',event.data)
             const data= JSON.parse(event.data);
-            setNotifications(prev => [data,...prev]);
+            console.log('notification WS',data)
+            notifySuccess('You have a new notification')
+            setNotifications(prev => {
+        const existing = prev.find(n => n.id === data.id);
+
+        if (existing) {
+            return prev.map(n =>
+                n.id === data.id ? data : n
+            );
+        }
+
+        return [data, ...prev];
+    });
             
         }
         ws.onopen = () => {
@@ -48,7 +60,6 @@ const NotificationProvider = ({children}) => {
     const loadNotifications=async()=>{
         try {
             const res= await getNotifications();
-            console.log(res)
             setNotifications(res.serializer)
         } catch (error) {
             console.log(error)
@@ -69,8 +80,7 @@ const NotificationProvider = ({children}) => {
             console.log('maked read')
         } catch (error) {
             console.log(error)
-        }
-        }
+        }}
     }
 
     const handleMarkAllRead = async() => {

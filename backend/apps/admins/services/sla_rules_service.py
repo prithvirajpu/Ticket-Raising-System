@@ -1,5 +1,6 @@
 from rest_framework import status
-from apps.tickets.models import (SLAPolicy,SubscriptionPlan)
+from apps.tickets.models import (SLAPolicy)
+from apps.clients.models import (SubscriptionPlan)
 
 from apps.tickets.serializer import SLAPolicySerializer
 

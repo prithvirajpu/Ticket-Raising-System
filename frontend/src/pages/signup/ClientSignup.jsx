@@ -125,7 +125,7 @@ const handleSubmit = async (e) => {
               <h1 className="text-2xl font-semibold text-[#0f172a]">Client SignUp Page</h1>
           </div>
             <form onSubmit={handleNext} className="space-y-5">
-              <div>
+              {/* <div>
                 <label className="block text-[13px] font-semibold text-gray-600 mb-1">Company Name</label>
                 <input
                       type="text"
@@ -142,7 +142,7 @@ const handleSubmit = async (e) => {
                       </p>
                     )}
 
-              </div>
+              </div> */}
 
               <div>
                 <label className="block text-[13px] font-semibold text-gray-600 mb-1">Email</label>

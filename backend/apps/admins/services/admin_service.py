@@ -2,9 +2,10 @@ from rest_framework import status
 from django.db import transaction
 from django.contrib.auth import get_user_model
 from apps.core_app.models import AgentApplication,AgentCertificate
-from apps.tickets.models import ClientProfile
+from apps.clients.models import ClientProfile
 from apps.core_app.constants import UserRole, ApprovalStatus
 from rest_framework.pagination import PageNumberPagination
+from django.utils import timezone
 
 User=get_user_model()
 
@@ -38,6 +39,10 @@ def approve_user_service(user_id, role):
             user.approval_status = ApprovalStatus.APPROVED
             user.is_active = True
             user.is_verified = agent.email_verified
+
+            if role in [UserRole.MANAGER, UserRole.TEAM_LEAD]:
+                user.is_certified_agent = True
+                user.certified_at = timezone.now()
             user.save()
 
         else:
@@ -49,7 +54,9 @@ def approve_user_service(user_id, role):
                 approval_status=ApprovalStatus.APPROVED,
                 is_active=True,
                 is_verified=agent.email_verified,
-                password=agent.password
+                password=agent.password,
+                is_certified_agent=role in [UserRole.MANAGER, UserRole.TEAM_LEAD],
+                certified_at=timezone.now() if role in [UserRole.MANAGER, UserRole.TEAM_LEAD] else None,
             )
 
         agent.status = ApprovalStatus.APPROVED

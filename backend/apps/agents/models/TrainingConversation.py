@@ -1,9 +1,9 @@
 from django.db import models
-from apps.tickets.models import Ticket
+from apps.tickets.models import TicketAssignment
 
 class TrainingConversation(models.Model):
-    ticket = models.ForeignKey(
-        Ticket,
+    assignment = models.ForeignKey(
+        TicketAssignment,
         on_delete=models.CASCADE,
         related_name='training_messages'
     )

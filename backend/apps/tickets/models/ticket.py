@@ -33,7 +33,7 @@ class Ticket(models.Model):
     ]
 
     ticket_code=models.CharField(max_length=30,unique=True,default=generate_ticket_code)
-    client=models.ForeignKey('tickets.ClientProfile',on_delete=models.CASCADE,related_name='client_tickets')
+    client=models.ForeignKey('clients.ClientProfile',on_delete=models.CASCADE,related_name='client_tickets')
     created_by=models.ForeignKey(User,on_delete=models.CASCADE,related_name='created_tickets')
     assigned_to=models.ForeignKey(User,on_delete=models.SET_NULL,
                                   null=True,blank=True,related_name='assigned_tickets' )
@@ -44,15 +44,13 @@ class Ticket(models.Model):
     is_ai_generated = models.BooleanField(default=False)
 
     is_training_ticket = models.BooleanField(default=False)
-    training_score = models.DecimalField(max_digits=4,decimal_places=2,null=True,blank=True)
-    training_passed = models.BooleanField(default=False)
-    training_feedback = models.TextField(blank=True,null=True)
     ai_customer_prompt = models.TextField(blank=True,null=True)
 
     subject=models.CharField(max_length=255)
     description=models.TextField()
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)
+
 
     def __str__(self):
         return self.ticket_code

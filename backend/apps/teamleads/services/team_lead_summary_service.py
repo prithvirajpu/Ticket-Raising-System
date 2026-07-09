@@ -1,5 +1,6 @@
 from apps.tickets.models import DocumentSummary,Ticket
 from rest_framework import status
+from apps.tickets.utils import send_notification
 from django.contrib.auth import get_user_model
 import os
 import requests
@@ -115,6 +116,15 @@ def submit_agent_summary_service(request, summary_id):
                 defaults={
                     'summary': agent_summary_text,
                     'created_by':request.user
+                }
+            )
+            send_notification(
+                user_id=agent.id,
+                notification_type="PRACTICE_TICKET",
+                title="New Practice Ticket",
+                message=f"{request.user.name} assigned you a new practice ticket.",
+                data={
+                    "redirect_to": "/agent/practice"
                 }
             )
 

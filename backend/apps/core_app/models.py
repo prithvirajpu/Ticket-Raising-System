@@ -26,7 +26,7 @@ class AgentApplication(models.Model):
     ]
     full_name=models.CharField(max_length=255)
     email=models.EmailField(unique=True)
-    phone=models.CharField(max_length=20,default='0000000000')
+    phone=models.CharField(max_length=20,null=True,blank=True)
     skills=models.TextField()
     resume=models.FileField(upload_to='resumes/',storage=raw_storage)
     password=models.CharField(max_length=255)
@@ -34,7 +34,6 @@ class AgentApplication(models.Model):
     is_active=models.BooleanField(default=False)
     email_verified=models.BooleanField(default=False)
     applied_at=models.DateTimeField(auto_now_add=True)
-    reviewed_at=models.DateTimeField(null=True,blank=True)
 
     def __str__(self):
         return self.full_name

@@ -7,7 +7,7 @@ export const createTicket= async(data)=>{
         const response= await api.post('/users/tickets/create/',data)
     return response.data.data
     } catch (error) {
-        console.log("CREATE TICKET FAILED ❌",error.response?.data)
+        console.log("CREATE TICKET FAILED ❌",error.response?.data?.errors?.details)
         throw error
     }
 }
@@ -90,12 +90,16 @@ export const escalateTicket=async(id)=>{
 }
 
 export const getProfile=async()=>{
-    const res= await api.get('/users/profile')
+    const res= await api.get('/users/profile/')
     return res.data.data
 }
 
 export const updateProfile= async (data)=>{
     const res = await api.put('/users/profile/update/',data)
+    return res.data.data
+}
+export const updateClientProfile= async (data)=>{
+    const res = await api.put('/clients/profile/update/',data)
     return res.data.data
 }
 
@@ -110,16 +114,12 @@ export const getManagerTickets=async ()=>{
 }
 
 export const uploadDocument= async (formData)=>{
-    try {
-        const res = await api.post ('/clients/upload/',formData,{
-            headers:{
-                'Content-Type':'multipart/form-data'
-            }
-        });
-        return res.data.data
-    } catch (error) {
-        console.log(error)
-    }
+    const res = await api.post ('/clients/upload/',formData,{
+        headers:{
+            'Content-Type':'multipart/form-data'
+        }
+    });
+    return res.data.data
 }
 
 export const getClientsWithDocs=async()=>{
@@ -171,12 +171,20 @@ export const getAgentSummary=async ()=>{
     }
 }
 
-export const getDashboard=async (role)=>{
+export const getAgentDashboard=async (role)=>{
     try {
-        const res= await api.get('/tickets/dashboard/')
+        const res= await api.get('/agents/dashboard/')
         return res.data.data
     } catch (error) {
-        notifyError('something went wrong')
+        console.log('something went wrong')
+    }
+}
+export const getUserDashboard=async (role)=>{
+    try {
+        const res= await api.get('/users/dashboard/')
+        return res.data.data
+    } catch (error) {
+        console.log('something went wrong in user dashboard')
     }
 }
 
@@ -192,7 +200,7 @@ export const generateFakeTickets= async (summary)=>{
     console.log(error.response);
     console.log(error.response?.data);
 
-    notifyError(
+    console.log(
         error.response?.data?.errors?.details ||
         'Failed to generate tickets'
     );
@@ -204,7 +212,7 @@ export const getAgentFakeTickets= async()=>{
         const res= await api.get('/agents/fake-tickets/');
     return res.data.data
     } catch (error) {
-        notifyError('fake ticket fetch error')
+        console.log('fake ticket fetch error')
     }
 }
 
@@ -214,7 +222,7 @@ export const getFakeTicketDetail = async(id)=>{
         console.log(res.data.data.message)
     return res.data.data
     } catch (error) {
-        notifyError('fake ticket detail page error')
+        console.log('fake ticket detail page error')
     }
 }
 
@@ -272,6 +280,28 @@ export const verifyTicketDetails =async (payload)=>{
     }
 }
 
+export const getIntegrationKeys = async ()=>{
+    try {
+        const res= await api.get("/clients/integration-keys/");
+        return res.data.data
+    } catch (error) {
+        console.log('integration key error')
+        console.log(error?.response?.data?.errors?.details)
+        throw error
+    }
+}
+
+export const regenerateIntegrationKeys = async ()=>{
+    try {
+        const res= await api.patch("/clients/integration/keys/regenerate/");
+        return res.data.data
+    } catch (error) {
+        console.log('regenerate key error')
+        console.log(error?.response?.data?.errors?.details)
+        throw error
+    }
+}
+
 export const getSubscriptionPlans= async ()=>{
     try {
         const res= await api.get('/clients/subscription/plans/')
@@ -281,12 +311,32 @@ export const getSubscriptionPlans= async ()=>{
     }
 }
 
-export const paymentUpdate= async(planId)=>{
+export const getCurrentPlan= async()=>{
     try {
-        const res= await api.post(`/clients/subscription/demo-payment/`,{plan_id:planId})
+        const res= await api.get('/clients/subscription/current/');
         return res.data.data
     } catch (error) {
-        console.log('error in demo payment')
+        console.log('current subscription plan fetch error')
+        throw error
+    }
+}
+
+export const cancelSubscription=async()=>{
+    try {
+        const res= await api.post('/clients/subscription/cancel/');
+    return res.data.data
+    } catch (error) {
+        console.log('cancel subscription error ')
+    }
+}
+
+export const createCheckoutSession= async(planId)=>{
+    try {
+        const res= await api.post(`/clients/subscriptions/checkout/`,{plan_id:planId})
+        return res.data.data
+    } catch (error) {
+        console.log('error in payment')
+        throw error
     }
 }
 
@@ -375,3 +425,213 @@ export const getTrainingMessages=async(Id)=>{
         console.log(error)
     }
 }
+export const retryTraining =async(Id)=>{
+    try {
+        const res= await api.post(`/agents/training/${Id}/retry/`)
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+    }
+}
+export const connectStripe =async()=>{
+    try {
+        const res= await api.post(`/payments/connect-account/`)
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+    }
+}
+export const getWalletMoney =async()=>{
+    try {
+        const res= await api.get(`/payments/wallet/`)
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+    }
+}
+export const getWalletTransactions =async()=>{
+    try {
+        const res= await api.get(`/payments/wallet/transactions/`)
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+    }
+}
+export const createWithdrawRequest =async(amount)=>{
+    try {
+        const res= await api.post(`/payments/withdraw/`,amount)
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+        notifyError(error?.response?.data?.errors?.details)
+        throw error
+    }
+}
+export const getWithdrawRequests =async(page=1)=>{
+    try {
+        const res= await api.get(`/admins/wallet/requests/?page${page}`)
+        return {
+           message: res.data.data.message,
+            paginator: res.data.paginator,
+        }
+    } catch (error) {
+        console.log(error)
+        console.log(error?.response?.data?.errors)
+    }
+}
+
+export const approveWithdrawal = async(id)=>{
+    try {
+        const res = await api.post(
+        `/admins/wallet/requests/${id}/approve/`
+    )
+    return res.data.data
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const rejectWithdrawal = async(id)=>{
+    try {
+        const res = await api.post(
+        `/admins/wallet/requests/${id}/reject/`
+    )
+    return res.data.data
+    } catch (error) {
+        console.log(error)
+    }
+}
+export const getClientDashboard = async()=>{
+    try {
+        const res = await api.get(`/clients/dashboard/`)
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+    }
+}
+export const getTLDashboard = async()=>{
+    try {
+        const res = await api.get(`/team-leads/dashboard/`)
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+        throw error.response.data.errors.details
+    }
+}
+export const getManagerDashboard = async()=>{
+    try {
+        const res = await api.get(`/managers/dashboard/`)
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+        throw error.response.data.errors.details
+    }
+}
+export const getAdminWalletTransactions = async(page=1)=>{
+    try {
+        const res = await api.get(`/admins/wallet-transactions/?page=${page}`)
+        return {
+            message: res.data.data.message,
+            paginator: res.data.paginator,
+        }
+    } catch (error) {
+        console.log(error)
+        throw error
+    }
+}
+export const getAdminDashboard = async(period='7d')=>{
+    try {
+        const res = await api.get(`/admins/dashboard/?period=${period}`)
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+        throw error
+    }
+}
+export const getRevenueDashboard  = async(salaryPage, subscriptionPage)=>{
+    try {
+        const res = await api.get(`/admins/finance/`,{
+            params:{
+                salary_page: salaryPage,
+                subscription_page: subscriptionPage,
+            }
+        })
+        return res.data.data
+    } catch (error) {
+        console.log(error)
+        throw error
+    }
+}
+
+export const updateAppUrl = async (appUrl) => {
+    const response = await api.patch("/clients/app-url/", {
+        app_url: appUrl,
+    });
+
+    return response.data;
+};
+
+export const downloadFinanceReport = async () => {
+    try {
+        const response = await api.get(
+            "/admins/finance/export/",
+            {
+                responseType: "blob",
+            }
+        );
+
+        const url = window.URL.createObjectURL(
+            new Blob([response.data])
+        );
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "finance_report.csv";
+
+        document.body.appendChild(link);
+        link.click();
+
+        link.remove();
+        window.URL.revokeObjectURL(url);
+
+    } catch (error) {
+        notifyError(
+            error?.response?.data?.errors?.details ||
+            "Unable to download report."
+        );
+    }
+};
+
+export const downloadDashboardReport = async (period = "7d") => {
+    try {
+        const response = await api.get(
+            `/admins/dashboard/export/?period=${period}`,
+            {
+                responseType: "blob",
+            }
+        );
+
+        const url = window.URL.createObjectURL(
+            new Blob([response.data])
+        );
+
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = `dashboard_report_${period}.csv`;
+
+        document.body.appendChild(link);
+
+        link.click();
+
+        link.remove();
+
+        window.URL.revokeObjectURL(url);
+
+    } catch (error) {
+        notifyError(
+            error?.response?.data?.errors?.details ||
+            "Unable to download dashboard report."
+        );
+    }
+};

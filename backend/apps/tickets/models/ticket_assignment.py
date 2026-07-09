@@ -14,9 +14,18 @@ class TicketAssignment(models.Model):
     ]
     ticket=models.ForeignKey(Ticket,on_delete=models.CASCADE,related_name='assignments')
     agent=models.ForeignKey(User,on_delete=models.CASCADE)
-
     status=models.CharField(max_length=20,choices=STATUS_CHOICES,default='PENDING')
-    rejection_reason=models.TextField(null=True,blank=True)
+
+    training_status = models.CharField(max_length=20,choices=[
+            ("NOT_STARTED", "Not Started"),
+            ("IN_PROGRESS", "In Progress"),
+            ("RESOLVED", "Resolved"),
+        ],
+        default="NOT_STARTED")
+    training_score = models.DecimalField(max_digits=4,decimal_places=2,null=True,blank=True)
+    training_passed = models.BooleanField(null=True,blank=True)
+
+    training_feedback = models.TextField(null=True,blank=True)
     created_at=models.DateTimeField(auto_now_add=True)
     expires_at=models.DateTimeField(null=True,blank=True)
     

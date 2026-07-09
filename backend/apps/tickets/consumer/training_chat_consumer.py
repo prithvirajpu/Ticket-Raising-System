@@ -1,26 +1,24 @@
 import json
 import asyncio
-import logging
-
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
-
-from apps.tickets.utils import (
-    save_agent_message,
-    save_ai_message,
-    build_ai_history,
-    get_ticket
-)
-from apps.tickets.services import get_ai_customer_reply
-
+from apps.tickets.utils import (save_agent_message,save_ai_message,build_ai_history,mark_training_resolved,get_ticket,get_training_assignment)
+from apps.tickets.services import get_ai_customer_reply,evaluate_agent_service
+import logging
 logger = logging.getLogger(__name__)
 
 
 class TrainingChatConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
+        user= self.scope['user']
         self.ticket_id = self.scope["url_route"]["kwargs"]["ticket_id"]
-        self.room_group_name = f"training_chat_{self.ticket_id}"
+        # self.room_group_name = f"training_chat_{self.ticket_id}"
+        assignment= await get_training_assignment(self.ticket_id,user.id)
+        self.assignment_id=assignment.id
+        self.room_group_name = (
+            f"training_chat_{self.assignment_id}"
+        )
 
         await self.channel_layer.group_add(
             self.room_group_name,
@@ -42,6 +40,8 @@ class TrainingChatConsumer(AsyncWebsocketConsumer):
 
         if data.get("type") == "chat_message":
             await self.handle_chat_message(data)
+        if data.get("type") == "resolve_ticket":
+            await self.handle_resolve_ticket()
 
     async def handle_chat_message(self, data):
         message = data.get("message", "").strip()
@@ -51,9 +51,9 @@ class TrainingChatConsumer(AsyncWebsocketConsumer):
 
         user = self.scope["user"]
 
-        ticket = await get_ticket(self.ticket_id)
+        assignment = await get_training_assignment(self.ticket_id,user.id)
 
-        agent_chat = await save_agent_message(ticket, message)
+        agent_chat = await save_agent_message(assignment, message)
 
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -67,10 +67,10 @@ class TrainingChatConsumer(AsyncWebsocketConsumer):
         )
 
         asyncio.create_task(
-            self.generate_ai_reply(ticket)
+            self.generate_ai_reply(assignment)
         )
 
-    async def generate_ai_reply(self, ticket):
+    async def generate_ai_reply(self, assignment):
 
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -82,13 +82,13 @@ class TrainingChatConsumer(AsyncWebsocketConsumer):
         try:
             await asyncio.sleep(2)
 
-            history = await build_ai_history(ticket)
+            history = await build_ai_history(assignment)
 
             ai_reply = await database_sync_to_async(
                 get_ai_customer_reply
-            )(ticket, history)
+            )(assignment, history)
 
-            ai_chat = await save_ai_message(ticket, ai_reply)
+            ai_chat = await save_ai_message(assignment, ai_reply)
 
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -142,4 +142,36 @@ class TrainingChatConsumer(AsyncWebsocketConsumer):
                     "is_typing": event["is_typing"],
                 }
             )
+        )
+
+    async def handle_resolve_ticket(self):
+        user= self.scope['user']
+        assignment= await get_training_assignment(self.ticket_id,user.id)
+
+        await mark_training_resolved(assignment)
+
+        await self.channel_layer.group_send(
+            self.room_group_name,{
+                'type':'ticket_resolved',
+                'message':'Ticket marked as resolved'
+            }
+        )
+        asyncio.create_task(evaluate_agent_service(assignment.id,user.id))
+    
+    async def ticket_resolved(self, event):
+        await self.send(
+            text_data=json.dumps({
+                "type": "ticket_resolved",
+                "message": event["message"]
+            })
+        )
+        
+    async def evaluation_result(self, event):
+        await self.send(
+            text_data=json.dumps({
+                "type": "evaluation_result",
+                "score": event["score"],
+                "passed": event["passed"],
+                "feedback": event["feedback"],
+            })
         )

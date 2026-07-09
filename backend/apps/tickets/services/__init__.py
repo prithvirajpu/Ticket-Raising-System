@@ -1,11 +1,9 @@
-
-from .dashboard_service import dashboard_service
 from .auto_assign_service import auto_assign_service
 from .chat_service import get_messages_service,send_message_service
 from .escalation_service import escalate_ticket_service
 from .resolve_ticket_service import resolve_ticket_service
 from .mark_messages_read_service import mark_messages_read_service
 from .notification_service import notification_service,mark_as_read_notification,mark_all_notifications_read_service
-from .mark_chat_notifications_read import mark_chat_notifications_read
-from .genereate_ai_customer_reply import get_ai_customer_reply
+from .genereate_ai_customer_reply import get_ai_customer_reply,get_ai_evaluation
 from .get_training_messages import get_training_messages_service
+from .evaluate_agent_service import evaluate_agent_service

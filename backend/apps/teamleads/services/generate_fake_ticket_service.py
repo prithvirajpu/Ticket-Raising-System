@@ -193,7 +193,7 @@ def generate_fake_ticket_service(request):
         team_lead = request.user  # Team Lead
         
         # Get all active, unblocked agents under this Team Lead
-        agents = team_lead.agents.filter(role='AGENT', is_active=True, is_blocked=False)
+        agents = team_lead.agents.filter(role='AGENT', is_active=True)
         if not agents.exists():
             return {'data': {}, 'errors': {"details": 'No agents under this Team Lead'}, 'status': 400}
         

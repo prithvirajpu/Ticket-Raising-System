@@ -16,37 +16,42 @@ def auto_assign_service():
     logger.info(f"Expired count: {expired_assignments.count()}")
 
     for assignment in expired_assignments:
+        try:
+            with transaction.atomic():
 
-        with transaction.atomic():
+                assignment = TicketAssignment.objects.select_for_update().get(id=assignment.id)
+                ticket = Ticket.objects.select_for_update().get(id=assignment.ticket_id)
 
-            assignment = TicketAssignment.objects.select_for_update().get(id=assignment.id)
-            ticket = Ticket.objects.select_for_update().get(id=assignment.ticket_id)
+                # safety check
+                if ticket.assigned_to_id:
+                    continue
 
-            # safety check
-            if ticket.assigned_to_id:
-                continue
+                assignment.status = "EXPIRED"
+                assignment.save(update_fields=["status"])
 
-            assignment.status = "EXPIRED"
-            assignment.save(update_fields=["status"])
+                agent = get_next_available_agent(ticket)
 
-            agent = get_next_available_agent(ticket)
-
-            if not agent:
-                continue
-
-            ticket.assigned_to = agent
-            ticket.status = "IN_PROGRESS"
-            ticket.save(update_fields=["assigned_to", "status"])
-            send_notification(
-                user_id=agent.id,
-                notification_type="TICKET_ASSIGNED",
-                title="New Ticket Assigned",
-                message=f"Ticket #{ticket.ticket_code} has been auto-assigned to you",
-                data={
-                    "ticket_id": ticket.id,
-                    "ticket_code": ticket.ticket_code,
-                }
-            )
+                if not agent:
+                    continue
+                logger.info("STEP 1")
+                ticket.assigned_to = agent
+                ticket.status = "IN_PROGRESS"
+                logger.info("STEP 2")
+                ticket.save(update_fields=["assigned_to", "status"])
+                logger.info("STEP 3")
+                send_notification(
+                    user_id=agent.id,
+                    notification_type="TICKET_ASSIGNED",
+                    title="New Ticket Assigned",
+                    message=f"Ticket #{ticket.ticket_code} has been auto-assigned to you",
+                    data={
+                        "ticket_id": ticket.id,
+                        "ticket_code": ticket.ticket_code,
+                        'redirect_to':f'/agent/ticket-detail/{ticket.id}'
+                    }
+                )
+                logger.info("STEP 4")
+        
             TicketAssignment.objects.filter(
                     ticket=ticket,
                     agent=agent,
@@ -77,3 +82,5 @@ def auto_assign_service():
                 performed_by=agent,
                 description=f"Ticket auto assigned to agent"
             )
+        except Exception:
+            logger.exception('Auto assign failed')

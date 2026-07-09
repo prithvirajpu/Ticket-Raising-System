@@ -3,8 +3,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from apps.core_app.utils import return_response
 from ..tickets.serializer import TicketSerializer
-from .services import (create_ticket_service,get_ticket_list_service,get_ticket_detail_service,close_ticket_service,get_profile_service,update_profile_service,
-                       submit_review_service,reopen_ticket_service,timeline_service)
+from .services import (create_ticket_service,get_ticket_list_service,get_ticket_detail_service,
+                       close_ticket_service,get_profile_service,update_profile_service,
+                       submit_review_service,reopen_ticket_service,timeline_service,
+                       user_dashboard)
 
 import logging
 logger= logging.getLogger(__name__)
@@ -13,8 +15,7 @@ class CreateTicketView(APIView):
     permission_classes=[IsAuthenticated]
 
     def post(self,request):
-        logger.info("REQUEST USER ID :%s", request.user.id)
-        logger.info("REQUEST USER EMAIL :%s", request.user.email)
+        client_id = request.auth.get("client_id")
         serializer=TicketSerializer(data=request.data)
         if not serializer.is_valid():
             logger.info('validated errors %s', serializer.errors)
@@ -24,7 +25,7 @@ class CreateTicketView(APIView):
                 "status":400
             })
         logger.info('validated data %s',serializer.validated_data)
-        result=create_ticket_service(serializer.validated_data,request.user)
+        result=create_ticket_service(serializer.validated_data,request.user,client_id)
 
         return return_response(result)
     
@@ -35,7 +36,8 @@ class TicketListView(APIView):
         search=request.query_params.get('search','')
         sort=request.query_params.get('sort','newest')
         page = int(request.query_params.get('page', 1))
-        result=get_ticket_list_service(request,sort,search,page)
+        client_id = request.auth["client_id"]
+        result=get_ticket_list_service(request,client_id,sort,search,page)
         return return_response(result)
     
 class TicketDetailView(APIView):
@@ -84,4 +86,12 @@ class TicketTimelineView(APIView):
 
     def get(self,request,ticket_id):
         result=timeline_service(ticket_id)
+        return return_response(result)
+    
+class UserDashboardView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def get(self,request):
+        client_id = request.auth.get("client_id")
+        result = user_dashboard(request.user, client_id)
         return return_response(result)

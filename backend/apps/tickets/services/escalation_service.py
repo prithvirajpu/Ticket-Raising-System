@@ -63,7 +63,16 @@ def escalate_ticket_service(user, ticket_id):
             notification_type="TICKET_ESCALATED",
             title="Ticket Escalated",
             message=f"Ticket #{ticket.ticket_code} has been escalated to you",
-            data={"ticket_id": ticket.id,"ticket_code": ticket.ticket_code}   
+            data={"ticket_id": ticket.id,
+                  "ticket_code": ticket.ticket_code,}   
+            )
+    send_notification(user_id=ticket.created_by.id,
+            notification_type="TICKET_ESCALATED",
+            title="Ticket Escalated",
+            message=f"Your ticket #{ticket.ticket_code} has been escalated to a higher authority",
+            data={"ticket_id": ticket.id,
+                  "ticket_code": ticket.ticket_code,
+                  'redirect_to':f'/user/tickets/details/{ticket.id}'}   
             )
 
     TicketActivity.objects.create(

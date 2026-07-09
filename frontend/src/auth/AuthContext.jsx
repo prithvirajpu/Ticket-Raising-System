@@ -1,4 +1,5 @@
 import { createContext,useContext,useEffect,useState } from "react";
+import api from "../api/axios";
 
 const AuthContext=createContext();
 
@@ -33,7 +34,6 @@ export const AuthProvider=({children})=>{
 
     const login=(access,refresh,role,profile_completed,approval_status,user_id)=>{
         localStorage.setItem('access',access);
-        localStorage.setItem('refresh',refresh);
         localStorage.setItem('role',role);
         localStorage.setItem('profile_completed',profile_completed)
         localStorage.setItem('approval_status', approval_status);
@@ -46,13 +46,19 @@ export const AuthProvider=({children})=>{
         setApprovalStatus(approval_status);
     };
     const isAuthenticated=!!accessToken
-    const logout=()=>{
-        localStorage.clear()
-        setUserRole(null)
-        setAccessToken(null)
-        setProfileCompleted(false)
-        setApprovalStatus(null);
-        setUserId(null)
+    const logout= async()=>{
+        try {
+            await api.post('/auth/logout/')
+        } catch(error){
+            console.log(error);
+        }finally {
+            localStorage.clear()
+            setUserRole(null)
+            setAccessToken(null)
+            setProfileCompleted(false)
+            setApprovalStatus(null);
+            setUserId(null)
+        }
     };
     return (
         <AuthContext.Provider value={{login,logout,userRole,userId,isAuthenticated,

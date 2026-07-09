@@ -51,7 +51,7 @@ const SlaRules = () => {
     try {
       setLoading(true)
       const res = await createSlaRuleInAdminSide(formData)
-      notifySuccess(res.message)
+      notifySuccess(res.data.message)
 
       setFormData({
         plan_id: '',
@@ -88,11 +88,6 @@ const SlaRules = () => {
     <DashboardLayout
       title="SLA Rules & Hierarchy"
       subtitle="Manage SLA rules based on plans and ticket priorities"
-      headerAction={
-        <button className="bg-slate-900 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm">
-          Manage Rules & Hierarchy
-        </button>
-      }
     >
 
       <div className="space-y-8 text-slate-800 antialiased">

@@ -1,17 +1,13 @@
 from rest_framework import status
 from django.db import transaction
-from apps.tickets.models import ClientProfile
+from apps.clients.models import ClientProfile
 
 def update_client_profile_service(user, data):
-
-    print('USER', user)
-    print('authenticated', user.is_authenticated)
-
-    company_name = data.get("company_name")
-    business_type = data.get("business_type")
+    name = data.get("name")
     phone = data.get("phone")
+    print(name,phone)
 
-    if not company_name or not business_type or not phone:
+    if not name or not phone:
         return {
             "data": None,
             "errors": {"details": "All fields are required"},
@@ -20,26 +16,18 @@ def update_client_profile_service(user, data):
 
     with transaction.atomic():
 
-        # =========================
-        # UPDATE USER MODEL
-        # =========================
-        user.name = company_name
-        user.business_type = business_type
+        user.name = name
         user.phone = phone
         user.profile_completed = True
         user.save(update_fields=[
             "name",
-            "business_type",
             "phone",
             "profile_completed"
         ])
 
-        # =========================
-        # UPDATE CLIENT PROFILE
-        # =========================
         client_profile, created = ClientProfile.objects.get_or_create(user=user)
 
-        client_profile.company_name = company_name
+        client_profile.company_name = name
         client_profile.save(update_fields=[
             "company_name",
         ])

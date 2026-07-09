@@ -1,8 +1,9 @@
 from pathlib import Path
 import os
 from datetime import timedelta
+from celery.schedules import crontab
 from dotenv import load_dotenv
-import cloudinary
+import dj_database_url
 
 load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,6 +28,7 @@ INSTALLED_APPS = [
     'apps.teamleads',
     'apps.managers',
     'apps.tickets',
+    'apps.payments',
     
 
     'rest_framework',
@@ -70,14 +72,10 @@ WSGI_APPLICATION = 'core.wsgi.application'
 ASGI_APPLICATION = 'core.asgi.application'
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
-    }
+    'default': dj_database_url.parse(
+        os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -101,8 +99,6 @@ CLOUDINARY_STORAGE = {
     "API_SECRET": os.getenv("CLOUDINARY_API_SECRET"),
     "RESOURCE_TYPE": "raw",
 }
-
-DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 STORAGES = {
     "default": {
@@ -180,21 +176,16 @@ REST_FRAMEWORK = {
 }
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
 ]
 
-SESSION_COOKIE_SAMESITE = "Lax"
-CSRF_COOKIE_SAMESITE = "None"
-
-SESSION_COOKIE_SECURE = False  
+CSRF_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SECURE = False 
 
-SESSION_COOKIE_AGE = 300  
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 SIMPLE_JWT={
-    "ACCESS_TOKEN_LIFETIME":timedelta(minutes=60),
+    "ACCESS_TOKEN_LIFETIME":timedelta(minutes=1),
     "REFRESH_TOKEN_LIFETIME":timedelta(days=1),
     "AUTH_HEADER_TYPES":("Bearer",),
 }
@@ -218,13 +209,33 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.tickets.tasks.auto_assign_task",
         "schedule": 60.0,
     },
+    'monthly-salary-distribution':{
+        'task':'apps.payments.tasks.monthly_salary_distribution_task',
+        # 'schedule': crontab(day_of_month=1, hour=0,minute=0)
+        'schedule':60.0,
+    }
 }
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
     },
 }
 
-SSO_SHARED_SECRET = os.getenv('SSO_SHARED_SECRET')
-INTERNAL_API_KEY = os.getenv('INTERNAL_API_KEY')
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    }
+}
+
+
+STRIPE_SECRET_KEY=os.getenv('STRIPE_SECRET_KEY')
+STRIPE_PUBLISHABLE_KEY=os.getenv('STRIPE_PUBLISHABLE_KEY')
+STRIPE_WEBHOOK_SECRET=os.getenv('STRIPE_WEBHOOK_SECRET')

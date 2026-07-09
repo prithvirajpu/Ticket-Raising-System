@@ -10,9 +10,6 @@ User = get_user_model()
 def generate_otp():
     return str(random.randint(100000,999999))
 
-from django.core.mail import send_mail
-from django.conf import settings
-
 def send_otp_email(email, otp):
     subject = "Your Verification Code - Action Required"
 
@@ -62,34 +59,34 @@ def return_response(result):
     """
 
     if result is None:
-
         result = {
-
             "data": None,
-
             "errors": {
                 "details": "No data available"
             },
-
             "status": 200
         }
 
     response_data = {
-
         "data": result.get("data", None),
-
         "errors": result.get("errors", None),
     }
-
     if result.get("paginator"):
-
         response_data["paginator"] = result.get(
             "paginator"
         )
-
     return Response(
-
         response_data,
-
         status=result.get("status", 200)
     )
+
+def set_refresh_cookie(response, refresh_token):
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=not settings.DEBUG,  # False locally, True in production
+        samesite="Lax",
+        max_age=7 * 24 * 60 * 60,
+    )
+    return response
