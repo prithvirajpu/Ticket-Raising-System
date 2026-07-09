@@ -100,8 +100,6 @@ CLOUDINARY_STORAGE = {
     "RESOURCE_TYPE": "raw",
 }
 
-DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
-
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
@@ -178,21 +176,16 @@ REST_FRAMEWORK = {
 }
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
 ]
 
-SESSION_COOKIE_SAMESITE = "Lax"
-CSRF_COOKIE_SAMESITE = "None"
-
-SESSION_COOKIE_SECURE = False  
+CSRF_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SECURE = False 
 
-SESSION_COOKIE_AGE = 300  
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 SIMPLE_JWT={
-    "ACCESS_TOKEN_LIFETIME":timedelta(minutes=60),
+    "ACCESS_TOKEN_LIFETIME":timedelta(minutes=1),
     "REFRESH_TOKEN_LIFETIME":timedelta(days=1),
     "AUTH_HEADER_TYPES":("Bearer",),
 }

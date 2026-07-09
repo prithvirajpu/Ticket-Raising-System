@@ -16,7 +16,6 @@ def get_finance_summary():
         WalletTransaction.objects.filter(
             transaction_type__in=[
                 "SALARY",
-                "BONUS",
                 "INCENTIVE",
             ]
         ).aggregate(

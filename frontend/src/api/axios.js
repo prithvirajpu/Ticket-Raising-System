@@ -21,18 +21,10 @@ api.interceptors.response.use(
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
-            const refresh = localStorage.getItem('refresh');
-
-            if (!refresh) {
-                localStorage.clear();
-                window.location.href = "/";
-                return Promise.reject(error);
-            }
-
             try {
                 const res = await axios.post(
                     "http://localhost:8000/api/auth/token/refresh/",
-                    { refresh }
+                    {},{withCredentials:true,}
                 );
 
                 const newAccess = res.data.access;

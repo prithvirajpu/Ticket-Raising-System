@@ -14,7 +14,7 @@ from apps.admins.services import (fetch_users_service,create_sla_rule_service,fe
                        get_agent_application_detail_service,get_client_list_service,get_hierarchy_service,
                        get_agent_list_service,toggle_agent_status_service,assign_hierarchy_service,get_all_users_service,
                        getwithdrawal_list,approve_withdrawal,reject_withdrawal,admin_wallet_transaction_service,
-                       admin_dashboard_service,admin_finance_service)
+                       admin_dashboard_service,admin_finance_service,export_finance_csv,export_dashboard_csv)
 from apps.admins.serializers import (UserApprovalSerializer,AssignHierarchySerializer)
 from django.contrib.auth import get_user_model
 import logging
@@ -176,3 +176,17 @@ class AdminFinanceAPIView(APIView):
         logger.warning('db hit')
         result = admin_finance_service(request)
         return return_response(result)
+    
+class FinanceReportCSVView(APIView):
+    # permission_classes = [IsAdmin]
+
+    def get(self, request):
+        print("CSV endpoint called")
+        return export_finance_csv()
+    
+class DashboardReportCSVView(APIView):
+    permission_classes = [IsAdmin]
+
+    def get(self, request):
+        period = request.GET.get("period", "7d")
+        return export_dashboard_csv(period)

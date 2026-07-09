@@ -79,3 +79,14 @@ def return_response(result):
         response_data,
         status=result.get("status", 200)
     )
+
+def set_refresh_cookie(response, refresh_token):
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=not settings.DEBUG,  # False locally, True in production
+        samesite="Lax",
+        max_age=7 * 24 * 60 * 60,
+    )
+    return response

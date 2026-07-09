@@ -9,7 +9,8 @@ from .serializers import (LoginSerializer,ClientSignupSerializer,
     VerifyOTPSerializer,ForgotPasswordSerializer,ResetPasswordSerializer)
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
-from django.shortcuts import redirect
+from rest_framework_simplejwt.views import TokenRefreshView
+from apps.core_app.utils import set_refresh_cookie
 import logging
 logger=logging.getLogger(__name__)
 
@@ -38,7 +39,6 @@ class SSOLoginAPIView(APIView):
         sso_loading_url = (
             f"http://localhost:5173/sso-loading"
             f"?access={data['access']}"
-            f"&refresh={data['refresh']}"
             f"&role={data['role']}"
             f"&user_id={data['user_id']}"
             f"&profile_completed={str(data['profile_completed']).lower()}"
@@ -61,7 +61,10 @@ class SSOLoginAPIView(APIView):
         </html>
         """
 
-        return HttpResponse(html)
+        response = HttpResponse(html)
+        set_refresh_cookie(response, result["refresh"])
+
+        return response
         
 class LoginView(APIView):
     permission_classes=[]
@@ -71,8 +74,52 @@ class LoginView(APIView):
         serializer.is_valid(raise_exception=True)
 
         user=serializer.validated_data['user']
-        result=login_service(user)
-        return return_response(result)
+        result=login_service(user)      
+        response= return_response(result)
+        set_refresh_cookie(response,result['refresh'])
+        return response
+
+class CookieTokenRefreshView(TokenRefreshView):
+
+    def post(self, request, *args, **kwargs):
+        print('cookies ',request.COOKIES)
+        refresh = request.COOKIES.get("refresh_token")
+        print('refresh',refresh)
+        if not refresh:
+            return Response(
+                {"detail": "Refresh token not found."},
+                status=401,
+            )
+
+        serializer = self.get_serializer(
+            data={"refresh": refresh})
+
+        serializer.is_valid(raise_exception=True)
+
+        return Response(serializer.validated_data)
+
+class GoogleClientAuthView(APIView):
+    permission_classes = []
+
+    def post(self, request):
+        token = request.data.get("id_token")
+        role = request.data.get("role")  
+        print('helo')
+        result=google_client_auth_service(token,role)
+        response = return_response(result)
+        if result.get("refresh"):
+            set_refresh_cookie(response, result["refresh"])
+        return response
+       
+class LogoutView(APIView):
+    permission_classes = []
+
+    def post(self, request):
+        response = Response({"message": "Logged out"})
+
+        response.delete_cookie("refresh_token")
+
+        return response
     
 class AgentSignupView(APIView):
     permission_classes = []
@@ -89,15 +136,6 @@ class ClientSignupView(APIView):
         serializer=ClientSignupSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         result=client_signup_service(serializer)
-        return return_response(result)
-    
-class GoogleClientAuthView(APIView):
-    permission_classes = []
-
-    def post(self, request):
-        token = request.data.get("id_token")
-        role = request.data.get("role")  
-        result=google_client_auth_service(token,role)
         return return_response(result)
     
 class VerifyOTPView(APIView):

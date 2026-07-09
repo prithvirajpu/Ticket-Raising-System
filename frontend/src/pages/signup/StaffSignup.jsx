@@ -34,7 +34,7 @@ const handleGoogleSuccess = async (credentialResponse) => {
     const { profile_completed, approval_status, role, access, refresh } = data;
     if (access && refresh) {
     localStorage.setItem("access", access);
-    localStorage.setItem("refresh", refresh);
+    // localStorage.setItem("refresh", refresh);
 }
 
     if (!profile_completed) {

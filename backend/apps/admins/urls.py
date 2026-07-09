@@ -2,7 +2,9 @@ from django.urls import path
 from .views import (UserManagementView,SLARulesView,PendingUsersView,AgentApplicationDetailView,ApproveUserView,RejectUserView,
                     ClientListView,AgentListView,ToggleAgentStatusView,AssignHierarchyView,AllUsersView,HierarchyView,
                     WithdrawRequestView,ApproveWithdrawalView,RejectWithdrawalView,AdminWalletTransactionAPIView,
-                    AdminDashboardAPIView,AdminFinanceAPIView)
+                    AdminDashboardAPIView,AdminFinanceAPIView,
+                    FinanceReportCSVView,DashboardReportCSVView,
+                    )
 
 urlpatterns=[
     path('dashboard/',AdminDashboardAPIView.as_view()),
@@ -28,6 +30,8 @@ urlpatterns=[
     path("wallet/requests/<int:pk>/reject/",RejectWithdrawalView.as_view()),
     
     path("finance/",AdminFinanceAPIView.as_view()),
+    path("finance/export/",FinanceReportCSVView.as_view()),
+    path("dashboard/export/",DashboardReportCSVView.as_view()),
 
 
 ]

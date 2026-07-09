@@ -26,12 +26,13 @@ def login_service(user,client_profile=None):
     return {
         "data": {
             "access": str(refresh.access_token),
-            "refresh": str(refresh),
+            # "refresh": str(refresh),
             "role": user.role,
             "user_id":user.id,
             "profile_completed": getattr(user, 'profile_completed', True),
             "approval_status": getattr(user, 'approval_status', 'APPROVED'),
         },
+        "refresh": str(refresh),
         "errors": None,
         "status": status.HTTP_200_OK
     }
@@ -134,6 +135,14 @@ def google_client_auth_service(token,role=None):
             }
         
         user=User.objects.filter(email=email).first()
+        if user and user.role == UserRole.USER:
+            return {
+                "data": None,
+                "errors": {
+                    "details": "Go to your platform and click customer support for login here"
+                },
+                "status": status.HTTP_403_FORBIDDEN
+            }
 
         if user and user.approval_status=='REJECTED':
             return {
@@ -202,8 +211,8 @@ def google_client_auth_service(token,role=None):
                 "approval_status": user.approval_status,
                 "profile_completed": user.profile_completed,
                 "access": jwt_token["access"],
-                "refresh": jwt_token["refresh"]
             },
+            "refresh": jwt_token["refresh"],
             "errors": None,
             "status": status.HTTP_200_OK
         }

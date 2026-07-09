@@ -9,6 +9,7 @@ const ConfirmModal= lazy(()=>import('../../components/modals/ConfirmModal'))
 
 const WalletPage = () => {
   const [loading, setLoading] = useState(false);
+  const [isStripeConnected, setIsStripeConnected] = useState(false);
   const [amount, setAmount] = useState('')
   const [transactions, setTransactions] = useState([]);
   const [withdrawAmount, setWithdrawAmount] = useState("");
@@ -24,7 +25,9 @@ const WalletPage = () => {
 
   const fetchWalletMoney = async () => {
     const res = await getWalletMoney();
+    console.log("wallet fetch", res);
     setAmount(res.message.balance)
+    setIsStripeConnected(res.message.is_stripe_connected);
   }
   const fetchWalletTransactions = async () => {
     const res = await getWalletTransactions();
@@ -101,7 +104,8 @@ const WalletPage = () => {
               <p className="text-xs text-slate-400 mt-1">Cleared context earnings ready for settlement</p>
             </div>
             
-            <button
+            {!isStripeConnected  && (
+                <button
               className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 rounded-xl transition-colors shadow-sm"
               onClick={handleConnectStripe}
               disabled={loading}
@@ -109,6 +113,9 @@ const WalletPage = () => {
               <CreditCard className="w-4 h-4" />
               {loading ? "Connecting..." : "Connect Stripe Account"}
             </button>
+
+            )}
+            
           </div>
 
           {/* WITHDRAW MONEY CONSOLE CARD */}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import Loader from "../../components/modals/Loader";
-import { getAdminDashboard } from "../../services/ticketService";
+import { getAdminDashboard,downloadDashboardReport } from "../../services/ticketService";
 import { Ticket, Users, Wallet, Clock, ChevronDown } from "lucide-react";
 import {
   ResponsiveContainer, PieChart, Pie, Cell, Tooltip,
@@ -55,6 +55,12 @@ const AdminDashboard = () => {
             <ChevronDown size={16} />
           </div>
         </div>
+        <button
+    onClick={() => downloadDashboardReport(period)}
+    className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+>
+    Download Dashboard Report
+</button>
       </div>
 
       <div className="space-y-8">

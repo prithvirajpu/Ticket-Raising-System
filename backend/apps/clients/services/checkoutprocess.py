@@ -250,7 +250,6 @@ def process_subscription_updated(event):
                 f"Updating DB record "
                 f"{stripe_subscription_id}"
             )
-        sub.save()
         logger.info(f"Subscription updated: {stripe_subscription_id}")
 
     except Exception as e:

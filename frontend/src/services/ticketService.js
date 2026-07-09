@@ -184,7 +184,7 @@ export const getUserDashboard=async (role)=>{
         const res= await api.get('/users/dashboard/')
         return res.data.data
     } catch (error) {
-        console.log('something went wrong')
+        console.log('something went wrong in user dashboard')
     }
 }
 
@@ -464,6 +464,7 @@ export const createWithdrawRequest =async(amount)=>{
     } catch (error) {
         console.log(error)
         notifyError(error?.response?.data?.errors?.details)
+        throw error
     }
 }
 export const getWithdrawRequests =async(page=1)=>{
@@ -568,4 +569,69 @@ export const updateAppUrl = async (appUrl) => {
     });
 
     return response.data;
+};
+
+export const downloadFinanceReport = async () => {
+    try {
+        const response = await api.get(
+            "/admins/finance/export/",
+            {
+                responseType: "blob",
+            }
+        );
+
+        const url = window.URL.createObjectURL(
+            new Blob([response.data])
+        );
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "finance_report.csv";
+
+        document.body.appendChild(link);
+        link.click();
+
+        link.remove();
+        window.URL.revokeObjectURL(url);
+
+    } catch (error) {
+        notifyError(
+            error?.response?.data?.errors?.details ||
+            "Unable to download report."
+        );
+    }
+};
+
+export const downloadDashboardReport = async (period = "7d") => {
+    try {
+        const response = await api.get(
+            `/admins/dashboard/export/?period=${period}`,
+            {
+                responseType: "blob",
+            }
+        );
+
+        const url = window.URL.createObjectURL(
+            new Blob([response.data])
+        );
+
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = `dashboard_report_${period}.csv`;
+
+        document.body.appendChild(link);
+
+        link.click();
+
+        link.remove();
+
+        window.URL.revokeObjectURL(url);
+
+    } catch (error) {
+        notifyError(
+            error?.response?.data?.errors?.details ||
+            "Unable to download dashboard report."
+        );
+    }
 };
