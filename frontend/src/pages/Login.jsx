@@ -34,12 +34,12 @@ const handleGoogleSuccess = async (credentialResponse) => {
     const id_token = credentialResponse.credential;
 
     const res = await api.post("auth/google/", { id_token });
-    const { access, refresh, role, profile_completed, approval_status,user_id } = res.data.data;
+    const { access, role, profile_completed, approval_status,user_id } = res.data.data;
 
     if (role === "AGENT") {
       if (!profile_completed) {
 
-        login(access, refresh, role,profile_completed,user_id);
+        login(access, role,profile_completed,user_id);
         notifyWarning("📝 Profile incomplete - Please complete your details");
         navigate("/agent/complete-profile");
         return; 
@@ -51,7 +51,7 @@ const handleGoogleSuccess = async (credentialResponse) => {
         navigate('/')
         return; 
       }
-      login(access, refresh, role,profile_completed,approval_status,user_id);
+      login(access, role,profile_completed,approval_status,user_id);
       notifySuccess("🎉 Welcome to Agent Dashboard!");
 
       navigate(redirectByRole(role));
@@ -59,7 +59,7 @@ const handleGoogleSuccess = async (credentialResponse) => {
     }
 
     if (role === "CLIENT") {
-      login(access, refresh, role, profile_completed);
+      login(access, role, profile_completed);
       if (!profile_completed) {
         notifyWarning("📋 Client profile incomplete - Complete your profile first");
         navigate("/client/complete-profile");
@@ -70,7 +70,7 @@ const handleGoogleSuccess = async (credentialResponse) => {
       return;
     }
 
-    login(access, refresh, role, profile_completed, approval_status,user_id);
+    login(access, role, profile_completed, approval_status,user_id);
     notifySuccess(`Welcome ${role}!`);
     navigate(redirectByRole(role));
     return;
@@ -115,12 +115,12 @@ const handleLogin = async (e) => {
 
  try {
     const res = await api.post('auth/login/', { email, password });    
-    const { access, refresh, role, profile_completed, approval_status,user_id } = res.data.data;  // ✅ Fetch these
+    const { access, role, profile_completed, approval_status,user_id } = res.data.data;  // ✅ Fetch these
 
     // AGENT role handling - match Google flow exactly
     if (role === "AGENT") {
       if (!profile_completed) {  // Handles undefined/false → incomplete
-        login(access, refresh, role, profile_completed);
+        login(access, role, profile_completed);
         notifyWarning("📝 Profile incomplete - Please complete your details");
         navigate("/agent/complete-profile");
         return;
@@ -133,14 +133,14 @@ const handleLogin = async (e) => {
       }
 
       // ✅ AGENT: complete + approved → dashboard
-      login(access, refresh, role, profile_completed, approval_status);
+      login(access, role, profile_completed, approval_status);
       notifySuccess("🎉 Welcome to Agent Dashboard!");
       navigate("/agent/dashboard");
       return;
     }
 
     // Other roles - use your utility
-    login(access, refresh, role, profile_completed);  // profile_completed optional for non-agents
+    login(access, role, profile_completed);  // profile_completed optional for non-agents
     notifySuccess("🎉 Login successful!");
     navigate(redirectByRole(role));
 

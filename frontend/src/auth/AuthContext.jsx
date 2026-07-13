@@ -32,7 +32,7 @@ export const AuthProvider=({children})=>{
         setLoading(false);
     },[])
 
-    const login=(access,refresh,role,profile_completed,approval_status,user_id)=>{
+    const login=(access,role,profile_completed,approval_status,user_id)=>{
         localStorage.setItem('access',access);
         localStorage.setItem('role',role);
         localStorage.setItem('profile_completed',profile_completed)
