@@ -60,10 +60,12 @@ class SSOLoginAPIView(APIView):
         </body>
         </html>
         """
-
         response = HttpResponse(html)
+        print("Refresh token:", result["refresh"][:30])
         set_refresh_cookie(response, result["refresh"])
-
+        print("Cookie set")
+        print(response.cookies.output())
+        print(response.headers)
         return response
         
 class LoginView(APIView):

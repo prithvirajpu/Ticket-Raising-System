@@ -85,8 +85,9 @@ def set_refresh_cookie(response, refresh_token):
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=not settings.DEBUG,  # False locally, True in production
+        secure=False,          # localhost
         samesite="Lax",
+        path="/",
         max_age=7 * 24 * 60 * 60,
     )
     return response

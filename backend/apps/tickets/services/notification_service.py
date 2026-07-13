@@ -7,25 +7,49 @@ from django.core.cache import cache
 import logging
 logger= logging.getLogger(__name__)
 
-def notification_service(request):
-    cache_key = f"notification_{request.user.id}"
-    cached_data = cache.get(cache_key)
+import traceback
 
-    if cached_data:
-        return cached_data
-    
-    notifications=Notification.objects.filter(
-        user=request.user
-    ).order_by('-created_at')
-    serializer= NotificationSerializer(notifications,many=True)
-    unread_count= notifications.filter(is_read=False).count()
-    result= {
-        'data':{'serializer':serializer.data,'unread_count':unread_count},
-        'errors':{},
-        'status':status.HTTP_200_OK
-    } 
-    cache.set(cache_key, result, timeout=60)
-    return result
+def notification_service(request):
+    try:
+        print("User:", request.user)
+
+        cache_key = f"notification_{request.user.id}"
+        print("Cache key:", cache_key)
+
+        cached_data = cache.get(cache_key)
+        print("Cache hit:", cached_data is not None)
+
+        if cached_data:
+            return cached_data
+
+        notifications = Notification.objects.filter(
+            user=request.user
+        ).order_by("-created_at")
+        print("Notifications queryset created")
+
+        serializer = NotificationSerializer(notifications, many=True)
+        print("Serializer OK")
+
+        unread_count = notifications.filter(is_read=False).count()
+        print("Unread:", unread_count)
+
+        result = {
+            "data": {
+                "serializer": serializer.data,
+                "unread_count": unread_count,
+            },
+            "errors": {},
+            "status": status.HTTP_200_OK,
+        }
+
+        cache.set(cache_key, result, timeout=60)
+        print("Cached")
+
+        return result
+
+    except Exception:
+        traceback.print_exc()
+        raise
 
 def mark_as_read_notification(request,notification_id):
     with transaction.atomic():

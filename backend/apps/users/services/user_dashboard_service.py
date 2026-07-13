@@ -16,7 +16,7 @@ def user_dashboard(user, client_id):
 
     tickets = Ticket.objects.filter(
         created_by=user,
-        client_profile_id=client_id
+        client_id=client_id
     )
 
     result = {
