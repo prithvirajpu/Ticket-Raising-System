@@ -92,6 +92,12 @@ class UserDashboardView(APIView):
     permission_classes=[IsAuthenticated]
 
     def get(self,request):
+        print("request.user =", request.user)
+        print("request.auth =", request.auth)
+        print("type =", type(request.auth))
+
         client_id = request.auth.get("client_id")
+        print("client_id =", client_id)
+
         result = user_dashboard(request.user, client_id)
         return return_response(result)

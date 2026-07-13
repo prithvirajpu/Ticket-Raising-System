@@ -9,7 +9,6 @@ const SSOLoading = () => {
 
     useEffect(() => {
         const access = searchParams.get("access");
-        const refresh = searchParams.get("refresh");
         const role = searchParams.get("role");
         const profile_completed = searchParams.get("profile_completed");
         const approval_status = searchParams.get("approval_status");
@@ -18,7 +17,7 @@ const SSOLoading = () => {
         console.log("SSO Data Received:", { access: !!access, role });
 
         if (access && role) {
-            login(access, refresh, role, profile_completed, approval_status,user_id);
+            login(access, role, profile_completed, approval_status,user_id);
 
             setTimeout(() => {
                 navigate("/user/dashboard", { replace: true });
