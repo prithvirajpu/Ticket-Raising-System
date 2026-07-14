@@ -2,8 +2,11 @@ import { useEffect, useState } from "react";
 import { getOngoingTickets } from "../../../services/ticketService";
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import { useNavigate } from "react-router-dom";
-import { Search } from "lucide-react";
+import { Search, Loader2, ArrowUpDown, Tag, Calendar, ChevronRight } from "lucide-react";
 import Pagination from "../../../components/Pagination";
+import Lottie from 'lottie-react';
+// Note: Make sure to adjust the relative path (../) to point to your assets folder!
+import emptyQueueAnimation from "../../../assets/empty-queue.json";
 
 const AgentOngoing = () => {
   const [tickets, setTickets] = useState([]);
@@ -26,7 +29,6 @@ const AgentOngoing = () => {
   }, [searchTerm]);
 
   // 2. Logic for fetching data
-  // This triggers when debouncedSearch, sort, OR page changes
   useEffect(() => {
     const fetchTickets = async () => {
       setLoading(true);
@@ -59,84 +61,119 @@ const AgentOngoing = () => {
 
   return (
     <DashboardLayout>
-      <div className="bg-white min-h-screen">
-        <div className="max-w-4xl mx-auto border border-gray-200 rounded-[2rem] p-10 shadow-sm min-h-[600px] flex flex-col">
+      <div className="min-h-screen bg-slate-50/50 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto flex flex-col min-h-[700px]">
           
-          {/* Header & Controls */}
-          <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
-            <h2 className="text-2xl font-bold text-gray-800">My Ongoing Tickets</h2>
+          {/* Header & Controls Area */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between pb-6 mb-6 border-b border-slate-200/60 gap-4">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight text-slate-900">My Ongoing Tickets</h2>
+              <p className="text-sm text-slate-500 mt-1">Manage and resolve queries.</p>
+            </div>
             
-            <div className="flex items-center gap-4 w-full md:w-auto">
-              <div className="relative flex-1 md:flex-none">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+              {/* Search Box */}
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   value={searchTerm}
                   onChange={handleSearchChange}
                   type="text" 
-                  placeholder="Search..." 
-                  className="pl-10 border border-gray-400 rounded-xl px-4 py-1.5 w-full md:w-64 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+                  placeholder="Filter tickets..." 
+                  className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 placeholder-slate-400 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-150"
                 />
               </div>
 
-              <div className="relative">
+              {/* Sorting Filter */}
+              <div className="relative w-full sm:w-auto">
+                <ArrowUpDown className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 <select
                   value={sort}
                   onChange={handleSortChange}
-                  className="border border-gray-400 px-4 py-1.5 rounded-xl text-sm font-medium bg-white cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-400 appearance-none pr-8"
+                  className="w-full sm:w-auto pl-10 pr-10 py-2 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 bg-white shadow-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-150 appearance-none"
                 >
                   <option value="newest">Newest First</option>
                   <option value="oldest">Oldest First</option>
                 </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                  <svg className="fill-current h-4 w-4" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                  <svg className="fill-current h-4 w-4" viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                  </svg>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Ticket List */}
-          <div className="space-y-6 flex-1">
+          {/* Ticket List Viewport */}
+          <div className="flex-1 space-y-4">
             {loading ? (
-              <div className="flex justify-center items-center h-40 text-gray-400 italic">
-                Loading tickets...
+              <div className="flex flex-col justify-center items-center h-64 bg-white rounded-2xl border border-slate-100 shadow-sm text-slate-400 gap-3">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                <span className="text-sm font-medium">Fetching your active ticket registry...</span>
               </div>
             ) : tickets.length === 0 ? (
-              <div className="flex justify-center items-center h-40 text-gray-400 italic text-center">
-                No ongoing tickets found matching "{debouncedSearch}"
-              </div>
+              <div className="flex flex-col justify-center items-center min-h-[350px] bg-white rounded-2xl border border-slate-200/80 shadow-sm text-center p-6">
+  <div className="w-48 h-48 flex items-center justify-center">
+    <Lottie 
+      animationData={emptyQueueAnimation} 
+      loop={true} 
+      className="w-full h-full"
+    />
+  </div>
+  <h3 className="text-base font-bold text-slate-900 mt-2">
+    No Data Found
+  </h3>
+  <p className="text-xs sm:text-sm text-slate-500 mt-1.5 max-w-sm leading-relaxed">
+    Adjust your filters or check back later.
+  </p>
+</div>
             ) : (
               tickets.map((ticket) => (
                 <div
                   key={ticket.id}
                   onClick={() => navigate(`/agent/ticket-detail/${ticket.id}`)}
-                  className="group relative p-6 border border-gray-300 rounded-[1.5rem] flex justify-between items-center cursor-pointer hover:border-[#3897f0] hover:shadow-md transition-all bg-white"
+                  className="group relative p-5 bg-white border border-slate-200/80 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer hover:border-blue-500 hover:shadow-md hover:shadow-blue-500/[0.02] transition-all duration-200"
                 >
-                  <div className="flex items-start gap-4">
-                    <div className="mt-2 w-3.5 h-3.5 rounded-full bg-yellow-400 shadow-sm" />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-bold text-gray-900 group-hover:text-[#3897f0] transition-colors">
+                  <div className="flex items-start gap-4 min-w-0">
+                    {/* Status indicator ring */}
+                    <div className="mt-1 flex-shrink-0 relative flex items-center justify-center">
+                      <span className="absolute inline-flex h-2 w-2 rounded-full bg-amber-400 animate-ping" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[11px] font-semibold font-mono px-2 py-0.5 bg-slate-100 text-slate-600 rounded">
+                          #{ticket.ticket_code}
+                        </span>
+                        <h3 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-blue-600 transition-colors truncate">
                           {ticket.subject}
                         </h3>
-                        <span className="text-xs text-gray-400 font-mono">#{ticket.ticket_code}</span>
                       </div>
-                      <p className="text-gray-400 text-sm max-w-md line-clamp-1 leading-relaxed mt-1">
+                      
+                      <p className="text-slate-500 text-xs sm:text-sm line-clamp-1 leading-relaxed mt-1.5 max-w-2xl">
                         {ticket.description || "In progress..."}
                       </p>
                     </div>
                   </div>
 
-                  <span className="hidden sm:block bg-gray-50 text-gray-600 px-6 py-1.5 rounded-xl text-sm font-bold border border-gray-200">
-                    In Progress
-                  </span>
+                  {/* Actions & Badge Column */}
+                  <div className="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100">
+                    <span className="inline-flex items-center text-xs font-semibold px-3 py-1 bg-amber-50 text-amber-700 border border-amber-100 rounded-lg">
+                      In Progress
+                    </span>
+                    <div className="p-1 rounded-lg text-slate-400 group-hover:text-blue-500 group-hover:bg-blue-50 transition-all duration-150">
+                      <ChevronRight className="w-5 h-5" />
+                    </div>
+                  </div>
                 </div>
               ))
             )}
           </div>
 
-          {/* Pagination */}
+          {/* Pagination Footer */}
           {!loading && pagination?.total_pages > 1 && (
-            <div className="mt-8 border-t border-gray-100 pt-6">
+            <div className="mt-8 border-t border-slate-200/60 pt-6">
               <Pagination
                 currentPage={pagination.current_page}
                 totalPages={pagination.total_pages}

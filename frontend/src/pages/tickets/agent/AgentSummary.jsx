@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { 
   Sparkles, 
-  FileText, 
   Calendar, 
   Target, 
   CheckCircle2, 
@@ -9,7 +8,10 @@ import {
 } from 'lucide-react';
 import DashboardLayout from '../../../layouts/DashboardLayout'
 import { getAgentSummary } from '../../../services/ticketService';
-import Loader from '../../../components/modals/Loader';
+import Lottie from 'lottie-react';
+
+// Imported locally from your assets folder
+import emptyQueueAnimation from "../../../assets/empty-queue.json";
 
 const AgentSummary = () => {
     const [summary, setSummary] = useState('');
@@ -34,9 +36,18 @@ const AgentSummary = () => {
     if (loading) {
         return (
             <DashboardLayout title="Knowledge Base" subtitle="AI Document Intelligence">
-                <div className="flex flex-col items-center justify-center min-h-[60vh]">
-                    <Loader />
-                    <p className="text-gray-500 font-medium mt-4 animate-pulse">Syncing performance insights...</p>
+                {/* Lottie animation layout integrated directly into the component container */}
+                <div className="flex flex-col justify-center items-center min-h-[350px] bg-white rounded-2xl border border-slate-200/80 shadow-sm text-center p-6 my-8 max-w-6xl mx-auto">
+                    <div className="w-48 h-48 flex items-center justify-center">
+                        <Lottie 
+                            animationData={emptyQueueAnimation} 
+                            loop={true} 
+                            className="w-full h-full"
+                        />
+                    </div>
+                    <p className="text-sm font-medium text-slate-400 mt-2 animate-pulse">
+                        Syncing performance insights...
+                    </p>
                 </div>
             </DashboardLayout>
         );
@@ -45,12 +56,20 @@ const AgentSummary = () => {
     if (!summary) {
         return (
             <DashboardLayout title="Agent Summary">
-                <div className="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-gray-200 shadow-sm mx-6 mt-8">
-                    <div className="bg-gray-50 w-16 h-16 rounded-full flex items-center justify-center mb-4">
-                        <FileText className="text-gray-300" size={32} />
+                <div className="flex flex-col justify-center items-center min-h-[350px] bg-white rounded-2xl border border-slate-200/80 shadow-sm text-center p-6 my-8 max-w-6xl mx-auto">
+                    <div className="w-48 h-48 flex items-center justify-center">
+                        <Lottie 
+                            animationData={emptyQueueAnimation} 
+                            loop={true} 
+                            className="w-full h-full"
+                        />
                     </div>
-                    <h3 className="text-gray-900 font-bold text-lg">No Summary Available</h3>
-                    <p className="text-gray-500">We couldn't find any performance data for you at this time.</p>
+                    <h3 className="text-base font-bold text-slate-900 mt-2">
+                        No Data Found
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-500 mt-1.5 max-w-sm leading-relaxed">
+                        Adjust your filters or check back later.
+                    </p>
                 </div>
             </DashboardLayout>
         );

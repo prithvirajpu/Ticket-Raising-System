@@ -5,6 +5,11 @@ import Loader from "../../../components/modals/Loader";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { getAgentTicketDetail,verifyTicketDetails } from "../../../services/ticketService";
 import { ISSUE_FIELDS } from "../../../constants/ticketConstants";
+import OrderIssueDetails from "../../../components/verify/OrderIssueDetails";
+import PaymentIssueDetails from "../../../components/verify/PaymentIssueDetails";
+import DeliveryIssueDetails from "../../../components/verify/DeliveryIssueDetails";
+import WalletIssueDetails from "../../../components/verify/WalletIssueDetails";
+import VerificationRenderer from "../../../components/verify/VerificationRenderer";
 
 const VerifyTicketPage = () => {
 
@@ -16,6 +21,7 @@ const VerifyTicketPage = () => {
 
     const [verifiedData,setVerifiedData]=useState(null)
     const [formData, setFormData] = useState({email: ""});
+    const [verifyLoading,setVerifyLoading]=useState(false);
 
     useEffect(() => {
         fetchTicket();
@@ -43,6 +49,7 @@ const VerifyTicketPage = () => {
 
     const handleVerify = async (e) => {
         e.preventDefault();
+        setVerifyLoading(true);
 
         try {
 
@@ -56,14 +63,18 @@ const VerifyTicketPage = () => {
             const response= await verifyTicketDetails(payload)
             console.log('this is verify response',response)
             setVerifiedData(response.data )
+            setVerifyLoading(false)
 
         } catch (error) {
             console.log(error);
             console.log('backend error',error.response?.data)
+        } finally{
+            setLoading(false)
         }
     };
 
     if (loading) return <Loader />;
+    if (verifyLoading) return <Loader />;
 
     const fields = ISSUE_FIELDS[ticket?.issue_type] || [];
 
@@ -196,7 +207,14 @@ const VerifyTicketPage = () => {
 
 </div>
 
-                    {/* Form */}
+{verifiedData && (
+
+    <VerificationRenderer
+        issueType={ticket.issue_type}
+        data={verifiedData}
+    />
+
+)}
 
                     <form
                         onSubmit={handleVerify}
@@ -247,345 +265,9 @@ const VerifyTicketPage = () => {
                         </div>
 
                     </form>
-                   {verifiedData && (
-
-    <div className="mt-8 border border-green-200 bg-green-50 rounded-2xl p-6">
-
-        <h3 className="text-xl font-bold text-green-700 mb-6">
-            Verified Details
-        </h3>
-
-        {/* ================= ORDER ISSUE ================= */}
-
-        {verifiedData.order && (
-
-            <div className="space-y-6">
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                    <div className="bg-white border rounded-xl p-4">
-                        <p className="text-xs uppercase text-gray-500 font-bold">
-                            Order ID
-                        </p>
-
-                        <p className="font-semibold">
-                            {verifiedData.order.order_id}
-                        </p>
-                    </div>
-
-                    <div className="bg-white border rounded-xl p-4">
-                        <p className="text-xs uppercase text-gray-500 font-bold">
-                            Status
-                        </p>
-
-                        <p className="font-semibold">
-                            {verifiedData.order.status}
-                        </p>
-                    </div>
-
-                    <div className="bg-white border rounded-xl p-4">
-                        <p className="text-xs uppercase text-gray-500 font-bold">
-                            Payment Status
-                        </p>
-
-                        <p className="font-semibold">
-                            {verifiedData.order.payment_status}
-                        </p>
-                    </div>
-
-                    <div className="bg-white border rounded-xl p-4">
-                        <p className="text-xs uppercase text-gray-500 font-bold">
-                            Total Amount
-                        </p>
-
-                        <p className="font-semibold">
-                            ${verifiedData.order.total_amount}
-                        </p>
-                    </div>
 
                 </div>
-
-                {/* SHIPPING ADDRESS */}
-
-                {verifiedData.shipping_address && (
-
-                    <div>
-
-                        <h4 className="font-bold mb-4">
-                            Shipping Address
-                        </h4>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                            <div className="bg-white border rounded-xl p-4">
-                                <p className="text-xs uppercase text-gray-500 font-bold">
-                                    Full Name
-                                </p>
-
-                                <p className="font-semibold">
-                                    {verifiedData.shipping_address.full_name}
-                                </p>
-                            </div>
-
-                            <div className="bg-white border rounded-xl p-4">
-                                <p className="text-xs uppercase text-gray-500 font-bold">
-                                    Mobile
-                                </p>
-
-                                <p className="font-semibold">
-                                    {verifiedData.shipping_address.mobile}
-                                </p>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                )}
-
-                {/* ITEMS */}
-
-                {verifiedData.items?.length > 0 && (
-
-                    <div>
-
-                        <h4 className="font-bold mb-4">
-                            Order Items
-                        </h4>
-
-                        <div className="space-y-3">
-
-                            {verifiedData.items.map((item,index)=>(
-
-                                <div
-                                    key={index}
-                                    className="bg-white border rounded-xl p-4"
-                                >
-
-                                    <div className="flex justify-between">
-
-                                        <div>
-
-                                            <p className="font-semibold">
-                                                {item.product_name}
-                                            </p>
-
-                                            <p className="text-sm text-gray-500">
-                                                Size: {item.size}
-                                            </p>
-
-                                        </div>
-
-                                        <div className="text-right">
-
-                                            <p className="font-bold">
-                                                Qty: {item.quantity}
-                                            </p>
-
-                                            <p className="text-sm text-gray-500">
-                                                ${item.price}
-                                            </p>
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                            ))}
-
-                        </div>
-
-                    </div>
-
-                )}
-
-            </div>
-
-        )}
-
-        {/* ================= PAYMENT ISSUE ================= */}
-
-        {verifiedData.payment_details && (
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                <div className="bg-white border rounded-xl p-4">
-                    <p className="text-xs uppercase text-gray-500 font-bold">
-                        Order ID
-                    </p>
-
-                    <p className="font-semibold">
-                        {verifiedData.payment_details.order_id}
-                    </p>
-                </div>
-
-                <div className="bg-white border rounded-xl p-4">
-                    <p className="text-xs uppercase text-gray-500 font-bold">
-                        Payment Method
-                    </p>
-
-                    <p className="font-semibold">
-                        {verifiedData.payment_details.payment_method}
-                    </p>
-                </div>
-
-                <div className="bg-white border rounded-xl p-4">
-                    <p className="text-xs uppercase text-gray-500 font-bold">
-                        Payment Status
-                    </p>
-
-                    <p className="font-semibold">
-                        {verifiedData.payment_details.payment_status}
-                    </p>
-                </div>
-
-                <div className="bg-white border rounded-xl p-4">
-                    <p className="text-xs uppercase text-gray-500 font-bold">
-                        Amount
-                    </p>
-
-                    <p className="font-semibold">
-                        ${verifiedData.payment_details.total_amount}
-                    </p>
-                </div>
-
-            </div>
-
-        )}
-
-        {/* ================= DELIVERY ISSUE ================= */}
-
-        {verifiedData.delivery_details && (
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                <div className="bg-white border rounded-xl p-4">
-                    <p className="text-xs uppercase text-gray-500 font-bold">
-                        Order ID
-                    </p>
-
-                    <p className="font-semibold">
-                        {verifiedData.delivery_details.order_id}
-                    </p>
-                </div>
-
-                <div className="bg-white border rounded-xl p-4">
-                    <p className="text-xs uppercase text-gray-500 font-bold">
-                        Status
-                    </p>
-
-                    <p className="font-semibold">
-                        {verifiedData.delivery_details.status}
-                    </p>
-                </div>
-
-                <div className="bg-white border rounded-xl p-4">
-                    <p className="text-xs uppercase text-gray-500 font-bold">
-                        Customer
-                    </p>
-
-                    <p className="font-semibold">
-                        {verifiedData.delivery_details.full_name}
-                    </p>
-                </div>
-
-                <div className="bg-white border rounded-xl p-4">
-                    <p className="text-xs uppercase text-gray-500 font-bold">
-                        Mobile
-                    </p>
-
-                    <p className="font-semibold">
-                        {verifiedData.delivery_details.mobile}
-                    </p>
-                </div>
-
-            </div>
-
-        )}
-
-        {/* ================= WALLET ISSUE ================= */}
-
-        {verifiedData.wallet && (
-
-            <div className="space-y-6">
-
-                <div className="bg-white border rounded-xl p-4">
-
-                    <p className="text-xs uppercase text-gray-500 font-bold">
-                        Wallet Balance
-                    </p>
-
-                    <p className="text-2xl font-bold">
-                        ${verifiedData.wallet.balance}
-                    </p>
-
-                </div>
-
-                {verifiedData.wallet.transactions?.length > 0 && (
-
-                    <div>
-
-                        <h4 className="font-bold mb-4">
-                            Recent Transactions
-                        </h4>
-
-                        <div className="space-y-3">
-
-                            {verifiedData.wallet.transactions.map((txn,index)=>(
-
-                                <div
-                                    key={index}
-                                    className="bg-white border rounded-xl p-4"
-                                >
-
-                                    <div className="flex justify-between">
-
-                                        <div>
-
-                                            <p className="font-semibold">
-                                                {txn.transaction_type}
-                                            </p>
-
-                                            <p className="text-sm text-gray-500">
-                                                {txn.description}
-                                            </p>
-
-                                        </div>
-
-                                        <div className="text-right">
-
-                                            <p className="font-bold">
-                                                ${txn.amount}
-                                            </p>
-
-                                            <p className="text-xs text-gray-500">
-                                                {txn.transaction_id}
-                                            </p>
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                            ))}
-
-                        </div>
-
-                    </div>
-
-                )}
-
-            </div>
-
-        )}
-
-    </div>
-
-)}
-                </div>
-
+                        
             </div>
 
         </DashboardLayout>

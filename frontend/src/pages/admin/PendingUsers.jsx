@@ -6,6 +6,9 @@ import DashboardLayout from '../../layouts/DashboardLayout';
 import ConfirmModal from '../../components/modals/ConfirmModal';
 import Pagination from '../../components/Pagination';
 import { UserPlus, Calendar, ShieldCheck, XCircle, Eye, Shield, Users, ArrowLeft } from 'lucide-react';
+import Lottie from 'lottie-react';
+import emptyQueueAnimation from "../../assets/empty-queue.json";
+
 
 const PendingUsers = () => {
   const [users, setUsers] = useState([])
@@ -92,12 +95,21 @@ const PendingUsers = () => {
         {/* CONTAINER MATRICES */}
         <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden p-6">
           {users.length === 0 ? (
-            <div className="text-center py-16 text-slate-400 italic">
-              <div className="flex flex-col items-center justify-center gap-2">
-                <Users className="w-10 h-10 text-slate-300 stroke-[1.5]" />
-                <span className="font-medium text-sm text-slate-500 mt-1">No pending agent applications matching current lifecycle records.</span>
-              </div>
-            </div>
+            <div className="flex flex-col justify-center items-center min-h-[350px] bg-white rounded-2xl border border-slate-200/80 shadow-sm text-center p-6">
+  <div className="w-48 h-48 flex items-center justify-center">
+    <Lottie 
+      animationData={emptyQueueAnimation} 
+      loop={true} 
+      className="w-full h-full"
+    />
+  </div>
+  <h3 className="text-base font-bold text-slate-900 mt-2">
+    No Data Found
+  </h3>
+  <p className="text-xs sm:text-sm text-slate-500 mt-1.5 max-w-sm leading-relaxed">
+    Adjust your filters or check back later.
+  </p>
+</div>
           ) : (
             <div className="flex flex-col gap-3">
               {users.map((user, index) => (
