@@ -4,3 +4,4 @@ from .client_services import client_signup_service
 from .user_services import check_user_email_exists
 from .otp_service import resend_otp_service,verify_otp_service
 from .sso_login_service import sso_login_service
+from .email_service import EmailService
