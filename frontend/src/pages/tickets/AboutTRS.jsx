@@ -10,6 +10,7 @@ import {
   UserCheck, // Added for the SSO End User integration
 } from "lucide-react";
 import DashboardLayout from "../../layouts/DashboardLayout";
+import BlackHole from "../../components/BlackHole";
 
 const AboutTRS = () => {
   return (
@@ -17,6 +18,7 @@ const AboutTRS = () => {
       title="About TRS"
       subtitle="Learn more about the Ticket Resolution System"
     >
+      
       <div className="max-w-5xl mx-auto space-y-10 pb-12 text-slate-800 antialiased">
         
         {/* Introduction & Mission */}
@@ -264,6 +266,7 @@ const AboutTRS = () => {
             </div>
           </div>
         </div>
+        <BlackHole/>
 
         {/* Footer */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl p-8 text-center shadow-lg shadow-blue-500/10 border border-blue-700/30">

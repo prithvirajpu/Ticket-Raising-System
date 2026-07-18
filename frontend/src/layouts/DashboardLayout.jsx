@@ -9,7 +9,7 @@ const DashboardLayout = ({ title, subtitle, headerAction, children }) => {
   const isUserTheme = userRole === 'USER'
 
   // Dynamic Theme Styling Classes
-const containerBg = isUserTheme ? 'bg-[#fbfbfa]' : 'bg-white'
+const containerBg = isUserTheme ? 'bg-[#f5f5f2]' : 'bg-white'
 const textTitle = isUserTheme ? 'text-neutral-900' : 'text-black'
 const textSubtitle = isUserTheme ? 'text-neutral-500' : 'text-gray-400'
   return (
