@@ -26,6 +26,7 @@ def resolve_ticket_service(user,ticket_id):
 
             send_notification(
                     user_id=ticket.created_by_id,
+                    client=ticket.client,
                     notification_type="TICKET_RESOLVED",
                     title="Ticket Resolved",
                     message=f"Ticket #{ticket.ticket_code} has been resolved",

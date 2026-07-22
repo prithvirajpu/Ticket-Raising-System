@@ -1,5 +1,6 @@
 
 import csv
+from django.utils import timezone
 
 from django.http import HttpResponse
 
@@ -26,6 +27,7 @@ def export_finance_csv():
     writer.writerow(["FINANCE SUMMARY"])
 
     writer.writerow([
+        "Report Date",
         "Revenue",
         "Salary Paid",
         "Pending Withdrawals",
@@ -33,6 +35,7 @@ def export_finance_csv():
     ])
 
     writer.writerow([
+        timezone.now().date(),
         summary["revenue"],
         summary["salary_paid"],
         summary["pending_salary"],
@@ -53,6 +56,7 @@ def export_finance_csv():
         "Plan",
         "Amount",
         "Status",
+        "Created On",
         "Expires On",
     ])
 
@@ -72,6 +76,7 @@ def export_finance_csv():
             subscription.plan.name,
             subscription.plan.price,
             subscription.status,
+            subscription.created_at.date(),
             subscription.end_date,
         ])
 
@@ -85,10 +90,10 @@ def export_finance_csv():
     writer.writerow(["SALARY DISTRIBUTION"])
 
     writer.writerow([
+        "Date",
         "Employee",
         "Role",
         "Salary",
-        "Date",
     ])
 
     salaries = (
@@ -101,10 +106,10 @@ def export_finance_csv():
     for salary in salaries:
 
         writer.writerow([
+            salary.created_at.date(),
             salary.wallet.user.name,
             salary.wallet.user.role,
             salary.amount,
-            salary.created_at.date(),
         ])
 
     return response

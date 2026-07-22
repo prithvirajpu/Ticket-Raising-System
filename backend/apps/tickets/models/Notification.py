@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from apps.clients.models import ClientProfile
 
 User=get_user_model()
 
@@ -15,6 +16,10 @@ class Notification(models.Model):
         ("CHAT_MESSAGE", "Chat Message"),
     )
     user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="notifications")
+    client = models.ForeignKey(
+        ClientProfile,
+        on_delete=models.CASCADE,related_name="notifications",null=True,blank=True
+    )
 
     notification_type = models.CharField(max_length=50,choices=NOTIFICATION_TYPES)
     title = models.CharField(max_length=255)

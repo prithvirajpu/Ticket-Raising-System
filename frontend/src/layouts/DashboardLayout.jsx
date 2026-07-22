@@ -13,7 +13,7 @@ const containerBg = isUserTheme ? 'bg-[#f5f5f2]' : 'bg-white'
 const textTitle = isUserTheme ? 'text-neutral-900' : 'text-black'
 const textSubtitle = isUserTheme ? 'text-neutral-500' : 'text-gray-400'
   return (
-    <div className={`min-h-screen w-full flex flex-col overflow-x-hidden transition-colors duration-300 font-sans ${containerBg}`}>
+    <div className={`relative min-h-screen w-full flex flex-col overflow-x-hidden transition-colors duration-300 font-sans ${containerBg}`}>
       
       {/* Background structural mesh decoration strictly for USER dark mode to match the footer */}
       {isUserTheme && (
@@ -23,7 +23,7 @@ const textSubtitle = isUserTheme ? 'text-neutral-500' : 'text-gray-400'
       <Navbar />
       
       {/* Optimized wrapper container for table/grid protections */}
-      <main className="w-full max-w-7xl mx-auto p-4 sm:p-6 flex-1 min-w-0 z-10">
+      <main className="w-full max-w-7xl mx-auto p-4 sm:p-6 flex-1 min-w-0">
         
         {/* Header container blocks */}
         <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6 sm:mb-8 w-full">

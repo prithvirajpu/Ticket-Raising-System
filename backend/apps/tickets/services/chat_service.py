@@ -28,6 +28,7 @@ def send_message_service(user,ticket_id,message):
         receiver_id = ticket.created_by_id
     notification = Notification.objects.filter(
         user_id=receiver_id,
+        client=ticket.client,
         notification_type="CHAT_MESSAGE",
         is_read=False,
         data__ticket_id=ticket.id
@@ -39,6 +40,7 @@ def send_message_service(user,ticket_id,message):
     else:
         send_notification(
             user_id=receiver_id,
+            client=ticket.client,
             notification_type="CHAT_MESSAGE",
             title="New Message",
             message=f"{user.name }: sent you a message",

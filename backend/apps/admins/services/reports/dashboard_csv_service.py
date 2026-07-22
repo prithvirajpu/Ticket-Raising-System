@@ -9,6 +9,9 @@ from ..dashboard.dashboard_report_service import get_ticket_report_dashboard
 
 
 def export_dashboard_csv(period="7d"):
+    from django.utils import timezone
+
+    
 
     tickets = get_ticket_dashboard(period)
     wallet = get_wallet_dashboard(period)
@@ -21,6 +24,10 @@ def export_dashboard_csv(period="7d"):
     )
 
     writer = csv.writer(response)
+    writer.writerow(["DASHBOARD REPORT"])
+    writer.writerow(["Generated On", timezone.now().strftime("%Y-%m-%d %H:%M:%S")])
+    writer.writerow(["Period", period])
+    writer.writerow([])
 
     # ======================================
     # Ticket Summary

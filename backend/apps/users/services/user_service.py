@@ -5,6 +5,7 @@ from apps.users.models import ClientUser
 from apps.tickets.serializer import TicketSerializer,TicketActivitySerializer
 from apps.tickets.utils import send_notification
 from django.db import transaction
+from apps.clients.services.sub_limit_service import check_ticket_limit
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Q
@@ -42,6 +43,13 @@ def create_ticket_service(data,user,client_id):
         }
     client = client_user.client_profile
     logger.info("client = %s", client)
+    limit=check_ticket_limit(client)
+    if not limit['allowed']:
+        return {
+            "data":None,
+            "errors":{'details':'Your client have limit usage'},
+            'status':status.HTTP_400_BAD_REQUEST
+        }
     
     subscription=ClientSubscription.objects.filter(client=client,status__in=['CANCEL_SCHEDULED','ACTIVE']).first()
     if not subscription:
@@ -298,6 +306,7 @@ def reopen_ticket_service(user,ticket_id):
             ticket.status='IN_PROGRESS'
             ticket.save(update_fields=['status'])
             send_notification(user_id=ticket.assigned_to_id,
+                    client=ticket.client,
                     notification_type="TICKET_REOPENED",
                     title="Ticket Reopened",
                     message=f"Ticket #{ticket.ticket_code} has been re-opened",

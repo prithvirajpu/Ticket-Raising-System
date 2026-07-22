@@ -10,6 +10,7 @@ import PaymentIssueDetails from "../../../components/verify/PaymentIssueDetails"
 import DeliveryIssueDetails from "../../../components/verify/DeliveryIssueDetails";
 import WalletIssueDetails from "../../../components/verify/WalletIssueDetails";
 import VerificationRenderer from "../../../components/verify/VerificationRenderer";
+import { notifyError } from "../../../utils/notify";
 
 const VerifyTicketPage = () => {
 
@@ -67,9 +68,11 @@ const VerifyTicketPage = () => {
 
         } catch (error) {
             console.log(error);
+            notifyError(error.response?.data?.errors?.details ||
+            "Verification failed.")
             console.log('backend error',error.response?.data)
         } finally{
-            setLoading(false)
+            setVerifyLoading(false)
         }
     };
 

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Loader from "../../../components/modals/Loader";
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import { ArrowLeft } from "lucide-react";
-import { notifySuccess } from "../../../utils/notify";
+import { notifyError, notifySuccess } from "../../../utils/notify";
 
 const CreateTicket = () => {
   const navigate = useNavigate();
@@ -43,6 +43,7 @@ const CreateTicket = () => {
       notifySuccess("Ticket created successfully !");
     } catch (error) {
       setError(error.response?.data?.errors?.details || "something went wrong");
+      notifyError(error.response?.data?.errors?.details || "something went wrong")
     } finally {
       setLoading(false);
     }

@@ -57,25 +57,68 @@ END OF DOCUMENT
 Please provide the summary in markdown format with headings.
 """
 
-    response = requests.post(
-        "https://openrouter.ai/api/v1/chat/completions",
+    # Fetch available free models
+    response = requests.get(
+        "https://openrouter.ai/api/v1/models",
         headers={
-            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "model": "meta-llama/llama-3-8b-instruct",
-            "messages": [
-                {"role": "user", "content": prompt}
-            ]
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}"
         }
     )
 
-    data = response.json()
-    if "choices" not in data:
-        raise Exception(f"OpenRouter Error: {data}")
+    response.raise_for_status()
 
-    return data['choices'][0]['message']['content']
+    data = response.json()["data"]
+
+    free_models = [
+        model["id"]
+        for model in data
+        if model["id"].endswith(":free")
+    ]
+
+    print("Available free models:")
+    for m in free_models:
+        print(" -", m)
+
+    last_error = None
+
+    for model in free_models:
+        print(f"\nTrying model: {model}")
+
+        try:
+            response = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": model,
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ]
+                },
+                timeout=120
+            )
+
+            data = response.json()
+
+            if response.status_code == 200 and "choices" in data:
+                print(f"✅ Success using {model}")
+                return data["choices"][0]["message"]["content"]
+
+            print(f"❌ {model} failed:")
+            print(data)
+
+            last_error = data
+
+        except Exception as e:
+            print(f"❌ Exception using {model}: {e}")
+            last_error = str(e)
+
+    raise Exception(f"All free models failed.\nLast error: {last_error}")
 
 import traceback
 

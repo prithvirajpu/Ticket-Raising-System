@@ -4,6 +4,7 @@ from rest_framework import status
 from apps.accounts.models import User
 from apps.clients.models import ClientProfile
 from apps.core_app.constants import UserRole
+from apps.clients.services.sub_limit_service import check_agent_limit
 
 logger = logging.getLogger(__name__)
 
@@ -107,21 +108,80 @@ def assign_hierarchy_service(data):
             if not manager_id or not team_lead_id:
                 return {
                     "data": None,
-                    "errors": {"details": "Agent requires both manager and team lead"},
-                    "status": 400
+                    "errors": {
+                        "details": "Agent requires both manager and team lead"
+                    },
+                    "status": status.HTTP_400_BAD_REQUEST
                 }
 
-            manager = User.objects.get(id=manager_id, role=UserRole.MANAGER)
-            team_lead = User.objects.get(id=team_lead_id, role=UserRole.TEAM_LEAD)
+            # Team Lead
+            team_lead = User.objects.filter(
+                id=team_lead_id,
+                role=UserRole.TEAM_LEAD
+            ).first()
 
+            if not team_lead:
+                return {
+                    "data": None,
+                    "errors": {
+                        "details": "Invalid Team Lead"
+                    },
+                    "status": status.HTTP_400_BAD_REQUEST
+                }
+
+            # Manager
+            manager = User.objects.filter(
+                id=manager_id,
+                role=UserRole.MANAGER
+            ).first()
+
+            if not manager:
+                return {
+                    "data": None,
+                    "errors": {
+                        "details": "Invalid Manager"
+                    },
+                    "status": status.HTTP_400_BAD_REQUEST
+                }
+
+            # Client served by this Team Lead
+            client = ClientProfile.objects.filter(
+                team_lead=team_lead
+            ).first()
+            logger.info("CLIENT = %s", client.company_name)
+
+            if not client:
+                return {
+                    "data": None,
+                    "errors": {
+                        "details": "No client assigned to this Team Lead."
+                    },
+                    "status": status.HTTP_400_BAD_REQUEST
+                }
+
+            # Subscription limit check
+            limit = check_agent_limit(
+                client=client,
+                exclude_user_id=user.id
+            )
+
+            if not limit["allowed"]:
+                return {
+                    "data": None,
+                    "errors": {
+                        "details": limit["message"]
+                    },
+                    "status": status.HTTP_400_BAD_REQUEST
+                }
+
+            # Assign hierarchy
             user.manager = manager
             user.team_lead = team_lead
 
             updated = True
 
-            logger.info(f"Assigned MANAGER -> {manager.id}")
-            logger.info(f"Assigned TEAM_LEAD -> {team_lead.id}")
-
+            logger.info("Assigned MANAGER -> %s", manager.id)
+            logger.info("Assigned TEAM_LEAD -> %s", team_lead.id)
         # ==================================================
         # SAVE USER
         # ==================================================

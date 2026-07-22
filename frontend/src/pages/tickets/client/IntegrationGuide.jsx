@@ -128,6 +128,42 @@ const IntegrationGuide = () => {
                 <AppUrlForm />
               </div>
             </section>
+            <section className="mb-12">
+  <div className="rounded-xl border border-amber-200 bg-amber-50 p-6">
+    <div className="flex items-start gap-3">
+      <div className="text-amber-600 text-xl">⚠️</div>
+
+      <div>
+        <h3 className="text-lg font-semibold text-amber-900">
+          Important Configuration
+        </h3>
+
+        <p className="mt-2 text-sm text-amber-800 leading-7">
+          Before enabling SSO integration, ensure that your <strong>Company Name </strong> 
+          in the TRS Client Profile is exactly the same as your application's
+          registered name.
+        </p>
+
+        <div className="mt-4 bg-white rounded-lg p-4 border border-amber-200">
+          <p className="text-sm text-slate-700">
+            <strong>Example</strong>
+          </p>
+
+          <ul className="mt-2 text-sm text-slate-700 list-disc ml-5 space-y-1">
+            <li>Application Name: <strong>ShopKickora</strong></li>
+            <li>TRS Company Name: <strong>ShopKickora</strong></li>
+          </ul>
+        </div>
+
+        <div className="mt-4 text-sm text-red-700">
+          If these names do not match exactly, TRS cannot identify your
+          application and the SSO token verification using your shared secret
+          will fail.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
             {/* Authentication Section */}
             <section id="auth" className="scroll-mt-20 mb-12">

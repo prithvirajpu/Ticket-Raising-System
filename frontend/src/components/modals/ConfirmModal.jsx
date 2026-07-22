@@ -1,3 +1,5 @@
+import { Loader2 } from "lucide-react";
+
 const ConfirmModal = ({
   isOpen,
   title = "Are you sure?",
@@ -12,7 +14,7 @@ const ConfirmModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[9999]">
       <div className="bg-white rounded-xl shadow-lg w-[400px] p-6 space-y-4">
 
         <h2 className="text-lg font-semibold text-gray-800">
@@ -37,6 +39,7 @@ const ConfirmModal = ({
             disabled={loading}
             className="px-4 py-2 text-sm rounded-md bg-red-600 text-white hover:bg-red-700 transition disabled:opacity-50"
           >
+            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {loading ? loadingText : confirmText}
           </button>
         </div>

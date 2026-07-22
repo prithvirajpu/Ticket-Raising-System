@@ -9,10 +9,12 @@ def send_notification(
     notification_type,
     title,
     message,
-    data=None
+    client=None,
+    data=None,
 ):
     notification = Notification.objects.create(
         user_id=user_id,
+        client=client,
         notification_type=notification_type,
         title=title,
         message=message,
