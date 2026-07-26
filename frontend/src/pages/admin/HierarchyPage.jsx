@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../../api/axios";
 import { assignHierarchy, getAllUsers, getHierarchy } from "../../services/ticketService";
-import { notifySuccess } from "../../utils/notify";
+import { notifyError, notifySuccess } from "../../utils/notify";
 import { 
   Building2, 
   ShieldAlert, 
@@ -48,6 +48,7 @@ const HierarchyPage = () => {
       fetchUsers();
     } catch (err) {
       console.log(err);
+      notifyError(err?.response?.data?.errors?.details || 'failed in the assign area')
     } finally {
       setLoading(false);
     }

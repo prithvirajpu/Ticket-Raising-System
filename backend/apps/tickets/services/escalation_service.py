@@ -67,6 +67,7 @@ def escalate_ticket_service(user, ticket_id):
                   "ticket_code": ticket.ticket_code,}   
             )
     send_notification(user_id=ticket.created_by.id,
+            client=ticket.client,
             notification_type="TICKET_ESCALATED",
             title="Ticket Escalated",
             message=f"Your ticket #{ticket.ticket_code} has been escalated to a higher authority",

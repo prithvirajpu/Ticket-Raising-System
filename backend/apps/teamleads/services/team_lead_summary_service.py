@@ -53,38 +53,75 @@ def generate_agent_summary_service(request,summary_id):
             "errors": {"details": str(e)},
             "status": status.HTTP_500_INTERNAL_SERVER_ERROR
         }
+
+FALLBACK_MODELS = [
+    "google/gemma-4-31b-it:free",
+    "google/gemma-4-26b-a4b-it:free",
+    "openai/gpt-oss-20b:free",
+    "nvidia/nemotron-3-super-120b-a12b:free",
+]
+
 def call_ai_agent_version(text):
     prompt = f"""
-    You are an AI assistant.
+You are an AI assistant.
 
-    Convert the following manager summary into agent training content.
+Convert the following manager summary into agent training content.
 
-    RULES:
-    - Remove confidential/internal details
-    - Keep only agent-relevant info
-    - Make it simple and actionable
+RULES:
+- Remove confidential/internal details
+- Keep only agent-relevant information
+- Make it simple and actionable
+- Use bullet points where appropriate
+- Organize into clear headings
+- Keep the content concise and easy for support agents to understand
 
-    Content:
-    {text[:4000]}
-    """
+Content:
+\"\"\"
+{text[:4000]}
+\"\"\"
+"""
 
-    response = requests.post(
-        "https://openrouter.ai/api/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {OPENROUTER_API_KEY}"
-        },
-        json={
-            "model": "meta-llama/llama-3-8b-instruct",
-            "messages": [
-                {"role": "user", "content": prompt}
-            ]
-        }
-    )
-    data= response.json()
-    if 'choices' not in data:
-        raise Exception(data)
-    
-    return data['choices'][0]['message']['content']
+    last_error = None
+
+    for model in FALLBACK_MODELS:
+        print(f"Trying model: {model}")
+
+        try:
+            response = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": model,
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ]
+                },
+                timeout=120
+            )
+
+            data = response.json()
+
+            if response.status_code == 200 and "choices" in data:
+                print(f"✅ Success using {model}")
+                return data["choices"][0]["message"]["content"]
+
+            print(f"❌ {model} failed")
+            print(data)
+
+            last_error = data
+
+        except Exception as e:
+            print(f"❌ Exception using {model}: {e}")
+            last_error = str(e)
+
+    raise Exception(f"All fallback models failed.\nLast error: {last_error}")
+
 
 def submit_agent_summary_service(request, summary_id):
     try:

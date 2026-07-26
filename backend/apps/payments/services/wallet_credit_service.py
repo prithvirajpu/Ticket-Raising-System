@@ -1,5 +1,6 @@
 from decimal import Decimal
 from rest_framework import status
+from django.core.cache import cache
 from apps.payments.models import (Wallet,WalletTransaction)
 
 def credit_wallet(
@@ -20,4 +21,6 @@ def credit_wallet(
         wallet=wallet,transaction_type=transaction_type,
         amount=amount,description=description,created_by=created_by
     )
+    cache.delete(f"wallet_balance_{user.id}")
+    cache.delete(f"wallet_transactions_{user.id}")
     return transaction

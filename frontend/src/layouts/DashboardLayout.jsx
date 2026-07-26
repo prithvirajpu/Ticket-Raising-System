@@ -1,9 +1,25 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import Navbar from '../components/Navbar'
+import { useAuth } from '../auth/AuthContext' // Added to dynamically check theme role
 
 const DashboardLayout = ({ title, subtitle, headerAction, children }) => {
+  const { userRole } = useAuth()
+  
+  // Dynamic dark theme check for USER role
+  const isUserTheme = userRole === 'USER'
+
+  // Dynamic Theme Styling Classes
+const containerBg = isUserTheme ? 'bg-[#f5f5f2]' : 'bg-white'
+const textTitle = isUserTheme ? 'text-neutral-900' : 'text-black'
+const textSubtitle = isUserTheme ? 'text-neutral-500' : 'text-gray-400'
   return (
-    <div className="min-h-screen bg-white w-full flex flex-col overflow-x-hidden">
+    <div className={`relative min-h-screen w-full flex flex-col overflow-x-hidden transition-colors duration-300 font-sans ${containerBg}`}>
+      
+      {/* Background structural mesh decoration strictly for USER dark mode to match the footer */}
+      {isUserTheme && (
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808005_1px,transparent_1px),linear-gradient(to_bottom,#80808005_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
+      )}
+
       <Navbar />
       
       {/* Optimized wrapper container for table/grid protections */}
@@ -12,16 +28,24 @@ const DashboardLayout = ({ title, subtitle, headerAction, children }) => {
         {/* Header container blocks */}
         <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6 sm:mb-8 w-full">
           <div className="min-w-0">
-            <h1 className="text-2xl sm:text-4xl font-bold text-black mb-2 tracking-tight truncate">
+            <h1 className={`text-2xl sm:text-4xl font-bold mb-2 tracking-tight truncate ${textTitle}`}>
               {title}
             </h1>
-            {subtitle && <p className="text-gray-400 text-xs sm:text-sm">{subtitle}</p>}
+            {subtitle && (
+              <p className={`text-xs sm:text-sm tracking-wide ${textSubtitle}`}>
+                {subtitle}
+              </p>
+            )}
           </div>
-          {headerAction && <div className="flex-shrink-0 w-full sm:w-auto">{headerAction}</div>}
+          {headerAction && (
+            <div className="flex-shrink-0 w-full sm:w-auto">
+              {headerAction}
+            </div>
+          )}
         </div>
 
         {/* Dynamic User Area View Content */}
-        <div className="w-full min-w-0 overflow-hidden">
+        <div className="w-full min-w-0">
           {children}
         </div>
         

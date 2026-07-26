@@ -220,6 +220,7 @@ const WithdrawalRequestsPage = () => {
               ? "Are you sure you want to approve this financial extraction entry? This execution sequence will authorize balance processing pipelines."
               : "Are you sure you want to reject this withdrawal request? This transaction action will cancel the ledger settlement request."
           }
+          loadingText="Processing Stripe transfer..."
           confirmText={modalConfig.type === "APPROVE" ? "Approve Request" : "Reject Request"}
           onConfirm={handleModalConfirm}
           onCancel={() => setIsModalOpen(false)}

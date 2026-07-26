@@ -8,19 +8,17 @@ import logging
 logger=logging.getLogger(__name__)
 
 OPENROUTER_API_KEY=os.getenv('OPENROUTER_API_KEY')
+
+FALLBACK_MODELS = [
+    "anthropic/claude-3-haiku:2024-11-20",   # Try first
+    "google/gemma-4-31b-it:free",
+    "google/gemma-4-26b-a4b-it:free",
+    "openai/gpt-oss-20b:free",
+    "nvidia/nemotron-3-super-120b-a12b:free",
+]
+
 def generate_tickets_from_summary(summary, num_tickets=3):
-    url = "https://openrouter.ai/api/v1/chat/completions"
-
-    payload = {
-        "model": "anthropic/claude-3-haiku:2024-11-20",
-        "response_format": {
-            "type": "json_object"
-        },
-        "messages": [
-            {
-                "role": "user",
-                "content": f"""
-
+    prompt = f"""
     You are generating CUSTOMER SUPPORT TRAINING TICKETS.
 
     Business Context:
@@ -46,116 +44,86 @@ def generate_tickets_from_summary(summary, num_tickets=3):
     WALLET_ISSUE
     PRODUCT_ISSUE
 
-    Examples:
-
-    DELIVERY_ISSUE
-
-    * Order delayed
-    * Package lost
-    * Tracking not updated
-    * Delivered to wrong address
-
-    PAYMENT_ISSUE
-
-    * Payment failed
-    * Money deducted but order not created
-    * Duplicate charge
-
-    REFUND_ISSUE
-
-    * Refund delayed
-    * Refund never received
-
-    PRODUCT_ISSUE
-
-    * Damaged item
-    * Wrong item delivered
-    * Missing accessories
-    * Wrong size
-
-    WALLET_ISSUE
-
-    * Cashback missing
-    * Wallet balance incorrect
-
-    ORDER_ISSUE
-
-    * Order cancelled unexpectedly
-    * Order stuck in processing
-
     For each ticket generate:
 
-    title
-    description
-    priority
-    category
-    customer_prompt
+    - title
+    - description
+    - priority
+    - category
+    - customer_prompt
 
-    customer_prompt must be written as a CUSTOMER PERSONA.
+    The customer_prompt must contain:
 
-    Include:
+    - Customer Name
+    - Personality
+    - Emotional State
+    - Problem
+    - Known Information
+    - Hidden Information
+    - Desired Outcome
 
-    Customer Name:
-    Personality:
-    Emotional State:
-    Problem:
-    Known Information:
-    Hidden Information:
-    Desired Outcome:
-
-    The customer_prompt will later be given to another AI that will ROLEPLAY the customer.
-
-    The AI customer must:
-
-    * behave like a real customer
-    * stay in character
-    * never act as a support agent
-    * never provide solutions
-    * reveal hidden information only when asked
-
-    Return ONLY valid JSON.
-
-    Required format:
+    Return ONLY valid JSON in this format:
 
     {{
     "tickets": [
-    {{
-    "title": "Payment Failed During Checkout",
-    "description": "Customer attempted payment three times but payment failed.",
-    "priority": "HIGH",
-    "category": "PAYMENT_ISSUE",
-    "customer_prompt": "Customer Name: Sarah. Personality: Frustrated. Emotional State: Angry. Problem: Payment failed three times. Known Information: Payment declined on multiple cards. Hidden Information: Needs the order before the weekend. Desired Outcome: Complete the purchase successfully."
-    }}
+        {{
+        "title": "...",
+        "description": "...",
+        "priority": "HIGH",
+        "category": "PAYMENT_ISSUE",
+        "customer_prompt": "..."
+        }}
     ]
     }}
 
-    Do not return:
-
-    * explanations
-    * markdown
-    * code blocks
-    * Ticket 1 / Ticket 2 labels
-    * any text outside the JSON
+    Do not return markdown, explanations, or code blocks.
     """
-    }
-    ]
-    }
 
-    headers = {
-    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-    "Content-Type": "application/json",
-    "HTTP-Referer": "http://localhost:3000",
-    "X-Title": "TRS Ticket System"
-    }
+    last_error = None
 
-    response = requests.post(url, json=payload, headers=headers)
+    for model in FALLBACK_MODELS:
+        print(f"Trying model: {model}")
 
-    if response.status_code != 200:
-        raise Exception(f"AI Error: {response.text}")
+        try:
+            response = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": "http://localhost:3000",
+                    "X-Title": "TRS Ticket System"
+                },
+                json={
+                    "model": model,
+                    "response_format": {
+                        "type": "json_object"
+                    },
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ]
+                },
+                timeout=120
+            )
 
-    data = response.json()
+            data = response.json()
 
-    return data["choices"][0]["message"]["content"]
+            if response.status_code == 200 and "choices" in data:
+                print(f"✅ Success using {model}")
+                return data["choices"][0]["message"]["content"]
+
+            print(f"❌ {model} failed")
+            print(data)
+
+            last_error = data
+
+        except Exception as e:
+            print(f"❌ Exception using {model}: {e}")
+            last_error = str(e)
+
+    raise Exception(f"All fallback models failed.\nLast error: {last_error}")
 
 
 def parse_ai_ticket_response(ai_response):
@@ -259,3 +227,4 @@ def generate_fake_ticket_service(request):
             'errors': {"details": str(e)},
             'status': status.HTTP_500_INTERNAL_SERVER_ERROR
         }
+    

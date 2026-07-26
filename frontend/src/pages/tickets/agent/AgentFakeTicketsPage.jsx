@@ -2,6 +2,8 @@ import { useEffect, useState } from "react"
 import { getAgentFakeTickets } from "../../../services/ticketService"
 import DashboardLayout from "../../../layouts/DashboardLayout"
 import { useNavigate } from "react-router-dom"
+import Lottie from 'lottie-react';
+import emptyQueueAnimation from "../../../assets/empty-queue.json";
 
 const AgentFakeTicketsPage = () => {
   const [tickets, setTickets] = useState([])
@@ -35,12 +37,21 @@ const AgentFakeTicketsPage = () => {
                 Loading tickets...
               </div>
             ) : tickets.length === 0 ? (
-              <div className="flex flex-col justify-center items-center h-40 text-gray-400 text-center">
-                <p className="font-semibold text-lg text-gray-700">No Tickets Found</p>
-                <p className="text-sm text-gray-500 mt-1">
-                  AI practice tickets will appear here once generated.
-                </p>
-              </div>
+              <div className="flex flex-col justify-center items-center min-h-[350px] bg-white rounded-2xl border border-slate-200/80 shadow-sm text-center p-6">
+  <div className="w-48 h-48 flex items-center justify-center">
+    <Lottie 
+      animationData={emptyQueueAnimation} 
+      loop={true} 
+      className="w-full h-full"
+    />
+  </div>
+  <h3 className="text-base font-bold text-slate-900 mt-2">
+    No Data Found
+  </h3>
+  <p className="text-xs sm:text-sm text-slate-500 mt-1.5 max-w-sm leading-relaxed">
+    Adjust your filters or check back later.
+  </p>
+</div>
             ) : (
               tickets.map((t) => (
                 <div

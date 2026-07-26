@@ -8,46 +8,42 @@
 # =====================
 # PYTHON
 # =====================
+venv/
+.venv/
+
 __pycache__/
 *.py[cod]
 *$py.class
 
-# Virtual Environments
-venv/
-.venv/
-backend/venv/
-backend/.venv/
-
 # =====================
-# DJANGO
+# DATABASES
 # =====================
 *.sqlite3
 db.sqlite3
 
+# =====================
+# DJANGO
+# =====================
 media/
 staticfiles/
 
+# =====================
+# LOGS
+# =====================
 *.log
 debug.log
-
-# Celery
-celerybeat-schedule*
-celeryd.pid
-
-# =====================
-# NODE / REACT
-# =====================
-frontend/node_modules/
-frontend/build/
-frontend/dist/
 
 # =====================
 # IDE
 # =====================
 .vscode/
 .idea/
-**/.vscode/
-**/.idea/
+
+# =====================
+# GIT
+# =====================
+.git
+.gitignore
 
 # =====================
 # OS
@@ -64,6 +60,7 @@ htmlcov/
 .mypy_cache/
 
 # =====================
-# GIT
+# FRONTEND
 # =====================
-*.orig
+node_modules/
+frontend/

@@ -4,6 +4,8 @@ import { getManagerTickets } from '../../../services/ticketService'
 import { Fingerprint, ChevronRight } from 'lucide-react'
 import Loader from '../../../components/modals/Loader'
 import DashboardLayout from '../../../layouts/DashboardLayout'
+import Lottie from 'lottie-react';
+import emptyQueueAnimation from "../../../assets/empty-queue.json";
 
 const ManagerTickets = () => {
     const [tickets, setTickets] = useState([])
@@ -45,9 +47,21 @@ const ManagerTickets = () => {
                     {/* List section */}
                     <div className="divide-y divide-gray-100">
                         {tickets.length === 0 ? (
-                            <div className="text-center py-20 text-gray-500">
-                                <p>No tickets available at the moment.</p>
-                            </div>
+                            <div className="flex flex-col justify-center items-center min-h-[350px] bg-white rounded-2xl border border-slate-200/80 shadow-sm text-center p-6">
+  <div className="w-48 h-48 flex items-center justify-center">
+    <Lottie 
+      animationData={emptyQueueAnimation} 
+      loop={true} 
+      className="w-full h-full"
+    />
+  </div>
+  <h3 className="text-base font-bold text-slate-900 mt-2">
+    No Data Found
+  </h3>
+  <p className="text-xs sm:text-sm text-slate-500 mt-1.5 max-w-sm leading-relaxed">
+    Adjust your filters or check back later.
+  </p>
+</div>
                         ) : (
                             tickets.map((t) => (
                                 <div
