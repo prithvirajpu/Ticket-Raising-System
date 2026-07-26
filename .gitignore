@@ -2,8 +2,13 @@
 # ENV FILES
 # =====================
 .env
+.env.docker
 .env.*
 
+staticfiles/
+
+
+debug.log
 # =====================
 # BACKEND (Django)
 # =====================
