@@ -2,45 +2,68 @@
 # ENV FILES
 # =====================
 .env
-.env.docker
 .env.*
+!.env.example
 
+# =====================
+# PYTHON
+# =====================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+venv/
+.venv/
+backend/venv/
+backend/.venv/
+
+# =====================
+# DJANGO
+# =====================
+*.sqlite3
+db.sqlite3
+
+media/
 staticfiles/
 
-
+*.log
 debug.log
-# =====================
-# BACKEND (Django)
-# =====================
-backend/venv/
-backend/__pycache__/
-backend/**/*.pyc
-backend/db.sqlite3
-backend/.vscode/
-backend/.idea/
-.vscode/
 
-# Inside C:\TRS\.gitignore
-**/celerybeat-schedule*
-backend/celerybeat-schedule*   # Celery Beat scheduler DB (JSON/SQLite)
-celeryd.pid            # Worker PID files
-celerybeat-schedule
+# Celery
 celerybeat-schedule*
-
-# Django logs
-backend/*.log
+celeryd.pid
 
 # =====================
-# FRONTEND (React)
+# NODE / REACT
 # =====================
 frontend/node_modules/
 frontend/build/
-frontend/.env
-frontend/.vscode/
-frontend/.idea/
+frontend/dist/
 
 # =====================
-# OS FILES
+# IDE
+# =====================
+.vscode/
+.idea/
+**/.vscode/
+**/.idea/
+
+# =====================
+# OS
 # =====================
 .DS_Store
 Thumbs.db
+
+# =====================
+# TESTS
+# =====================
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# =====================
+# GIT
+# =====================
+*.orig

@@ -1,28 +1,66 @@
-venv/
+# =====================
+# ENV FILES
+# =====================
 .env
-.env.docker
-.git
-.gitignore
+.env.*
+!.env.example
+
+# =====================
+# PYTHON
+# =====================
+venv/
+.venv/
 
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
 
+# =====================
+# DATABASES
+# =====================
+*.sqlite3
 db.sqlite3
 
-debug.log
-
+# =====================
+# DJANGO
+# =====================
 media/
-
 staticfiles/
 
+# =====================
+# LOGS
+# =====================
+*.log
+debug.log
+
+# =====================
+# IDE
+# =====================
 .vscode/
 .idea/
 
+# =====================
+# GIT
+# =====================
+.git
+.gitignore
+
+# =====================
+# OS
+# =====================
+.DS_Store
+Thumbs.db
+
+# =====================
+# TESTS
+# =====================
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# =====================
+# FRONTEND
+# =====================
 node_modules/
-
-Dockerfile
-docker-compose.yml
-
-README.md
+frontend/
