@@ -28,7 +28,7 @@ const useChat = (ticketId, currentUserId) => {
     if (!ticketId) return;
 
     socketRef.current = new WebSocket(
-      `ws://localhost:8000/ws/chat/${ticketId}/?token=${accessToken}`,
+      `ws://localhost:8001/ws/chat/${ticketId}/?token=${accessToken}`,
     );
 
     socketRef.current.onmessage = (event) => {

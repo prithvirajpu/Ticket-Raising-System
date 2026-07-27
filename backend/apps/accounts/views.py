@@ -84,9 +84,7 @@ class LoginView(APIView):
 class CookieTokenRefreshView(TokenRefreshView):
 
     def post(self, request, *args, **kwargs):
-        print('cookies ',request.COOKIES)
         refresh = request.COOKIES.get("refresh_token")
-        print('refresh',refresh)
         if not refresh:
             return Response(
                 {"detail": "Refresh token not found."},

@@ -30,5 +30,57 @@ services:
     ports:
       - "6379:6379"
 
+  celery:
+    build: .
+
+    container_name: trs_celery
+
+    command: celery -A core worker -l info
+
+    env_file:
+      - .env.docker
+
+    volumes:
+      - .:/app
+
+    depends_on:
+      - redis
+
+  celery_beat:
+    build: .
+
+    container_name: trs_celery_beat
+
+    command: celery -A core beat -l info
+
+    env_file:
+      - .env.docker
+
+    volumes:
+      - .:/app
+
+    depends_on:
+      - redis
+      - celery
+
+  daphne:
+    build: .
+
+    container_name: trs_daphne
+
+    command: daphne -b 0.0.0.0 -p 8001 core.asgi:application
+
+    env_file:
+      - .env.docker
+
+    volumes:
+      - .:/app
+
+    ports:
+      - "8001:8001"
+
+    depends_on:
+      - redis
+
 volumes:
   static_volume:
