@@ -5,8 +5,8 @@ from celery.schedules import crontab
 from dotenv import load_dotenv
 import dj_database_url
 
-load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG')=='True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS','').split(',')
@@ -206,6 +206,7 @@ SECURE_PROXY_SSL_HEADER = (
     "HTTP_X_FORWARDED_PROTO",
     "https",
 )
+USE_X_FORWARDED_HOST = True
 
 SIMPLE_JWT={
     "ACCESS_TOKEN_LIFETIME":timedelta(minutes=1),

@@ -122,7 +122,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             text_data=json.dumps({
                 "type": "messages_read",
                 "message_ids": event["message_ids"],
-                'reader_id': self.scope["user"].id,
+                "reader_id": event["reader_id"],
             })
         )
 

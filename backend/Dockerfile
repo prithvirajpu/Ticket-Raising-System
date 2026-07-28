@@ -1,8 +1,6 @@
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
-
-# Ensure Python output is sent straight to terminal
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
@@ -21,3 +19,5 @@ RUN pip install --upgrade pip && \
 COPY . .
 
 EXPOSE 8000
+
+CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000"]

@@ -37,6 +37,7 @@ class JWTAuthMiddleware:
             decoded = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
             user_id = decoded.get("user_id")
             return User.objects.get(id=user_id)
-        except Exception:
+        except Exception as e:
+            logger.error("JWT ERROR: %s", str(e))
             return AnonymousUser()
         
