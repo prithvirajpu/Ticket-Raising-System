@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 
+BASE_WS= import.meta.env.VITE_WS_URL
+
 const useTrainingChat = (ticketId,currentUserId) => {
   const { accessToken } = useAuth();
 
@@ -31,7 +33,7 @@ const useTrainingChat = (ticketId,currentUserId) => {
     if (!ticketId) return;
 
     socketRef.current = new WebSocket(
-      `ws://localhost:8080/ws/training-chat/${ticketId}/?token=${accessToken}`
+      `${BASE_WS}/ws/training-chat/${ticketId}/?token=${accessToken}`
     );
 
     socketRef.current.onopen = () => {
