@@ -1,0 +1,22 @@
+*   [33mf3e0427[m[33m ([m[1;35mrefs/stash[m[33m)[m WIP on host: c32b046 fix: websocket issue solve
+[31m|[m[32m\[m  
+[31m|[m * [33m30d1a0e[m index on host: c32b046 fix: websocket issue solve
+[31m|[m[31m/[m  
+* [33mc32b046[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mhost[m[33m, [m[1;31morigin/host[m[33m)[m fix: websocket issue solve
+* [33m6c34aaa[m Dockerize backend with Gunicorn, Daphne, Nginx, Celery and Redis Cloud
+* [33m32bdcb8[m Dockerize backend services with Gunicorn, Daphne, Celery and Redis
+*   [33mfcb2ee9[m[33m ([m[1;31morigin/completion[m[33m, [m[1;32mcompletion[m[33m)[m Merge remote-tracking branch 'origin/master' into completion
+[33m|[m[34m\[m  
+[33m|[m *   [33m932a8bb[m[33m ([m[1;31morigin/master[m[33m)[m Merge pull request #8 from prithvirajpu/stable-working-auth
+[33m|[m [35m|[m[36m\[m  
+[33m|[m * [36m\[m   [33m172b22c[m Merge pull request #7 from prithvirajpu/feature/wallet-system
+[33m|[m [1;31m|[m[1;32m\[m [36m\[m  
+* [1;31m|[m [1;32m|[m [36m|[m [33ma0b44e5[m chore: add .env-example adding
+* [1;31m|[m [1;32m|[m [36m|[m [33mbab3240[m chore: remove node_modules and add docker configuration
+* [1;31m|[m [1;32m|[m [36m|[m [33m0741ff6[m feat: add sub plan conditions and model fallback
+* [1;31m|[m [1;32m|[m [36m|[m [33mb3bcc6c[m style: add one animation
+* [1;31m|[m [1;32m|[m [36m|[m [33mb33c0a1[m feat: add welcome email to user
+* [1;31m|[m [1;32m|[m [36m|[m [33m4ae5022[m style: add some empty animation and update user pages
+[36m|[m [1;31m|[m[36m_[m[1;32m|[m[36m/[m  
+[36m|[m[36m/[m[1;31m|[m [1;32m|[m   
+* [1;31m|[m [1;32m|[m [33m38c296b[m[33m ([m[1;33mtag: [m[1;33mstable-auth-working[m[33m, [m[1;31morigin/stable-working-auth[m[33m, [m[1;32mstable-working-auth[m[33m)[m chore: ignore vscode files
