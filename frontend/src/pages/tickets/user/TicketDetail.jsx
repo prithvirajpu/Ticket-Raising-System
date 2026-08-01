@@ -55,7 +55,10 @@ const {
     handleSendMessage,
     messageEndRef,
     handleKeyDown
-} = useChat(id, ticket?.current_user_id);
+} = useChat(
+    ticket ? id : null,
+    ticket?.current_user_id
+);
 
 const {
     incomingCall,

@@ -5,8 +5,8 @@ from celery.schedules import crontab
 from dotenv import load_dotenv
 import dj_database_url
 
-load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG')=='True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS','').split(',')
@@ -150,6 +150,12 @@ LOGGING = {
     },
 }
 
+if not DEBUG:
+    LOGGING["handlers"].pop("file", None)
+
+    LOGGING["loggers"]["django"]["handlers"] = ["console"]
+    LOGGING["loggers"][""]["handlers"] = ["console"]
+    
 EMAIL_BACKEND=os.getenv('EMAIL_BACKEND')
 EMAIL_HOST=os.getenv('EMAIL_HOST')
 EMAIL_PORT=os.getenv('EMAIL_PORT')
@@ -167,6 +173,12 @@ if DEBUG:
         "http://127.0.0.1:5173",
         "http://localhost:3000",
     ]
+else:
+    CORS_ALLOWED_ORIGINS = os.getenv(
+        "CORS_ALLOWED_ORIGINS",
+        ""
+    ).split(",")
+
 CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
@@ -175,14 +187,26 @@ REST_FRAMEWORK = {
     ),
 }
 
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ]
+else:
+    CSRF_TRUSTED_ORIGINS = os.getenv(
+        "CSRF_TRUSTED_ORIGINS",
+        ""
+    ).split(",")
 
 CSRF_COOKIE_SAMESITE = "Lax"
-CSRF_COOKIE_SECURE = False 
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
 
+SECURE_PROXY_SSL_HEADER = (
+    "HTTP_X_FORWARDED_PROTO",
+    "https",
+)
+USE_X_FORWARDED_HOST = True
 
 SIMPLE_JWT={
     "ACCESS_TOKEN_LIFETIME":timedelta(minutes=1),
@@ -201,7 +225,10 @@ AUTH_USER_MODEL = 'accounts.User'
 
 GOOGLE_CLIENT_ID = os.getenv('My_GOOGLE_CLIENT_ID')
 
-REDIS_URL = os.getenv("REDIS_URL")
+REDIS_URL = os.getenv(
+    "REDIS_URL",
+    "redis://redis:6379/0"
+)
 CELERY_BROKER_URL = REDIS_URL
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'

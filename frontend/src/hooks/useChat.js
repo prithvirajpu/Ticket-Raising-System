@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { getTicketMessages } from "../services/ticketService";
 import { useAuth } from "../auth/AuthContext";
 import { useCall } from "../auth/CallContext";
+import { refreshAccessToken } from "../auth/authService";
 
 const useChat = (ticketId, currentUserId) => {
   const {
@@ -17,7 +18,7 @@ const useChat = (ticketId, currentUserId) => {
     setUpLocalStream,
     cleanupCall,
   } = useCall();
-  const { accessToken } = useAuth();
+  const { updateAccessToken } = useAuth();  
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
 
@@ -27,53 +28,91 @@ const useChat = (ticketId, currentUserId) => {
   useEffect(() => {
     if (!ticketId) return;
 
-    socketRef.current = new WebSocket(
-      `ws://localhost:8000/ws/chat/${ticketId}/?token=${accessToken}`,
-    );
+    let socket;
 
-    socketRef.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
+    const connectSocket = async () => {
+let token;
 
-      if (data.type === "chat_message") {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: data.id,
-            message: data.message,
-            sender_id: Number(data.sender_id),
-            sender_name: data.sender_name,
-            created_at: data.created_at,
-            is_seen: false,
-          },
-        ]);
+try {
+    token = await refreshAccessToken(updateAccessToken);
+} catch (err) {
+    console.error("Couldn't refresh token", err);
 
-        // IMPORTANT: only receiver marks read
-        if (Number(data.sender_id) !== Number(currentUserId)) {
-          socketRef.current?.send(JSON.stringify({ type: "mark_read" }));
-        }
-      }
+    token = localStorage.getItem("access");
 
-      if (data.type === "messages_read") {
-        const { message_ids, reader_id } = data;
+    if (!token) {
+        return;
+    }
+}
+        console.log("ACCESS TOKEN FROM STORAGE:", localStorage.getItem("access"));
 
-        // only apply if OTHER user read it
-        if (Number(reader_id) === Number(currentUserId)) return;
-
-        setMessages((prev) =>
-          prev.map((msg) =>
-            message_ids.includes(msg.id) ? { ...msg, is_seen: true } : msg,
-          ),
+        socket = new WebSocket(
+            `ws://localhost:8080/ws/chat/${ticketId}/?token=${token}`
         );
-      }
+
+        socketRef.current = socket;
+
+        socket.onopen = () => {
+            console.log("CHAT SOCKET CONNECTED");
+        };
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+
+            if (data.type === "chat_message") {
+                setMessages((prev) => [
+                    ...prev,
+                    {
+                        id: data.id,
+                        message: data.message,
+                        sender_id: Number(data.sender_id),
+                        sender_name: data.sender_name,
+                        created_at: data.created_at,
+                        is_seen: false,
+                    },
+                ]);
+
+                if (Number(data.sender_id) !== Number(currentUserId)) {
+                    socket.send(
+                        JSON.stringify({
+                            type: "mark_read",
+                        })
+                    );
+                }
+            }
+
+            if (data.type === "messages_read") {
+                const { message_ids, reader_id } = data;
+
+                if (Number(reader_id) === Number(currentUserId)) return;
+
+                setMessages((prev) =>
+                    prev.map((msg) =>
+                        message_ids.includes(msg.id)
+                            ? { ...msg, is_seen: true }
+                            : msg
+                    )
+                );
+            }
+        };
+
+        socket.onclose = () => {
+            console.log("CHAT SOCKET CLOSED");
+        };
+
+        socket.onerror = (err) => {
+            console.log(err);
+        };
     };
-    socketRef.current.onclose = () => {
-      console.log("Chat socket closed");
-    };
+
+    connectSocket();
 
     return () => {
-      socketRef.current.close();
+        if (socket) {
+            socket.close();
+        }
     };
-  }, [ticketId]);
+}, [ticketId, currentUserId]);
 
   // Enter key to send message
   const handleKeyDown = (e) => {
@@ -124,6 +163,11 @@ const useChat = (ticketId, currentUserId) => {
   }, [ticketId]);
 
   const handleSendMessage = async () => {
+    console.log("🔥 SEND CLICKED");
+  console.log("MESSAGE:", newMessage);
+  console.log("SOCKET:", socketRef.current);
+  console.log("STATE:", socketRef.current?.readyState);
+
     if (!newMessage.trim()) return;
 
     const payload = {
@@ -134,6 +178,10 @@ const useChat = (ticketId, currentUserId) => {
       created_at: new Date().toISOString(),
     };
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      console.log(
+ "socket state:",
+ socketRef.current?.readyState
+);
       socketRef.current.send(JSON.stringify(payload));
       setNewMessage("");
       scrollToBottom();

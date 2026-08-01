@@ -45,6 +45,10 @@ export const AuthProvider=({children})=>{
         setProfileCompleted(profile_completed)
         setApprovalStatus(approval_status);
     };
+    const updateAccessToken = (token) => {
+    localStorage.setItem("access", token);
+    setAccessToken(token);
+};
     const isAuthenticated=!!accessToken
     const logout= async()=>{
         try {
@@ -62,7 +66,7 @@ export const AuthProvider=({children})=>{
     };
     return (
         <AuthContext.Provider value={{login,logout,userRole,userId,isAuthenticated,
-        loading,accessToken,profileCompleted,setProfileCompleted,approvalStatus ,setApprovalStatus}} >
+        loading,accessToken,setAccessToken,updateAccessToken,profileCompleted,setProfileCompleted,approvalStatus ,setApprovalStatus}} >
             
             {children}
         </AuthContext.Provider>

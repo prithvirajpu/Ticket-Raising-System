@@ -31,7 +31,7 @@ const useTrainingChat = (ticketId,currentUserId) => {
     if (!ticketId) return;
 
     socketRef.current = new WebSocket(
-      `ws://localhost:8000/ws/training-chat/${ticketId}/?token=${accessToken}`
+      `ws://localhost:8080/ws/training-chat/${ticketId}/?token=${accessToken}`
     );
 
     socketRef.current.onopen = () => {

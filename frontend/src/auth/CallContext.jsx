@@ -22,7 +22,7 @@ export const CallProvider = ({ children }) => {
     console.log("the user id is : ", userId);
 
     const ws = new WebSocket(
-      `ws://localhost:8000/ws/call/?token=${accessToken}`,
+      `ws://localhost:8080/ws/call/?token=${accessToken}`,
     );
 
     socketRef.current = ws;

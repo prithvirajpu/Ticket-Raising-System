@@ -12,7 +12,7 @@ const NotificationProvider = ({children}) => {
     useEffect(()=>{
          if (!accessToken) return;
          console.log("Creating Notification WS");
-        const ws= new WebSocket(`ws://localhost:8000/ws/notifications/?token=${accessToken}`)
+        const ws= new WebSocket(`ws://localhost:8080/ws/notifications/?token=${accessToken}`)
 
         ws.onmessage=(event)=>{
             const data= JSON.parse(event.data);
