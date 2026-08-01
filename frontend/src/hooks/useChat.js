@@ -4,6 +4,7 @@ import { useAuth } from "../auth/AuthContext";
 import { useCall } from "../auth/CallContext";
 import { refreshAccessToken } from "../auth/authService";
 
+BASE_WS= import.meta.env.VITE_WS_URL
 const useChat = (ticketId, currentUserId) => {
   const {
     incomingCall,
@@ -47,7 +48,7 @@ try {
         console.log("ACCESS TOKEN FROM STORAGE:", localStorage.getItem("access"));
 
         socket = new WebSocket(
-            `ws://localhost:8080/ws/chat/${ticketId}/?token=${token}`
+            `${BASE_WS}/ws/chat/${ticketId}/?token=${token}`
         );
 
         socketRef.current = socket;

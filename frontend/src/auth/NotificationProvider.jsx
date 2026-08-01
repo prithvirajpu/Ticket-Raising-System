@@ -3,6 +3,7 @@ import { useAuth } from "./AuthContext"
 import { getNotifications, markAllNotificationsRead, markNotificationRead } from "../services/ticketService"
 import { notifySuccess } from "../utils/notify"
 
+BASE_WS= import.meta.env.VITE_WS_URL
 const NotificationContext= createContext()
 const NotificationProvider = ({children}) => {
     const {accessToken} =useAuth()
@@ -12,7 +13,7 @@ const NotificationProvider = ({children}) => {
     useEffect(()=>{
          if (!accessToken) return;
          console.log("Creating Notification WS");
-        const ws= new WebSocket(`ws://localhost:8080/ws/notifications/?token=${accessToken}`)
+        const ws= new WebSocket(`${BASE_WS}/ws/notifications/?token=${accessToken}`)
 
         ws.onmessage=(event)=>{
             const data= JSON.parse(event.data);
