@@ -67,3 +67,4 @@ htmlcov/
 # GIT
 # =====================
 *.orig
+backend/certbot/
