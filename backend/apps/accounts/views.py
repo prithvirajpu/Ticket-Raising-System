@@ -9,6 +9,7 @@ from .serializers import (LoginSerializer,ClientSignupSerializer,
     VerifyOTPSerializer,ForgotPasswordSerializer,ResetPasswordSerializer)
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
+from django.conf import settings
 from rest_framework_simplejwt.views import TokenRefreshView
 from apps.core_app.utils import set_refresh_cookie
 import logging
@@ -30,14 +31,16 @@ class SSOLoginAPIView(APIView):
         data = result.get("data",{})
         if not data:
             return HttpResponse(
-                """
+                f"""
                 <script>
-                    window.location.replace("http://localhost:5173/sso-error?code=invalid_login");
+                    window.location.replace(
+                    "{settings.FRONTEND_URL}/sso-error?code=invalid_login"
+                    );
                 </script>
                 """
             )
         sso_loading_url = (
-            f"http://localhost:5173/sso-loading"
+            f"{settings.FRONTEND_URL}/sso-loading"
             f"?access={data['access']}"
             f"&role={data['role']}"
             f"&user_id={data['user_id']}"
