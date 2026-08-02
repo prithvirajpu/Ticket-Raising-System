@@ -250,8 +250,11 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [REDIS_URL],
-        },
+            "hosts": [{
+                "address": REDIS_URL,
+                "max_connections": 20,
+            }],
+        }
     },
 }
 
@@ -261,7 +264,11 @@ CACHES = {
         "LOCATION": REDIS_URL,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        },
+            "CONNECTION_POOL_KWARGS": {
+                "max_connections": 10,
+                "retry_on_timeout": True,
+            },
+        }
     }
 }
 
