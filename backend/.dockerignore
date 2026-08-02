@@ -64,3 +64,6 @@ htmlcov/
 # =====================
 node_modules/
 frontend/
+
+# Certbot
+certbot/
