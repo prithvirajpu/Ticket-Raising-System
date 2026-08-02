@@ -5,7 +5,7 @@ import {  replace, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Send, Phone, User, Clock, AlertCircle, Calendar, CheckCheck,Check, } from "lucide-react"; // Using Lucide for icons
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
-import { getSlaTimer } from "../../../utils/slaTImer";
+import { getSlaTimer } from "../../../utils/slaTimer";
 import { notifySuccess } from "../../../utils/notify";
 import useChat from "../../../hooks/useChat";
 import OngoingCallModal from "../../../components/modals/OngoingCallModal";

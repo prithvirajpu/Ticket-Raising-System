@@ -4,7 +4,7 @@ import Loader from "../../../components/modals/Loader";
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import { ArrowLeft, User, Clock, AlertCircle, Send, CheckCheck, HelpCircle } from "lucide-react";
 import { getFakeTicketDetail, getTrainingMessages, retryTraining } from "../../../services/ticketService";
-import { getSlaTimer } from "../../../utils/slaTImer";
+import { getSlaTimer } from "../../../utils/slaTimer";
 import useTrainingChat from "../../../hooks/useTrainingChat";
 import { useAuth } from "../../../auth/AuthContext";
 

@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
-import { getSlaTimer } from "../../../utils/slaTImer";
+import { getSlaTimer } from "../../../utils/slaTimer";
 import useChat from "../../../hooks/useChat";
 import { notifySuccess } from "../../../utils/notify";
 import OngoingCallModal from "../../../components/modals/OngoingCallModal";
