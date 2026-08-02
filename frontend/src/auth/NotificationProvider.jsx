@@ -3,7 +3,7 @@ import { useAuth } from "./AuthContext"
 import { getNotifications, markAllNotificationsRead, markNotificationRead } from "../services/ticketService"
 import { notifySuccess } from "../utils/notify"
 
-BASE_WS= import.meta.env.VITE_WS_URL
+const BASE_WS= import.meta.env.VITE_WS_URL
 const NotificationContext= createContext()
 const NotificationProvider = ({children}) => {
     const {accessToken} =useAuth()

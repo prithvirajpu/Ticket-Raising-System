@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 
-BASE_WS= import.meta.env.VITE_WS_URL
+const BASE_WS= import.meta.env.VITE_WS_URL
 
 const useTrainingChat = (ticketId,currentUserId) => {
   const { accessToken } = useAuth();

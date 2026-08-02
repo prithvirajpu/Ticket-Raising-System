@@ -4,7 +4,7 @@ import { useAuth } from "./AuthContext";
 import { notifyError } from "../utils/notify";
 import { startPeerCall } from "../services/StartPeerCall";
 
-BASE_WS= import.meta.env.VITE_WS_URL
+const BASE_WS= import.meta.env.VITE_WS_URL
 const CallContext = createContext();
 export const CallProvider = ({ children }) => {
   const { accessToken, userId } = useAuth();

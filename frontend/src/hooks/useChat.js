@@ -4,7 +4,7 @@ import { useAuth } from "../auth/AuthContext";
 import { useCall } from "../auth/CallContext";
 import { refreshAccessToken } from "../auth/authService";
 
-BASE_WS= import.meta.env.VITE_WS_URL
+const BASE_WS= import.meta.env.VITE_WS_URL
 const useChat = (ticketId, currentUserId) => {
   const {
     incomingCall,
