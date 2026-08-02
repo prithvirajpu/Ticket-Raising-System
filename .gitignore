@@ -67,4 +67,15 @@ htmlcov/
 # GIT
 # =====================
 *.orig
+
+# =====================
+# SSL / CERTBOT
+# =====================
+backend/certbot/
+
+# =====================
+# DOCKER
+# =====================
+**/.env.production
+=======
 backend/certbot/
