@@ -182,7 +182,16 @@ export const CallProvider = ({ children }) => {
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: true,
     });
+    stream.getAudioTracks().forEach(track => {
+    console.log({
+        label: track.label,
+        enabled: track.enabled,
+        muted: track.muted,
+        readyState: track.readyState,
+    });
+});
     localStreamRef.current = stream;
+    
     return stream;
   };
 

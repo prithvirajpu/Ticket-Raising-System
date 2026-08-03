@@ -18,9 +18,25 @@ export const createPeer = (userId, remoteAudioRef, streamGetter) => {
     "destroyed?",
     peerInstance?.destroyed,
   );
-  peerInstance = new Peer(peerId, {
-    debug: 2,
-  });
+peerInstance = new Peer(peerId, {
+  debug: 2,
+
+  config: {
+  iceServers: [
+    {
+      urls: "stun:stun.l.google.com:19302",
+    },
+    {
+      urls: [
+        "turn:13.205.216.174:3478?transport=udp",
+        "turn:13.205.216.174:3478?transport=tcp",
+      ],
+      username: "trs",
+      credential: "trs123",
+    },
+  ],
+},
+});
 
   peerInstance.on("open", (id) => {
     console.log("✅ Peer connected:", id);
@@ -38,9 +54,24 @@ export const createPeer = (userId, remoteAudioRef, streamGetter) => {
       }
 
       call.answer(stream);
+      call.peerConnection?.addEventListener("iceconnectionstatechange", () => {
+  console.log(
+    "Receiver ICE:",
+    call.peerConnection.iceConnectionState,
+  );
+});
+
+call.peerConnection?.addEventListener("connectionstatechange", () => {
+  console.log(
+    "Receiver Connection:",
+    call.peerConnection.connectionState,
+  );
+});
 
       call.on("stream", (remoteStream) => {
         console.log("🎧 Remote stream received");
+            window.currentCall = call;
+    window.currentPC = call.peerConnection;
 
         if (remoteAudioRef?.current) {
           remoteAudioRef.current.srcObject = remoteStream;

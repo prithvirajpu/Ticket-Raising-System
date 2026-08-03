@@ -96,6 +96,22 @@ services:
       - redis_data:/data
     command: redis-server --appendonly yes
 
+  turn:
+    image: coturn/coturn:latest
+    container_name: trs_turn
+
+    ports:
+      - "3478:3478/tcp"
+      - "3478:3478/udp"
+      - "49160-49200:49160-49200/udp"
+
+    volumes:
+      - ./turn/turnserver.conf:/etc/coturn/turnserver.conf
+
+    command: ["-c", "/etc/coturn/turnserver.conf"]
+
+    restart: unless-stopped
+
 volumes:
   static_volume:
   redis_data:

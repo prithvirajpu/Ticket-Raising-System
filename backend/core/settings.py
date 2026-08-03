@@ -210,7 +210,7 @@ SECURE_PROXY_SSL_HEADER = (
 USE_X_FORWARDED_HOST = True
 
 SIMPLE_JWT={
-    "ACCESS_TOKEN_LIFETIME":timedelta(minutes=1),
+    "ACCESS_TOKEN_LIFETIME":timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME":timedelta(days=1),
     "AUTH_HEADER_TYPES":("Bearer",),
 }
