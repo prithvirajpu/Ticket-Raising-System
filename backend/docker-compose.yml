@@ -17,6 +17,8 @@ services:
 
     expose:
       - "8000"
+    depends_on:
+      - redis
 
   celery:
     build: .
@@ -30,6 +32,9 @@ services:
 
     volumes:
       - .:/app
+    
+    depends_on:
+      - redis
 
   celery_beat:
     build: .
@@ -46,6 +51,7 @@ services:
 
     depends_on:
       - celery
+      - redis
 
   daphne:
     build: .
@@ -62,6 +68,8 @@ services:
 
     expose:
       - "8001"
+    depends_on:
+      - redis
 
 
   nginx:
@@ -80,5 +88,14 @@ services:
       - web
       - daphne
 
+  redis:
+    image: redis:7-alpine
+    container_name: trs_redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
 volumes:
   static_volume:
+  redis_data:
