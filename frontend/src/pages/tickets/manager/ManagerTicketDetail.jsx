@@ -15,6 +15,7 @@ import {
   Calendar,
   Check,
   CheckCheck,
+  Bell,
 } from "lucide-react";
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
@@ -24,6 +25,7 @@ import { notifySuccess } from "../../../utils/notify";
 import OngoingCallModal from "../../../components/modals/OngoingCallModal";
 import CallingModal from "../../../components/modals/CallingModal";
 import { useCall } from "../../../auth/CallContext";
+import NotifyClientModal from "../../../components/modals/NotifyClientModal";
 
 const ManagerTicketDetail = () => {
   const { id } = useParams();
@@ -34,17 +36,18 @@ const ManagerTicketDetail = () => {
   const [resolveModalOpen, setResolveModalOpen] = useState(false);
   const [resolveLoading, setResolveLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(null);
+  const [showNotifyModal, setShowNotifyModal] = useState(false);
 
-const {
+  const {
     messages,
     newMessage,
     setNewMessage,
     handleSendMessage,
     messageEndRef,
     handleKeyDown
-} = useChat(id, ticket?.current_user_id);
+  } = useChat(id, ticket?.current_user_id);
 
-const {
+  const {
     incomingCall,
     setIncomingCall,
     handleCall,
@@ -53,7 +56,7 @@ const {
     handleEndCall,
     callState,
     remoteAudioRef
-} = useCall();
+  } = useCall();
 
   const currentUserId = Number(ticket?.current_user_id);
 
@@ -103,36 +106,47 @@ const {
 
   if (loading) return <Loader />;
   if (!ticket) return <p className="p-6">Ticket not found</p>;
+
   return (
     <>
       <DashboardLayout>
-        <div className="min-h-screen bg-white ">
-          {/* Top Navigation */}
-          <div className="flex items-center justify-between mb-8 max-w-6xl mx-auto">
-            <div className="flex items-center gap-4">
+        <div className="min-h-screen bg-white">
+          {/* Top Navigation Bar with Mobile Responsiveness */}
+          <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-4 mb-8 max-w-6xl mx-auto px-4 sm:px-0">
+            <div className="flex items-center gap-3 sm:gap-4">
               <button
                 onClick={() => navigate(-1)}
                 className="hover:bg-gray-100 p-2 rounded-full transition-colors"
               >
                 <ArrowLeft size={20} />
               </button>
-              <h1 className="text-xl font-bold">
+              <h1 className="text-lg sm:text-xl font-bold">
                 Ticket #{ticket.ticket_code || id}
               </h1>
             </div>
 
-            {ticket.status !== "RESOLVED" && ticket.status !== "CLOSED" && (
+            <div className="flex items-center gap-2 sm:gap-3 ml-auto sm:ml-0">
               <button
-                disabled={resolveLoading}
-                onClick={() => setResolveModalOpen(true)}
-                className="bg-[#1DB954] hover:bg-green-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                onClick={() => setShowNotifyModal(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 active:bg-slate-100 transition-all shadow-sm"
               >
-                Mark as Resolved
+                <Bell size={15} className="text-slate-500" />
+                <span>Notify Client</span>
               </button>
-            )}
+
+              {ticket.status !== "RESOLVED" && ticket.status !== "CLOSED" && (
+                <button
+                  disabled={resolveLoading}
+                  onClick={() => setResolveModalOpen(true)}
+                  className="bg-[#1DB954] hover:bg-green-600 text-white px-4 py-1.5 sm:px-6 sm:py-2 text-xs sm:text-sm rounded-xl font-medium transition-colors shadow-sm disabled:opacity-50"
+                >
+                  Mark as Resolved
+                </button>
+              )}
+            </div>
           </div>
 
-          <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8">
+          <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 px-4 sm:px-0">
             {/* Left Side: Ticket Details Card */}
             <div className="md:col-span-4 lg:col-span-3">
               <div className="border border-gray-300 rounded-3xl p-6 space-y-6">
@@ -224,7 +238,6 @@ const {
                         className={`flex flex-col ${isMe ? "items-end" : "items-start"} gap-2`}
                       >
                         <div className="flex items-center gap-2 text-xs text-gray-500 font-bold">
-                          {/* {msg.sender_name} */}
                           <span className="text-[10px] text-gray-400">
                             {new Date(msg.created_at).toLocaleTimeString()}
                           </span>
@@ -317,7 +330,7 @@ const {
           </div>
         </div>
       </DashboardLayout>
-     
+      
       <ConfirmModal
         isOpen={resolveModalOpen}
         title="Resolve Ticket"
@@ -335,6 +348,14 @@ const {
         userName={ticket.customer_name}
         onCancel={handleEndCall}
       />
+
+      {showNotifyModal && (
+        <NotifyClientModal
+          ticket={ticket}
+          isOpen={showNotifyModal}
+          onClose={() => setShowNotifyModal(false)}
+        />
+      )}
     </>
   );
 };

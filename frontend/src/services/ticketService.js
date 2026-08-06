@@ -570,6 +570,14 @@ export const updateAppUrl = async (appUrl) => {
 
     return response.data;
 };
+export const sendClientNotification  = async (ticketId,subject,message) => {
+    const response = await api.post("/clients/notify-client/", {
+        ticket_id: ticketId,
+        subject,message,
+    });
+
+    return response.data;
+};
 
 export const downloadFinanceReport = async () => {
     try {

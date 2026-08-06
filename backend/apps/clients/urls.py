@@ -4,9 +4,10 @@ from .views import (CurrentSubscriptionAPIView,SubscriptionPlanView,
                     CreateCheckoutSessionAPIView,StripeWebhookAPIView,
                     CancelSubscriptionAPIView,ClientIntegrationKeysAPIView,
                     RegenerateClientKeysAPIView,ClientDashboardAPIView,
-                    UpdateAppUrlView)
+                    UpdateAppUrlView,NotifyClientAPIView)
 
 urlpatterns=[
+    path('notify-client/',NotifyClientAPIView.as_view()),
     path("profile/update/", UpdateClientProfileView.as_view()),
     path('upload/', UploadDocView.as_view()),
     path('subscription/plans/',SubscriptionPlanView.as_view()),

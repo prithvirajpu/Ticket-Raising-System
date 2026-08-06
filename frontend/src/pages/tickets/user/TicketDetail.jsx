@@ -279,7 +279,7 @@ useEffect(() => {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-gray-50/30">
+            <div ref={messageEndRef} className="flex-1 overflow-y-auto p-6 space-y-8 bg-gray-50/30">
               {messages.map((msg, index) => {
                 const isMe = Number(msg.sender_id) === Number(currentUserId);
 
@@ -335,7 +335,7 @@ useEffect(() => {
                 );
               })}
 
-              <div ref={messageEndRef} />
+              <div  />
             </div>
 
             {/* Input */}
