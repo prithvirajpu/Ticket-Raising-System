@@ -48,19 +48,19 @@ const TicketDetail = () => {
   const [timeline, setTimeline] = useState([]);
   const localStreamRef = useRef(null);
 
-const {
+  const {
     messages,
     newMessage,
     setNewMessage,
     handleSendMessage,
     messageEndRef,
     handleKeyDown
-} = useChat(
+  } = useChat(
     ticket ? id : null,
     ticket?.current_user_id
-);
+  );
 
-const {
+  const {
     incomingCall,
     setIncomingCall,
     handleAccept,
@@ -68,16 +68,15 @@ const {
     handleEndCall,
     callState,
     remoteAudioRef
-} = useCall();
+  } = useCall();
 
   const currentUserId = Number(ticket?.current_user_id);
 
-console.log("Modal open?", !!incomingCall);
+  console.log("Modal open?", !!incomingCall);
 
-useEffect(() => {
-  console.log("TicketDetail incomingCall:", incomingCall);
-}, [incomingCall]);
-
+  useEffect(() => {
+    console.log("TicketDetail incomingCall:", incomingCall);
+  }, [incomingCall]);
 
   const handleConfirmReopen = async () => {
     setReopenLoading(true);
@@ -146,11 +145,8 @@ useEffect(() => {
 
   const formatTime = (t) => {
     if (!t) return "";
-
     const d = new Date(t);
-
     if (isNaN(d.getTime())) return "";
-
     return d.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
@@ -163,7 +159,7 @@ useEffect(() => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto font-sans">
+      <div className="max-w-7xl mx-auto font-sans px-4 sm:px-0">
         {/* Header Actions */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
@@ -198,10 +194,11 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* Combined Unified Grid: 3-column, 6-column, 3-column split */}
+        {/* Combined Unified Grid Configuration */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* 1. LEFT SIDEBAR: Ticket Details (Takes up 3 spaces) */}
-          <div className="lg:col-span-3 space-y-6">
+          
+          {/* 1. LEFT SIDEBAR: Ticket Details (Takes up 3 spaces on Desktop, Top position on Mobile) */}
+          <div className="lg:col-span-3 order-1 lg:order-1 space-y-6">
             <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
               <h2 className="text-lg font-bold text-gray-800 mb-6">
                 Ticket Details
@@ -264,110 +261,8 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* 2. MIDDLE PORTION: Chat Section (Takes up 6 spaces) */}
-          <div className="lg:col-span-6 flex flex-col h-[700px] bg-white border border-gray-200 rounded-3xl shadow-sm overflow-hidden">
-            {/* Conversation Header */}
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-              <div>
-                <h2 className="text-xl font-bold text-gray-800">
-                  Conversation
-                </h2>
-                <p className="text-sm text-gray-400">
-                  Chat with the support team
-                </p>
-              </div>
-            </div>
-
-            {/* Messages */}
-            <div ref={messageEndRef} className="flex-1 overflow-y-auto p-6 space-y-8 bg-gray-50/30">
-              {messages.map((msg, index) => {
-                const isMe = Number(msg.sender_id) === Number(currentUserId);
-
-                return (
-                  <div
-                    key={index}
-                    className={`flex flex-col ${
-                      isMe ? "items-end" : "items-start"
-                    } gap-2`}
-                  >
-                    <div className="flex items-center gap-2 text-[11px] text-gray-400 font-bold uppercase">
-                      <span className="font-normal normal-case">
-                        {formatTime(msg.created_at)}
-                      </span>
-                    </div>
-
-                    <div
-                      className={`flex gap-3 items-end max-w-[85%] ${
-                        isMe ? "flex-row-reverse" : ""
-                      }`}
-                    >
-                      {/* Bubble */}
-
-                      <div
-                        className={`relative p-4 rounded-2xl text-sm shadow-sm ${
-                          isMe
-                            ? "bg-[#3f644b] text-white rounded-tr-none"
-                            : "bg-gray-200 text-gray-900 rounded-tl-none"
-                        }`}
-                      >
-                        {msg.message}
-
-{isMe && (
-  <span className="absolute bottom-1 right-2">
-    {msg.is_seen ? (
-      <CheckCheck size={14} className="text-sky-300" />
-    ) : (
-      <CheckCheck size={14} className="text-gray-400" />
-    )}
-  </span>
-)}
-                      </div>
-                      {/* Avatar */}
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${
-                          isMe ? "bg-emerald-500" : "bg-gray-500"
-                        }`}
-                      >
-                        {msg.sender_name?.[0]}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-
-              <div  />
-            </div>
-
-            {/* Input */}
-            <div className="p-6 border-t border-gray-100 bg-white">
-              <div className="relative flex items-center">
-                <textarea
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Type your message..."
-                  className="w-full pl-6 pr-24 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none resize-none"
-                />
-
-                <div className="absolute right-3 flex items-center gap-2">
-                  {/* <button className="p-2 text-gray-400 hover:text-gray-600">
-                    <Paperclip size={20} />
-                  </button> */}
-
-                  <button
-                    onClick={handleSendMessage}
-                    className="p-2 text-gray-900"
-                  >
-                    <Send size={20} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 3. RIGHT SIDEBAR: Timeline (Takes up 3 spaces) */}
-          <div className="lg:col-span-3 bg-white border border-gray-200 rounded-3xl p-6 h-[700px] overflow-y-auto shadow-sm">
+          {/* 2. TIMELINE: (Takes up 3 spaces on Desktop, Shifts to Middle/Second position on Mobile) */}
+          <div className="lg:col-span-3 bg-white border border-gray-200 rounded-3xl p-6 h-[500px] lg:h-[700px] overflow-y-auto shadow-sm order-2 lg:order-3">
             <h2 className="text-lg font-bold text-gray-800 mb-6">Timeline</h2>
 
             <div className="relative">
@@ -397,8 +292,107 @@ useEffect(() => {
               ))}
             </div>
           </div>
+
+          {/* 3. CHAT AREA: (Takes up 6 spaces on Desktop, Pushed to the End position on Mobile) */}
+          <div className="lg:col-span-6 flex flex-col h-[700px] bg-white border border-gray-200 rounded-3xl shadow-sm overflow-hidden order-3 lg:order-2">
+            {/* Conversation Header */}
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-bold text-gray-800">
+                  Conversation
+                </h2>
+                <p className="text-sm text-gray-400">
+                  Chat with the support team
+                </p>
+              </div>
+            </div>
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-gray-50/30">
+              {messages.map((msg, index) => {
+                const isMe = Number(msg.sender_id) === Number(currentUserId);
+
+                return (
+                  <div
+                    key={index}
+                    className={`flex flex-col ${
+                      isMe ? "items-end" : "items-start"
+                    } gap-2`}
+                  >
+                    <div className="flex items-center gap-2 text-[11px] text-gray-400 font-bold uppercase">
+                      <span className="font-normal normal-case">
+                        {formatTime(msg.created_at)}
+                      </span>
+                    </div>
+
+                    <div
+                      className={`flex gap-3 items-end max-w-[85%] ${
+                        isMe ? "flex-row-reverse" : ""
+                      }`}
+                    >
+                      {/* Bubble */}
+                      <div
+                        className={`relative p-4 rounded-2xl text-sm shadow-sm ${
+                          isMe
+                            ? "bg-[#3f644b] text-white rounded-tr-none"
+                            : "bg-gray-200 text-gray-900 rounded-tl-none"
+                        }`}
+                      >
+                        {msg.message}
+
+                        {isMe && (
+                          <span className="absolute bottom-1 right-2">
+                            {msg.is_seen ? (
+                              <CheckCheck size={14} className="text-sky-300" />
+                            ) : (
+                              <CheckCheck size={14} className="text-gray-400" />
+                            )}
+                          </span>
+                        )}
+                      </div>
+                      {/* Avatar */}
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${
+                          isMe ? "bg-emerald-500" : "bg-gray-500"
+                        }`}
+                      >
+                        {msg.sender_name?.[0]}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              <div ref={messageEndRef} />
+            </div>
+
+            {/* Input */}
+            <div className="p-6 border-t border-gray-100 bg-white">
+              <div className="relative flex items-center">
+                <textarea
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Type your message..."
+                  className="w-full pl-6 pr-24 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none resize-none"
+                />
+
+                <div className="absolute right-3 flex items-center gap-2">
+                  <button
+                    onClick={handleSendMessage}
+                    className="p-2 text-gray-900"
+                  >
+                    <Send size={20} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
+      
       <ConfirmModal
         isOpen={showCloseModal}
         title="Close Ticket?"
@@ -410,12 +404,14 @@ useEffect(() => {
         onConfirm={handleConfirmClose}
         onCancel={() => setShowCloseModal(false)}
       />
+      
       <ReviewModal
         isOpen={showReviewModal}
         onClose={() => setShowReviewModal(false)}
         onSubmit={handleSubmitReview}
         loading={reviewLoading}
       />
+      
       <ConfirmModal
         isOpen={reopenModalOpen}
         title="Reopen Ticket?"

@@ -124,9 +124,7 @@ try {
   };
   // scroll helper
   const scrollToBottom = () => {
-    messageEndRef.current?.scrollIntoView({
-       top: messageEndRef.current.scrollHeight,
-       behavior: "smooth" });
+    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
   
   useEffect(() => {
