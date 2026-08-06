@@ -40,8 +40,7 @@ const UserDashboard = () => {
 
     // Trigger snappier entrance animation for main frame
     const animFrame = requestAnimationFrame(() => {
-      const timer = setTimeout(() => setAnimate(true), 50); // Faster trigger
-      return () => clearTimeout(timer);
+      setAnimate(true) // Faster trigger
     });
 
     // Intersection Observer for rapid staggered scroll entry
@@ -208,7 +207,7 @@ const UserDashboard = () => {
             {/* 2. About Section (Reduced from duration-1000/delay-150 to duration-500/delay-75) */}
             <div 
               data-section="about"
-              className={`relative overflow-hidden rounded-3xl bg-white border border-neutral-150 shadow-sm mb-10 transition-all duration-500 ease-out delay-75 ${
+              className={`relative overflow-hidden rounded-3xl bg-white border border-neutral-150 shadow-sm mb-10 transition-all duration-500 ease-out ${
                 visibleSections['about'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               }`}
             >
@@ -281,7 +280,7 @@ const UserDashboard = () => {
             {/* 3. Feature Highlight Grid (Reduced from duration-1000/delay-300 to duration-500/delay-150) */}
             <div 
               data-section="features"
-              className={`grid grid-cols-1 md:grid-cols-3 gap-6 mb-4 transition-all duration-500 ease-out delay-150 ${
+              className={`grid grid-cols-1 md:grid-cols-3 gap-6 mb-4 transition-all duration-500 ease-out ${
                 visibleSections['features'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               }`}
             >
@@ -325,7 +324,7 @@ const UserDashboard = () => {
             {/* 4. Modular Footer Section */}
             <div 
               data-section="footer"
-              className={`transition-all duration-500 ease-out delay-200 ${
+              className={`transition-all duration-500 ease-out ${
                 visibleSections['footer'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               }`}
             >
