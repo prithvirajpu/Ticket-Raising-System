@@ -103,7 +103,9 @@ const Navbar = () => {
       />
     </div>
 
-   <span className={`font-serif font-bold text-xl tracking-normal hidden sm:block ${textPrimary}`}>
+<span className={`font-serif font-bold text-xl tracking-normal hidden sm:block ${
+  isUserTheme ? 'text-white' : 'text-[#0f172a]'
+}`}>
   TRS
 </span>
 
