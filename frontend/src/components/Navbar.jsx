@@ -5,6 +5,7 @@ import { LogOut, User, Ticket, Menu, X, Bell } from 'lucide-react'
 import ConfirmModal from './modals/ConfirmModal'
 import { useNotifications } from '../auth/NotificationProvider'
 import NotificationPage from './NotificationsPage'
+import logo from '../assets/trs_logo_1.png'
 
 const Navbar = () => {
   const { userRole, logout } = useAuth()
@@ -91,14 +92,22 @@ const Navbar = () => {
         
         {/* Left Section: Logo and Desktop Nav */}
         <div className="flex items-center gap-4 lg:gap-8 min-w-0 flex-1">
-          <Link to="/" className="flex items-center gap-2 flex-shrink-0" onClick={closeMobileMenu}>
-            <div className={`p-1.5 rounded-lg transition-colors ${isUserTheme ? 'bg-emerald-950/50 border border-emerald-500/20' : 'bg-green-100'}`}>
-              <Ticket className={`w-5 h-5 ${isUserTheme ? 'text-emerald-400' : 'text-green-600'}`} strokeWidth={2.5} />
-            </div>
-            <span className={`font-bold text-xl tracking-tight hidden sm:block ${textPrimary}`}>
-              TicketFlow
-            </span>
-          </Link>
+<Link to="/" className="flex items-center gap-2 flex-shrink-0" onClick={closeMobileMenu}>
+    
+    {/* Clean container without padding or background color */}
+    <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
+      <img 
+        src={logo} 
+        alt="TRS Logo" 
+        className="w-full h-full object-cover" 
+      />
+    </div>
+
+   <span className={`font-serif font-bold text-xl tracking-normal hidden sm:block ${textPrimary}`}>
+  TRS
+</span>
+
+  </Link>
 
           {/* Desktop Nav */}
           <nav className="hidden lg:flex items-center gap-3 min-w-0 py-1">
