@@ -32,8 +32,8 @@ def create_connect_account(user):
 def create_onboarding_link(user):
     account_link = stripe.AccountLink.create(
         account=user.stripe_connect_account_id,
-        refresh_url="http://localhost:5173/wallet",
-        return_url="http://localhost:5173/connect-success",
+        refresh_url=f"{settings.FRONTEND_URL}/wallet",
+        return_url=f"{settings.FRONTEND_URL}/connect-success",
         type="account_onboarding",
     )
 

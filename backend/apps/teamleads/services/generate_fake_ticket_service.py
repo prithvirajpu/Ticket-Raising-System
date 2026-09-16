@@ -2,6 +2,7 @@ import requests
 import os
 import re
 import json
+from django.conf import settings
 from rest_framework import status
 from apps.tickets.models import Ticket,TicketAssignment
 import logging
@@ -90,7 +91,7 @@ def generate_tickets_from_summary(summary, num_tickets=3):
                 headers={
                     "Authorization": f"Bearer {OPENROUTER_API_KEY}",
                     "Content-Type": "application/json",
-                    "HTTP-Referer": "http://localhost:3000",
+                    "HTTP-Referer": f"{settings.FRONTEND_URL}",
                     "X-Title": "TRS Ticket System"
                 },
                 json={

@@ -24,7 +24,7 @@ def handle_stripe_webhook_service(request):
     
     if event['type'] =='checkout.session.completed':
         process_checkout_completed(event)
-    if event['type'] =='customer.subscription.created':
+    elif event['type'] =='customer.subscription.created':
         process_subscription_created(event)
     elif event['type'] == 'invoice.payment_succeeded':
         process_subscription_renewal(event)

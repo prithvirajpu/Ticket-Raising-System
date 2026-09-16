@@ -7,7 +7,7 @@ from .auth_services import login_service
 from datetime import datetime
 import logging
 logger=logging.getLogger(__name__)
-
+from django.conf import settings
 
 def sso_login_service(request,token):
     try:
@@ -50,9 +50,10 @@ def sso_login_service(request,token):
         name = payload.get("username", "User")
         
         user=User.objects.filter(email=email).first()
+
         if user:
             if user.role !='USER':
-                return redirect( "http://localhost:5173/sso-error?code=role_conflict")
+                return redirect( f"{settings.FRONTEND_URL}/sso-error?code=role_conflict")
         if not user:
             user = User.objects.create(
                 email=email,

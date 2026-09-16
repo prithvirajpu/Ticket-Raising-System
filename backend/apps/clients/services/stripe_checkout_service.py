@@ -68,8 +68,8 @@ def stripe_checkout_service(request):
                 'price':plan.stripe_price_id,
                 'quantity':1,
                 }],
-            success_url='http://localhost:5173/subscription-success',
-            cancel_url="http://localhost:5173/subscription-cancel",
+            success_url=f'{settings.FRONTEND_URL}/subscription-success',
+            cancel_url=f"{settings.FRONTEND_URL}/subscription-cancel",
             metadata={
                 'plan_id':str(plan.id),
                 'user_id':str(request.user.id),},

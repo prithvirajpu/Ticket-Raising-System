@@ -226,6 +226,11 @@ def process_subscription_updated(event):
         subscription = event['data']['object']
         stripe_subscription_id  = getattr(subscription, "id", None)
         cancel_at_period_end = getattr(subscription, "cancel_at_period_end", False)
+        current_period_end_ts = getattr(
+            subscription,
+            "current_period_end",
+            None
+        )
 
         logger.info(
     f"subscription.updated received "
@@ -237,7 +242,19 @@ def process_subscription_updated(event):
         ).first()
 
         if not sub:
+            logger.warning(
+                f"Subscription not found: {stripe_subscription_id}"
+            )
             return
+        if current_period_end_ts:
+            current_period_end = datetime.fromtimestamp(
+                current_period_end_ts,
+                tz=timezone.utc
+            )
+
+            sub.current_period_end = current_period_end
+            sub.end_date = current_period_end.date()
+            
         sub.cancel_at_period_end=cancel_at_period_end
 
         if cancel_at_period_end:
