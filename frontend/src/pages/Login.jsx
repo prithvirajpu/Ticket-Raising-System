@@ -39,7 +39,7 @@ const handleGoogleSuccess = async (credentialResponse) => {
     if (role === "AGENT") {
       if (!profile_completed) {
 
-        login(access, role,profile_completed,user_id);
+        login(access, role,profile_completed,approval_status,user_id);
         notifyWarning("📝 Profile incomplete - Please complete your details");
         navigate("/agent/complete-profile");
         return; 
@@ -59,7 +59,7 @@ const handleGoogleSuccess = async (credentialResponse) => {
     }
 
     if (role === "CLIENT") {
-      login(access, role, profile_completed);
+      login(access, role,profile_completed,approval_status,user_id);
       if (!profile_completed) {
         notifyWarning("📋 Client profile incomplete - Complete your profile first");
         navigate("/client/complete-profile");
@@ -120,7 +120,7 @@ const handleLogin = async (e) => {
     // AGENT role handling - match Google flow exactly
     if (role === "AGENT") {
       if (!profile_completed) {  // Handles undefined/false → incomplete
-        login(access, role, profile_completed);
+        login(access, role,profile_completed,approval_status,user_id);
         notifyWarning("📝 Profile incomplete - Please complete your details");
         navigate("/agent/complete-profile");
         return;
@@ -133,14 +133,14 @@ const handleLogin = async (e) => {
       }
 
       // ✅ AGENT: complete + approved → dashboard
-      login(access, role, profile_completed, approval_status);
+      login(access, role,profile_completed,approval_status,user_id);
       notifySuccess("🎉 Welcome to Agent Dashboard!");
       navigate("/agent/dashboard");
       return;
     }
 
     // Other roles - use your utility
-    login(access, role, profile_completed);  // profile_completed optional for non-agents
+    login(access, role,profile_completed,approval_status,user_id);  // profile_completed optional for non-agents
     notifySuccess("🎉 Login successful!");
     navigate(redirectByRole(role));
 

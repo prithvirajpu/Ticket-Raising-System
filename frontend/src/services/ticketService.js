@@ -643,3 +643,19 @@ export const downloadDashboardReport = async (period = "7d") => {
         );
     }
 };
+
+export const getClientTickets=async(status='',page=1)=>{
+    try{
+        const params= {page}
+        if(status){
+            params.status=status
+        }
+        const res=await api.get(`/clients/tickets/all/`,{params})
+        return res.data
+    }catch(error){
+        console.log('Get client tickets failed',
+            error.response?.data?.error?.details
+        )
+        throw error
+    }
+}

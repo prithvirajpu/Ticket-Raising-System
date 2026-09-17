@@ -11,3 +11,4 @@ from .regenerate_client_keys import regenerate_client_keys_service,update_app_ur
 from .client_dashboard_service import get_client_dashboard
 from .sub_limit_service import get_active_subscription,check_agent_limit,check_ticket_limit
 from .send_client_notification import notify_client_service
+from .get_client_tickets_service import get_client_tickets_service

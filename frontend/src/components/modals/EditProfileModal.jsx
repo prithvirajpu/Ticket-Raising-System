@@ -1,40 +1,61 @@
 import { useState, useEffect } from "react";
+import {validateName,validatePhone} from '../../validation/validateName'
 
 const EditProfileModal = ({ isOpen, onClose, initialData, onSave, saving }) => {
   const [editData, setEditData] = useState({ ...initialData });
-  const [error, setError] = useState("");
+  const [error, setError] = useState({name:'',phone:''});
 
   useEffect(() => {
     if (isOpen) {
       setEditData({ ...initialData });
-      setError(""); // Reset errors when modal opens
+      setError({name:'',phone:''}); // Reset errors when modal opens
     }
   }, [isOpen, initialData]);
 
   if (!isOpen) return null;
 
-  const validatePhone = (phone) => {
-    // Basic regex: allows +, spaces, dashes, and 10-15 digits
-    const phoneRegex = /^\+?[\d\s\-]{10,15}$/;
-    return phoneRegex.test(phone);
-  };
+  // const validatePhone = (phone) => {
+  //   const trimmedPhone= phone.trim();
+  //   if (!trimmedPhone)return 'Enter the digits'
+  //   // Basic regex: allows +, spaces, dashes, and 10-15 digits
+  //   const phoneRegex = /^[+\d\s()-]+$/;
+  //   if (!phoneRegex.test(trimmedPhone)) {
+  //     return false;
+  //   }
+  //   // Count only actual digits
+  //   const digitsOnly = trimmedPhone.replace(/\D/g, "");
+  //   // Must contain 10-15 digits
+  //   return digitsOnly.length >= 10 && digitsOnly.length <= 15;
+  // };
 
   const handleChange = (e) => {
-    setEditData({ ...editData, [e.target.name]: e.target.value });
-    // Clear error as user types
-    if (error) setError("");
+    const {name,value}=e.target
+    setEditData(prev=>({
+      ...prev,[name]:value
+    }));
+    setError((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Validation Logic
-    if (editData.phone && !validatePhone(editData.phone)) {
-      setError("Please enter a valid phone number (10-15 digits).");
-      return;
+    const nameError= validateName(editData.name || '')
+    if (nameError){
+      setError({name:nameError,phone:''});
+      return
+    }
+    const phoneError= validatePhone(editData.phone || '')
+    if (phoneError){
+      setError({name:'',phone:phoneError});
+      return
     }
 
-    onSave(editData);
+    onSave({...editData,
+      name:editData.name.trim(),
+      phone: editData.phone?.trim()|| '',
+    });
   };
 
   return (
@@ -64,8 +85,17 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSave, saving }) => {
                 type="text"
                 value={editData.name || ""}
                 onChange={handleChange}
-                className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-slate-800 font-medium"
+                className={`w-full px-4 py-3.5 border rounded-2xl outline-none transition-all text-slate-800 font-medium ${
+                  error.name
+                    ? "bg-red-50 border-red-300 focus:ring-4 focus:ring-red-500/10"
+                    : "bg-slate-50 border-slate-200 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500"
+                }`}
               />
+              {error.name && (
+                <p className="text-red-500 text-xs font-semibold ml-1 animate-in fade-in slide-in-from-top-1">
+                  {error.name}
+                </p>
+              )}
             </div>
 
             {/* Email Input */}
@@ -90,16 +120,16 @@ const EditProfileModal = ({ isOpen, onClose, initialData, onSave, saving }) => {
                 type="tel"
                 value={editData.phone || ""}
                 onChange={handleChange}
-                placeholder="e.g. +1 234 567 890"
+                placeholder="e.g. 9072513338"
                 className={`w-full px-4 py-3.5 border rounded-2xl outline-none transition-all font-medium ${
-                  error 
-                  ? "bg-red-50 border-red-300 focus:ring-4 focus:ring-red-500/10 text-red-900" 
-                  : "bg-slate-50 border-slate-200 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 text-slate-800"
+                  error.phone
+                    ? "bg-red-50 border-red-300 focus:ring-4 focus:ring-red-500/10 text-red-900"
+                    : "bg-slate-50 border-slate-200 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 text-slate-800"
                 }`}
               />
-              {error && (
+              {error.phone && (
                 <p className="text-red-500 text-xs font-semibold ml-1 animate-in fade-in slide-in-from-top-1">
-                  {error}
+                  {error.phone}
                 </p>
               )}
             </div>

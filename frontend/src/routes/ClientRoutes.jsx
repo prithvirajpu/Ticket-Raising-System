@@ -7,10 +7,13 @@ import SubscriptionPlans from "../pages/tickets/client/SubscriptionPlans";
 import IntegrationGuide from "../pages/tickets/client/IntegrationGuide";
 import SubscriptionSuccess from "../pages/tickets/client/SubscriptionSuccess";
 import SubscriptionFailed from "../pages/tickets/client/SubscriptionFailed";
+import ClientTickets from "../pages/tickets/client/ClientTickets";
 
 const clientRoutes = (
   <>
     <Route path="/client/dashboard" element={<ProtectedRoute role={["CLIENT"]}><ClientDashboard /></ProtectedRoute>} />
+
+    <Route path="/client/tickets" element={<ProtectedRoute role={["CLIENT"]}><ClientTickets /></ProtectedRoute>} />
 
     <Route path="/client/upload" element={<ProtectedRoute role={["CLIENT"]}><UploadFile /></ProtectedRoute>} />
 

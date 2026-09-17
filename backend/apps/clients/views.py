@@ -13,7 +13,8 @@ from .services import (plan_fetch_service,get_client_integration_keys,
                        current_subscription_service,stripe_checkout_service,
                        handle_stripe_webhook_service,cancel_subscription_service,
                        regenerate_client_keys_service,get_client_dashboard,
-                       update_app_url_service,notify_client_service)
+                       update_app_url_service,notify_client_service,get_client_tickets_service,
+                       )
 from ..tickets.serializer import TicketSerializer
 from django.contrib.auth import get_user_model
 
@@ -118,4 +119,11 @@ class NotifyClientAPIView(APIView):
             request.data,
         )
 
+        return return_response(result)
+
+class ClientTicketsAPIView(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def get(self,request):
+        result=get_client_tickets_service(request)
         return return_response(result)

@@ -4,17 +4,46 @@ import { notifyError, notifySuccess } from "../utils/notify";
 
 function AppUrlForm() {
   const [appUrl, setAppUrl] = useState("");
+  const [urlError, setUrlError] = useState("");
 
+  const validateUrl=(url)=>{
+    try{
+      const parsedUrl=new URL(url)
+      if(!["http:","https:"].includes(parsedUrl.protocol)){
+        return "URL must start with https://"
+      }
+      if(!parsedUrl.hostname){
+        return 'Please enter a valid application URL'
+      }
+      return ''
+    }catch{
+      return 'Please enter a valid URL'
+    }
+  }
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    const error= validateUrl(appUrl)
+    if(error){
+      setUrlError(error)
+      return;
+    }
+    setUrlError('')
     try {
       const res= await updateAppUrl(appUrl);
       notifySuccess(res?.data?.message)
     } catch (err) {
-      notifyError(err?.response?.data?.errors?.details);
+      notifyError(err?.response?.data?.errors?.details ||
+        'Failed to update application URL'
+      );
     }
   };
+  const handleURLChange=(e)=>{
+    const value=e.target.value
+    setAppUrl(value);
+    if(urlError){
+      setUrlError('');
+    }
+  }
 
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
@@ -26,13 +55,14 @@ function AppUrlForm() {
           <div className="flex flex-col sm:flex-row items-stretch gap-3">
             <div className="relative flex-1">
               <input
-                type="url"
+                // type="url"
                 placeholder="https://shopkickora.com"
                 value={appUrl}
-                onChange={(e) => setAppUrl(e.target.value)}
+                onChange={handleURLChange}
                 required
-                className="w-full bg-slate-50 text-slate-800 text-sm rounded-lg border border-slate-200 px-4 py-2.5 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 transition-all duration-150 shadow-inner"
+                className={`w-full bg-slate-50 text-slate-800 text-sm rounded-lg border px-4 py-2.5 placeholder-slate-400 focus:outline-none focus:ring-1 transition-all duration-150 shadow-inner ${ urlError ? "border-red-500 focus:border-red-500 focus:ring-red-500/50" : "border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/50" }`}
               />
+              {urlError && ( <p className="mt-2 text-sm text-red-500"> {urlError} </p> )}
             </div>
             <button
               type="submit"

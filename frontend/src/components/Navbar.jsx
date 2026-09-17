@@ -67,6 +67,7 @@ const Navbar = () => {
       default:
         return [
           { label: 'Dashboard', path: '/client/dashboard' },
+          { label: 'Tickets', path: '/client/tickets' },
           { label: 'Upload', path: '/client/upload' },
           { label: 'Plans', path: '/client/plans' },
           { label: 'Guideline', path: '/client/guideline' },

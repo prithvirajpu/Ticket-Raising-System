@@ -4,7 +4,7 @@ from .views import (CurrentSubscriptionAPIView,SubscriptionPlanView,
                     CreateCheckoutSessionAPIView,StripeWebhookAPIView,
                     CancelSubscriptionAPIView,ClientIntegrationKeysAPIView,
                     RegenerateClientKeysAPIView,ClientDashboardAPIView,
-                    UpdateAppUrlView,NotifyClientAPIView)
+                    UpdateAppUrlView,NotifyClientAPIView,ClientTicketsAPIView)
 
 urlpatterns=[
     path('notify-client/',NotifyClientAPIView.as_view()),
@@ -21,5 +21,6 @@ urlpatterns=[
     path('stripe/webhook/',StripeWebhookAPIView.as_view()),
     path('subscription/cancel/',CancelSubscriptionAPIView.as_view()),
     path('dashboard/',ClientDashboardAPIView.as_view()),
+    path('tickets/all/',ClientTicketsAPIView.as_view()),
 
 ]
