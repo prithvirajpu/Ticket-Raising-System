@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (UserManagementView,SLARulesView,PendingUsersView,AgentApplicationDetailView,ApproveUserView,RejectUserView,
                     ClientListView,AgentListView,ToggleAgentStatusView,AssignHierarchyView,AllUsersView,HierarchyView,
                     WithdrawRequestView,ApproveWithdrawalView,RejectWithdrawalView,AdminWalletTransactionAPIView,
-                    AdminDashboardAPIView,AdminFinanceAPIView,
+                    AdminDashboardAPIView,AdminFinanceAPIView,SubscriptionPlanCreateAPIView,
                     FinanceReportCSVView,DashboardReportCSVView,
                     )
 
@@ -32,6 +32,6 @@ urlpatterns=[
     path("finance/",AdminFinanceAPIView.as_view()),
     path("finance/export/",FinanceReportCSVView.as_view()),
     path("dashboard/export/",DashboardReportCSVView.as_view()),
-
+    path('plans/',SubscriptionPlanCreateAPIView.as_view())
 
 ]

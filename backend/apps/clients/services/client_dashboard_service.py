@@ -28,14 +28,16 @@ def get_client_dashboard(user):
     if subscription else 'No active plan')
 
     active_users=ClientUser.objects.filter(client_profile=client,user__is_active=True).count()
-
-    open_tickets = Ticket.objects.filter(
-        client=client,status="OPEN"
+    client_tickets = Ticket.objects.filter(
+            client=client,
+            created_by__role="USER",
+            is_ai_generated=False,
+        )
+    open_tickets = client_tickets.filter(
+        client=client,status="OPEN",
     ).count()
 
-    total_tickets = Ticket.objects.filter(
-        client=client
-    ).count()
+    total_tickets = client_tickets.count()
     result= {
         "data": {
             "message": {

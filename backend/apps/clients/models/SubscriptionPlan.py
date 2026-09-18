@@ -8,6 +8,8 @@ class SubscriptionPlan(models.Model):
     max_agents=models.IntegerField()
     max_tickets=models.IntegerField()
     stripe_price_id=models.CharField(max_length=255,blank=True,null=True)
+    stripe_product_id =models.CharField(max_length=255,blank=True,null=True)
+    is_active=models.BooleanField(default=True)
     created_at=models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

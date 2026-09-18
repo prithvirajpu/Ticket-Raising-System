@@ -13,8 +13,9 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from apps.admins.services import (fetch_users_service,create_sla_rule_service,fetch_sla_rules_service,approve_user_service,reject_user_service,
                        get_agent_application_detail_service,get_client_list_service,get_hierarchy_service,
                        get_agent_list_service,toggle_agent_status_service,assign_hierarchy_service,get_all_users_service,
-                       getwithdrawal_list,approve_withdrawal,reject_withdrawal,admin_wallet_transaction_service,
-                       admin_dashboard_service,admin_finance_service,export_finance_csv,export_dashboard_csv)
+                       getwithdrawal_list,approve_withdrawal,reject_withdrawal,admin_wallet_transaction_service,create_subscription_plan_service,
+                       admin_dashboard_service,admin_finance_service,export_finance_csv,export_dashboard_csv,
+                       get_subscription_plans_service)
 from apps.admins.serializers import (UserApprovalSerializer,AssignHierarchySerializer)
 from django.contrib.auth import get_user_model
 import logging
@@ -190,3 +191,14 @@ class DashboardReportCSVView(APIView):
     def get(self, request):
         period = request.GET.get("period", "7d")
         return export_dashboard_csv(period)
+
+class SubscriptionPlanCreateAPIView(APIView):
+    permission_classes= [IsAuthenticated,IsAdmin]
+
+    def post(self,request):
+        result= create_subscription_plan_service(request.data)
+        return return_response(result)
+    def get(self,request):
+        result= get_subscription_plans_service()
+        return return_response(result)
+    

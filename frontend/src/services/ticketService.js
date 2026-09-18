@@ -659,3 +659,13 @@ export const getClientTickets=async(status='',page=1)=>{
         throw error
     }
 }
+
+export const createSubscriptionPlan = async (planData) => {
+    const response = await api.post("/admins/plans/",planData);
+    return response.data;
+};
+
+export const getSubscriptionPlansAdmin = async () => {
+    const response = await api.get("/admins/plans/");
+    return response.data;
+};

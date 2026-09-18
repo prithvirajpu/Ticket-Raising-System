@@ -12,6 +12,7 @@ import HierarchyPage from "../pages/admin/HierarchyPage";
 import WithdrawalRequestsPage from "../pages/admin/WithdrawalRequestsPage";
 import WalletTransactionsPage from "../pages/admin/WalletTransactionsPage";
 import AdminRevenue from "../pages/admin/AdminRevenue";
+import SubscriptionPlans from "../pages/admin/SubsctiptionPlans";
 
 const adminRoutes = (
   <>
@@ -22,6 +23,8 @@ const adminRoutes = (
     <Route path="/admin/agent-manage" element={<ProtectedRoute role={["ADMIN"]}><AgentManagement /></ProtectedRoute>} />
 
     <Route path="/admin/client-manage" element={<ProtectedRoute role={["ADMIN"]}><ClientManagement /></ProtectedRoute>} />
+
+    <Route path="/admin/plans" element={<ProtectedRoute role={["ADMIN"]}><SubscriptionPlans /></ProtectedRoute>} />
 
     <Route path="/admin/pending-req" element={<ProtectedRoute role={["ADMIN"]}><PendingUsers /></ProtectedRoute>} />
 

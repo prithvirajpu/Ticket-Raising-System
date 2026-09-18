@@ -24,8 +24,9 @@ const Navbar = () => {
         return [
           { label: 'Dashboard', path: '/admin/dashboard' },
           { label: 'Agents', path: '/admin/agent-manage' },
-          { label: 'Clients', path: '/admin/client-manage' },
           { label: 'Users', path: '/admin/user-manage' },
+          { label: 'Clients', path: '/admin/client-manage' },
+          { label: 'Plans', path: '/admin/plans' },
           { label: 'SLA', path: '/admin/sla' },
           { label: 'Wallet', path: '/admin/wallet-transactions' },
           { label: 'Revenue', path: '/admin/finance' },
