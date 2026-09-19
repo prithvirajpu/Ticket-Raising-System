@@ -67,8 +67,26 @@ def assign_hierarchy_service(data):
 
             logger.info("Processing CLIENT hierarchy assignment")
 
+            client_profile = ClientProfile.objects.filter(user=user).first()
+
+            if not client_profile:
+                return {
+                    "data": None,
+                    "errors": {
+                        "details": "Client profile not found"
+                    },
+                    "status": status.HTTP_400_BAD_REQUEST
+                }
             if manager_id:
                 manager = User.objects.get(id=manager_id, role=UserRole.MANAGER)
+                if not manager:
+                    return {
+                        "data": None,
+                        "errors": {
+                            "details": "Invalid Manager"
+                        },
+                        "status": status.HTTP_400_BAD_REQUEST
+                    }
                 user.manager = manager
                 updated = True
                 logger.info(f"Assigned MANAGER -> {manager.id}")
@@ -77,6 +95,26 @@ def assign_hierarchy_service(data):
 
             if team_lead_id:
                 team_lead = User.objects.get(id=team_lead_id, role=UserRole.TEAM_LEAD)
+                if not team_lead:
+                    return {
+                        "data": None,
+                        "errors": {
+                            "details": "Invalid Team Lead"
+                        },
+                        "status": status.HTTP_400_BAD_REQUEST
+                    }
+                limit=check_agent_limit(
+                    client=ClientProfile.objects.get(user=user),
+                    team_lead=team_lead
+                )
+                if not limit["allowed"]:
+                    return {
+                        "data": None,
+                        "errors": {
+                            "details": limit["message"]
+                        },
+                        "status": status.HTTP_400_BAD_REQUEST
+                    }
                 user.team_lead = team_lead
                 updated = True
                 logger.info(f"Assigned TEAM_LEAD -> {team_lead.id}")

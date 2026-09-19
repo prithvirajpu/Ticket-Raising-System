@@ -28,8 +28,8 @@ const DeliveryIssueDetails = ({ data }) => {
                 <Info label="Delivery Status" value={delivery.delivery_status} />
                 <Info label="Payment Status" value={delivery.payment_status} />
                 <Info label="Payment Method" value={delivery.payment_method} />
-                <Info label="Total Amount" value={`₹ ${delivery.total_amount}`} />
-                <Info label="Final Amount" value={`₹ ${delivery.final_total}`} />
+                <Info label="Total Amount" value={`$ ${delivery.total_amount}`} />
+                <Info label="Final Amount" value={`$ ${delivery.final_total}`} />
 
             </Section>
 
@@ -73,7 +73,7 @@ const DeliveryIssueDetails = ({ data }) => {
                                 <Info label="Size" value={item.delivery_item.size}/>
                                 <Info label="Return Requested" value={item.delivery_item.return_requested ? "Yes":"No"}/>
                                 <Info label="Cancelled" value={item.delivery_item.is_cancelled ? "Yes":"No"}/>
-                                <Info label="Purchase Price" value={`₹ ${item.delivery_item.purchase_price}`}/>
+                                <Info label="Purchase Price" value={`$ ${item.delivery_item.purchase_price}`}/>
 
                             </div>
 

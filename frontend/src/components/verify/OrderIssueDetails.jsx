@@ -36,9 +36,9 @@ const OrderIssueDetails = ({ data }) => {
                     <Info label="Status" value={order?.status} />
                     <Info label="Payment Status" value={order?.payment_status} />
                     <Info label="Payment Method" value={order?.payment_method} />
-                    <Info label="Total Amount" value={`₹ ${order?.total_amount}`} />
-                    <Info label="Final Amount" value={`₹ ${order?.final_total}`} />
-                    <Info label="Shipping Charge" value={`₹ ${order?.shipping_charge}`} />
+                    <Info label="Total Amount" value={`$ ${order?.total_amount}`} />
+                    <Info label="Final Amount" value={`$ ${order?.final_total}`} />
+                    <Info label="Shipping Charge" value={`$ ${order?.shipping_charge}`} />
                     <Info label="Ordered On" value={order?.created_at} />
 
                 </div>
@@ -108,12 +108,12 @@ const OrderIssueDetails = ({ data }) => {
 
                                 <Info
                                     label="Purchase Price"
-                                    value={`₹ ${item.order_item.purchase_price}`}
+                                    value={`$ ${item.order_item.purchase_price}`}
                                 />
 
                                 <Info
                                     label="Current Price"
-                                    value={`₹ ${item.product.current_price}`}
+                                    value={`$ ${item.product.current_price}`}
                                 />
 
                             </div>

@@ -27,10 +27,10 @@ const WalletIssueDetails = ({ data }) => {
 
                 <div className="grid md:grid-cols-2 gap-4">
 
-                    <Info label="Balance" value={`₹ ${wallet.balance}`} />
+                    <Info label="Balance" value={`$ ${wallet.balance}`} />
                     <Info label="Transactions" value={wallet.total_transactions} />
-                    <Info label="Total Credit" value={`₹ ${wallet.total_credit}`} />
-                    <Info label="Total Debit" value={`₹ ${wallet.total_debit}`} />
+                    <Info label="Total Credit" value={`$ ${wallet.total_credit}`} />
+                    <Info label="Total Debit" value={`$ ${wallet.total_debit}`} />
 
                 </div>
 
@@ -57,7 +57,7 @@ const WalletIssueDetails = ({ data }) => {
 
                                     <Info label="Transaction ID" value={txn.transaction.transaction_id}/>
                                     <Info label="Type" value={txn.transaction.transaction_type}/>
-                                    <Info label="Amount" value={`₹ ${txn.transaction.amount}`}/>
+                                    <Info label="Amount" value={`$ ${txn.transaction.amount}`}/>
                                     <Info label="Description" value={txn.transaction.description}/>
                                     <Info label="Order" value={txn.linked_order?.order_id}/>
                                     <Info label="Date" value={txn.transaction.created_at}/>

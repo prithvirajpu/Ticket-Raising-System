@@ -32,6 +32,7 @@ urlpatterns=[
     path("finance/",AdminFinanceAPIView.as_view()),
     path("finance/export/",FinanceReportCSVView.as_view()),
     path("dashboard/export/",DashboardReportCSVView.as_view()),
-    path('plans/',SubscriptionPlanCreateAPIView.as_view())
+    path('plans/',SubscriptionPlanCreateAPIView.as_view()),
+    path('plans/<int:plan_id>/',SubscriptionPlanCreateAPIView.as_view()),
 
 ]

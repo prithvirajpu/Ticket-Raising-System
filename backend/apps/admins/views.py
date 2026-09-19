@@ -15,7 +15,7 @@ from apps.admins.services import (fetch_users_service,create_sla_rule_service,fe
                        get_agent_list_service,toggle_agent_status_service,assign_hierarchy_service,get_all_users_service,
                        getwithdrawal_list,approve_withdrawal,reject_withdrawal,admin_wallet_transaction_service,create_subscription_plan_service,
                        admin_dashboard_service,admin_finance_service,export_finance_csv,export_dashboard_csv,
-                       get_subscription_plans_service)
+                       get_subscription_plans_service,update_subscription_plan_service)
 from apps.admins.serializers import (UserApprovalSerializer,AssignHierarchySerializer)
 from django.contrib.auth import get_user_model
 import logging
@@ -200,5 +200,8 @@ class SubscriptionPlanCreateAPIView(APIView):
         return return_response(result)
     def get(self,request):
         result= get_subscription_plans_service()
+        return return_response(result)
+    def patch(self,request,plan_id):
+        result=update_subscription_plan_service(plan_id,request.data)
         return return_response(result)
     

@@ -669,3 +669,8 @@ export const getSubscriptionPlansAdmin = async () => {
     const response = await api.get("/admins/plans/");
     return response.data;
 };
+
+export const updateSubscriptionPlan = async (planId, data) => {
+    const response = await api.patch(`/admins/plans/${planId}/`, data);
+    return response.data;
+};

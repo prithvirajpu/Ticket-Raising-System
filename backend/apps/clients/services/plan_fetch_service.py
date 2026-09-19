@@ -8,7 +8,7 @@ def plan_fetch_service(request):
 
     if cached_data:
         return cached_data
-    plans=SubscriptionPlan.objects.all().values(
+    plans=SubscriptionPlan.objects.filter(is_active=True).values(
             'id','name', 'price', 'duration_days', 'max_agents', 'max_tickets'
         ).order_by('price')
     result= {

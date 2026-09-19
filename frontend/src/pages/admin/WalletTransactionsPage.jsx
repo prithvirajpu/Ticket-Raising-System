@@ -127,11 +127,11 @@ const WalletTransactionsPage = () => {
                         </td>
 
                         <td className="p-4 text-slate-900 font-bold tracking-tight">
-                          ₹{item.amount}
+                          ${item.amount}
                         </td>
 
                         <td className="p-4 text-slate-600 font-semibold">
-                          ₹{item.balance}
+                          ${item.balance}
                         </td>
 
                         <td className="p-4 text-slate-600 font-medium">

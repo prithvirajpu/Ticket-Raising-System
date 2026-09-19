@@ -4,7 +4,7 @@ from apps.tickets.models import Ticket
 from django.contrib.auth import get_user_model
 User=get_user_model()
 import logging
-logger=logging.getLogger()
+logger=logging.getLogger(__name__)
 
 def get_active_subscription(client):
     subscription=(ClientSubscription.objects.select_related('plan').filter(
@@ -39,7 +39,7 @@ def check_ticket_limit(client):
         )
     }
 
-def check_agent_limit(client, exclude_user_id=None):
+def check_agent_limit(client,team_lead=None, exclude_user_id=None,adding_agent=False):
     subscription = get_active_subscription(client)
     logger.info("SUBSCRIPTION = %s", subscription)
     logger.info("MAX AGENTS = %s", subscription.plan.max_agents if subscription else None)
@@ -50,7 +50,7 @@ def check_agent_limit(client, exclude_user_id=None):
             "message": "No active subscription found."
         }
 
-    team_lead = client.team_lead
+    team_lead = team_lead or client.team_lead
 
     queryset = User.objects.filter(
         role="AGENT",
@@ -67,16 +67,27 @@ def check_agent_limit(client, exclude_user_id=None):
 )
     current_agent_count = queryset.count()
     logger.info("CURRENT COUNT = %s", current_agent_count)
-
-    if current_agent_count >= subscription.plan.max_agents:
-        return {
-            "allowed": False,
-            "message": (
-                f"Agent limit reached. "
-                f"Your {subscription.plan.name} allows only "
-                f"{subscription.plan.max_agents} agents."
-            )
-        }
+    max_agents = subscription.plan.max_agents
+    if adding_agent:
+        if current_agent_count >=max_agents:
+            return {
+                "allowed": False,
+                "message": (
+                    f"Agent limit reached. "
+                    f"Your {subscription.plan.name} allows only "
+                    f"{subscription.plan.max_agents} agents."
+                )
+            }
+    else:
+        if current_agent_count > max_agents:
+            return {
+                "allowed": False,
+                "message": (
+                    f"Team Lead already has {current_agent_count} agents, "
+                    f"but your {subscription.plan.name} allows only "
+                    f"{max_agents} agents."
+                )
+            }
 
     return {
         "allowed": True,

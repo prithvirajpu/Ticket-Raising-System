@@ -107,7 +107,7 @@ function SubscriptionPlans() {
                                     placeholder="e.g. Enterprise Tier"
                                     value={formData.name}
                                     onChange={handleChange}
-                                    required
+                                    // required
                                     className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-800 placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                                 />
                             </div>
@@ -115,7 +115,7 @@ function SubscriptionPlans() {
                             {/* Price */}
                             <div>
                                 <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-2">
-                                    Price (₹)
+                                    Price ($)
                                 </label>
                                 <input
                                     type="number"
@@ -123,8 +123,8 @@ function SubscriptionPlans() {
                                     placeholder="e.g. 4999"
                                     value={formData.price}
                                     onChange={handleChange}
-                                    required
-                                    min="0"
+                                    // required
+                                    // min="0"
                                     className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-800 placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                                 />
                             </div>
@@ -140,8 +140,8 @@ function SubscriptionPlans() {
                                     placeholder="e.g. 30"
                                     value={formData.duration_days}
                                     onChange={handleChange}
-                                    required
-                                    min="1"
+                                    // required
+                                    // min="1"
                                     className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-800 placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                                 />
                             </div>
@@ -157,8 +157,8 @@ function SubscriptionPlans() {
                                     placeholder="e.g. 10"
                                     value={formData.max_agents}
                                     onChange={handleChange}
-                                    required
-                                    min="1"
+                                    // required
+                                    // min="1"
                                     className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-800 placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                                 />
                             </div>
@@ -174,8 +174,8 @@ function SubscriptionPlans() {
                                     placeholder="e.g. 1000"
                                     value={formData.max_tickets}
                                     onChange={handleChange}
-                                    required
-                                    min="1"
+                                    // required
+                                    // min="1"
                                     className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-800 placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                                 />
                             </div>

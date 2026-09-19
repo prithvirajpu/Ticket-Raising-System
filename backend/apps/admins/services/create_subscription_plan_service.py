@@ -29,7 +29,7 @@ def create_subscription_plan_service(data):
                 "status": status.HTTP_400_BAD_REQUEST
             }
 
-        if price is None:
+        if not price:
             return {
                 "data": None,
                 "errors": {
@@ -38,7 +38,7 @@ def create_subscription_plan_service(data):
                 "status": status.HTTP_400_BAD_REQUEST
             }
 
-        if duration_days is None:
+        if not duration_days :
             return {
                 "data": None,
                 "errors": {
@@ -47,7 +47,7 @@ def create_subscription_plan_service(data):
                 "status": status.HTTP_400_BAD_REQUEST
             }
 
-        if max_agents is None:
+        if not max_agents:
             return {
                 "data": None,
                 "errors": {
@@ -56,7 +56,7 @@ def create_subscription_plan_service(data):
                 "status": status.HTTP_400_BAD_REQUEST
             }
 
-        if max_tickets is None:
+        if not max_tickets :
             return {
                 "data": None,
                 "errors": {
@@ -125,7 +125,7 @@ def create_subscription_plan_service(data):
         stripe_price = stripe.Price.create(
             product=product.id,
             unit_amount=int(Decimal(str(price)) * 100),
-            currency="inr",
+            currency="usd",
             recurring={
                 "interval": "month"
             }

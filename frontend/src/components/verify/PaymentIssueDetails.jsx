@@ -27,8 +27,8 @@ const PaymentIssueDetails = ({ data }) => {
                 <Info label="Order ID" value={payment.order_id} />
                 <Info label="Payment Method" value={payment.payment_method} />
                 <Info label="Payment Status" value={payment.payment_status} />
-                <Info label="Total Amount" value={`₹ ${payment.total_amount}`} />
-                <Info label="Final Amount" value={`₹ ${payment.final_total}`} />
+                <Info label="Total Amount" value={`$ ${payment.total_amount}`} />
+                <Info label="Final Amount" value={`$ ${payment.final_total}`} />
                 <Info label="Created" value={payment.created_at} />
 
             </Section>
@@ -50,7 +50,7 @@ const PaymentIssueDetails = ({ data }) => {
 
                 <Section title="Wallet">
 
-                    <Info label="Balance" value={`₹ ${wallet.balance}`} />
+                    <Info label="Balance" value={`$ ${wallet.balance}`} />
                     <Info label="Transactions" value={wallet.total_transactions} />
 
                 </Section>

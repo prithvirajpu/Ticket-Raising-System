@@ -12,3 +12,4 @@ from .finance.finance_service import admin_finance_service
 from .reports.finance_csv_service import export_finance_csv
 from .reports.dashboard_csv_service import export_dashboard_csv
 from .create_subscription_plan_service import create_subscription_plan_service,get_subscription_plans_service
+from .update_subscription_plan_service import update_subscription_plan_service
