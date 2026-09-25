@@ -221,7 +221,8 @@ def close_ticket_service(user,ticket_id):
                     "status": status.HTTP_400_BAD_REQUEST
                 }
             ticket.status='CLOSED'
-            ticket.save(update_fields=['status'])
+            ticket.closed_at=timezone.now()
+            ticket.save(update_fields=['status','closed_at'])
             TicketActivity.objects.create(
                 ticket=ticket,
                 action="CLOSED",

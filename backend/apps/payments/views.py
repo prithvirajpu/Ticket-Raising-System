@@ -20,7 +20,7 @@ class WalletTransactionAPIView(APIView):
     permission_classes =[IsAuthenticated]
 
     def get(self,request):
-        result=get_wallet_transactions_service(request.user)
+        result=get_wallet_transactions_service(request,request.user)
         return return_response(result)
     
 class CreateConnectAccountView(APIView):

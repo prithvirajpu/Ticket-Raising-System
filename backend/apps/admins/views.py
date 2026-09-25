@@ -9,14 +9,16 @@ from apps.core_app.models import AgentApplication
 from rest_framework.response import Response
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
+from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from apps.admins.services import (fetch_users_service,create_sla_rule_service,fetch_sla_rules_service,approve_user_service,reject_user_service,
                        get_agent_application_detail_service,get_client_list_service,get_hierarchy_service,
                        get_agent_list_service,toggle_agent_status_service,assign_hierarchy_service,get_all_users_service,
                        getwithdrawal_list,approve_withdrawal,reject_withdrawal,admin_wallet_transaction_service,create_subscription_plan_service,
                        admin_dashboard_service,admin_finance_service,export_finance_csv,export_dashboard_csv,
-                       get_subscription_plans_service,update_subscription_plan_service)
-from apps.admins.serializers import (UserApprovalSerializer,AssignHierarchySerializer)
+                       get_subscription_plans_service,update_subscription_plan_service,create_salary_config,
+                       update_salary_config,get_salary_config)
+from apps.admins.serializers import (UserApprovalSerializer,AssignHierarchySerializer,SalaryDistributionConfigSerializer)
 from django.contrib.auth import get_user_model
 import logging
 logger=logging.getLogger(__name__)
@@ -204,4 +206,50 @@ class SubscriptionPlanCreateAPIView(APIView):
     def patch(self,request,plan_id):
         result=update_subscription_plan_service(plan_id,request.data)
         return return_response(result)
+
+class SalaryDistributionConfigAPIView(APIView):
+    permission_classes =[IsAuthenticated,IsAdmin]
+
+    def get(self,request):
+        result=get_salary_config()
+        if result["data"]:
+            serializer = SalaryDistributionConfigSerializer(
+                result["data"]
+            )
+            result["data"] = serializer.data
+        return return_response(result)
     
+    def post(self, request):
+        serializer = SalaryDistributionConfigSerializer(
+            data=request.data
+        )
+        if not serializer.is_valid():
+            return return_response({
+                "data": None,
+                "errors": serializer.errors,
+                "status": 400
+            })
+        result = create_salary_config(serializer.validated_data)
+        if result["data"]:
+            result["data"] = SalaryDistributionConfigSerializer(
+                result["data"]
+            ).data
+        return return_response(result)
+
+    def patch(self, request):
+        serializer = SalaryDistributionConfigSerializer(
+            data=request.data,
+            partial=True
+        )
+        if not serializer.is_valid():
+            return return_response({
+                "data": None,
+                "errors": serializer.errors,
+                "status": 400
+            })
+        result = update_salary_config(serializer.validated_data)
+        if result["data"]:
+            result["data"] = SalaryDistributionConfigSerializer(
+                result["data"]
+            ).data
+        return return_response(result)

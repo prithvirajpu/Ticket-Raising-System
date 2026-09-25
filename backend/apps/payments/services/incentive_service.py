@@ -9,11 +9,11 @@ User=get_user_model()
 
 def calculate_agent_score(agent,month,year):
 
-    resolved_count = Ticket.objects.filter(
+    closed_count = Ticket.objects.filter(
         assigned_to=agent,
-        status__in=["RESOLVED", "CLOSED"],
-        updated_at__year=year,
-        updated_at__month=month,
+        status="CLOSED",
+        closed_at__year=year,
+        closed_at__month=month,
     ).count()
 
     escalated_count = Ticket.objects.filter(
@@ -32,7 +32,7 @@ def calculate_agent_score(agent,month,year):
     )["avg"] or 0
 
     score = (
-        resolved_count * 10
+        closed_count * 10
         + avg_rating * 15
         - escalated_count * 20
     )

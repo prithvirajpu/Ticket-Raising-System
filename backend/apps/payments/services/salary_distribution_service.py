@@ -1,39 +1,52 @@
-from  decimal import Decimal
 from datetime import datetime
+from calendar import monthrange
+from decimal import Decimal
+import logging
+
 from django.utils import timezone
+from django.db import transaction
+from django.contrib.auth import get_user_model
+
 from apps.clients.models import ClientSubscription
 from apps.payments.models import SalaryPayout
-from django.contrib.auth import get_user_model
+
+from .salary_service import (
+    get_agent_ticket_counts,
+    calculate_agent_salaries,
+    get_salary_distribution_config,
+    calculate_salary_pools,
+    get_salary_eligible_team_leads,
+    get_salary_eligible_managers,
+    calculate_team_lead_salaries,
+    calculate_manager_salaries,
+    calculate_company_pool,
+)
+
 from .wallet_credit_service import credit_wallet
 from .incentive_service import reward_best_agent
-from django.db import transaction
-import logging
+
+
 logger = logging.getLogger(__name__)
 
 User = get_user_model()
-from calendar import monthrange
 
 
-@transaction.atomic
-def get_monthly_revenue():
-    active_subscriptions = ClientSubscription.objects.filter(
-        status="ACTIVE"
-    ).select_related("plan")
+def get_monthly_revenue(month_start, month_end):
+    subscriptions = (
+        ClientSubscription.objects
+        .filter(
+            start_date__lte=month_end,
+            end_date__gte=month_start,
+        )
+        .select_related("plan")
+    )
 
     revenue = Decimal("0")
 
-    for subscription in active_subscriptions:
+    for subscription in subscriptions:
         revenue += subscription.plan.price
-    return revenue
 
-def calculate_salary_pools(revenue):
-    return {
-        "agent_pool": revenue * Decimal("0.25"),
-        "tl_pool": revenue * Decimal("0.18"),
-        "manager_pool": revenue * Decimal("0.10"),
-        "company_pool": revenue * Decimal("0.42"),
-        'incentive_pool':revenue * Decimal('0.05')
-    }
+    return revenue
 
 @transaction.atomic
 def distribute_monthly_salary():
@@ -48,15 +61,33 @@ def distribute_monthly_salary():
         month = current_date.month - 1
         year = current_date.year
 
-    days_in_month = monthrange(year, month)[1]
+    days_in_month = monthrange(
+        year,
+        month
+    )[1]
 
     month_start = timezone.make_aware(
-        datetime(year, month, 1)
+        datetime(
+            year,
+            month,
+            1
+        )
     )
 
     month_end = timezone.make_aware(
-        datetime(year, month, days_in_month, 23, 59, 59)
+        datetime(
+            year,
+            month,
+            days_in_month,
+            23,
+            59,
+            59
+        )
     )
+
+    # -----------------------------------------
+    # Prevent duplicate salary distribution
+    # -----------------------------------------
 
     already_paid = SalaryPayout.objects.filter(
         month=month,
@@ -64,117 +95,242 @@ def distribute_monthly_salary():
     ).exists()
 
     if already_paid:
-        logger.info("Salary already distributed for %s/%s", month, year)
-        return {"message": "Already distributed"}
 
-    revenue = get_monthly_revenue()
-    pools = calculate_salary_pools(revenue)
-
-    agents = User.objects.filter(
-        role="AGENT",
-        is_active=True,
-        is_certified_agent=True,
-    )
-
-    tls = User.objects.filter(
-        role="TEAM_LEAD",
-        is_active=True,
-    )
-
-    managers = User.objects.filter(
-        role="MANAGER",
-        is_active=True,
-    )
-
-    admin = User.objects.filter(role="ADMIN").first()
-
-    agent_count = agents.count()
-    tl_count = tls.count()
-    manager_count = managers.count()
-
-    # Company Share
-    if admin:
-        credit_wallet(
-            user=admin,
-            amount=pools["company_pool"],
-            transaction_type="BONUS",
-            description=f"Company revenue share ({month}/{year})",
+        logger.info(
+            "Salary already distributed for %s/%s",
+            month,
+            year
         )
 
-    # Agent Salary
-    if agent_count:
-        base_salary = pools["agent_pool"] / agent_count
+        return {
+            "message": "Already distributed"
+        }
 
-        for agent in agents:
+    # -----------------------------------------
+    # Get monthly revenue
+    # -----------------------------------------
 
-            if not agent.certified_at:
-                continue
+    revenue = get_monthly_revenue(
+    month_start.date(),
+    month_end.date(),
+)
 
-            certified_date = timezone.localtime(agent.certified_at)
+    # -----------------------------------------
+    # Get salary configuration
+    # -----------------------------------------
 
-            # Certified after salary month
-            if certified_date > month_end:
-                worked_days = 0
+    config = get_salary_distribution_config()
 
-            # Certified before salary month
-            elif certified_date < month_start:
-                worked_days = days_in_month
+    # -----------------------------------------
+    # Calculate all revenue pools
+    # -----------------------------------------
 
-            # Certified during salary month
-            else:
-                worked_days = days_in_month - certified_date.day + 1
+    pools = calculate_salary_pools(
+        revenue,
+        config
+    )
 
-            if worked_days == 0:
-                continue
+    agent_pool = pools["agent_pool"]
+    incentive_pool = pools["incentive_pool"]
+    team_lead_pool = pools["team_lead_pool"]
+    manager_pool = pools["manager_pool"]
 
-            salary = (
-                base_salary
-                * Decimal(worked_days)
-                / Decimal(days_in_month)
-            )
+    # -----------------------------------------
+    # Get eligible Team Leads
+    # -----------------------------------------
 
-            credit_wallet(
-                user=agent,
-                amount=round(salary, 2),
-                transaction_type="SALARY",
-                description=f"Salary distribution",
-            )
+    team_leads = get_salary_eligible_team_leads()
 
-    # Team Leads
-    if tl_count:
-        tl_share = round(pools["tl_pool"] / tl_count, 2)
+    # -----------------------------------------
+    # Get eligible Managers
+    # -----------------------------------------
 
-        for tl in tls:
-            credit_wallet(
-                user=tl,
-                amount=tl_share,
-                transaction_type="SALARY",
-                description=f"Salary Share Distribution ({month}/{year})",
-            )
+    managers = get_salary_eligible_managers()
 
-    # Managers
-    if manager_count:
-        manager_share = round(pools["manager_pool"] / manager_count, 2)
+    # -----------------------------------------
+    # Calculate Team Lead salaries
+    # -----------------------------------------
 
-        for manager in managers:
-            credit_wallet(
-                user=manager,
-                amount=manager_share,
-                transaction_type="SALARY",
-                description=f"Salary Share Distribution ({month}/{year})",
-            )
+    team_lead_salaries = calculate_team_lead_salaries(
+        team_leads,
+        team_lead_pool
+    )
 
+    # -----------------------------------------
+    # Calculate Manager salaries
+    # -----------------------------------------
+
+    manager_salaries = calculate_manager_salaries(
+        managers,
+        manager_pool
+    )
+        # -----------------------------------------
+    # Get agent ticket counts
+    # -----------------------------------------
+
+    ticket_counts = get_agent_ticket_counts(
+        month_start,
+        month_end
+    )
+
+    # -----------------------------------------
+    # Calculate Agent salaries
+    # -----------------------------------------
+
+    agent_salaries = calculate_agent_salaries(
+        agent_pool,
+        ticket_counts
+    )
+    distributed_agent_amount = sum(
+    agent_salaries.values(),
+    Decimal("0")
+)
+    # -----------------------------------------
+    # Calculate Company remainder
+    # -----------------------------------------
+
+    company_pool = calculate_company_pool(
+        revenue=revenue,
+        agent_pool=distributed_agent_amount,
+        incentive_pool=incentive_pool,
+        team_lead_pool=team_lead_pool,
+        manager_pool=manager_pool,
+    )
+
+    # -----------------------------------------
+    # Safety check
+    # -----------------------------------------
+
+    if company_pool < 0:
+
+        raise ValueError(
+            "Salary distribution cannot be completed because "
+            "configured revenue shares exceed available revenue."
+        )
+
+    # -----------------------------------------
+    # Company / Admin share
+    # -----------------------------------------
+
+    admin = User.objects.filter(
+        role="ADMIN"
+    ).first()
+
+    if admin and company_pool > 0:
+
+        credit_wallet(
+            user=admin,
+            amount=round(company_pool, 2),
+            transaction_type="BONUS",
+            description=(
+                f"Company revenue share "
+                f"({month}/{year})"
+            ),
+        )
+
+    # -----------------------------------------
+    # Agent salaries
+    # -----------------------------------------
+
+    for agent_id, salary in agent_salaries.items():
+
+        agent = User.objects.filter(
+            id=agent_id
+        ).first()
+
+        if not agent:
+            continue
+
+        credit_wallet(
+            user=agent,
+            amount=salary,
+            transaction_type="SALARY",
+            description=(
+                f"Agent salary "
+                f"({month}/{year})"
+            ),
+        )
+
+    # -----------------------------------------
+    # Team Lead salaries
+    # -----------------------------------------
+
+    for team_lead_id, salary in team_lead_salaries.items():
+
+        team_lead = User.objects.filter(
+            id=team_lead_id
+        ).first()
+
+        if not team_lead:
+            continue
+
+        credit_wallet(
+            user=team_lead,
+            amount=salary,
+            transaction_type="SALARY",
+            description=(
+                f"Team Lead salary "
+                f"({month}/{year})"
+            ),
+        )
+
+    # -----------------------------------------
+    # Manager salaries
+    # -----------------------------------------
+
+    for manager_id, salary in manager_salaries.items():
+
+        manager = User.objects.filter(
+            id=manager_id
+        ).first()
+
+        if not manager:
+            continue
+
+        credit_wallet(
+            user=manager,
+            amount=salary,
+            transaction_type="SALARY",
+            description=(
+                f"Manager salary "
+                f"({month}/{year})"
+            ),
+        )
+
+    # -----------------------------------------
     # Incentive
-    reward_best_agent(pools["incentive_pool"])
+    # -----------------------------------------
+
+    if incentive_pool > 0:
+
+        reward_best_agent(
+            incentive_pool
+        )
+
+    # -----------------------------------------
+    # Mark salary as processed
+    # -----------------------------------------
 
     SalaryPayout.objects.create(
         month=month,
         year=year,
     )
 
+    # -----------------------------------------
+    # Return distribution summary
+    # -----------------------------------------
+
     return {
         "revenue": revenue,
-        "agent_count": agent_count,
-        "tl_count": tl_count,
-        "manager_count": manager_count,
+
+        "agent_pool": agent_pool,
+        "incentive_pool": incentive_pool,
+        "team_lead_pool": team_lead_pool,
+        "manager_pool": manager_pool,
+
+        "company_pool": company_pool,
+
+        "agent_count": len(agent_salaries),
+        "team_lead_count": len(team_lead_salaries),
+        "manager_count": len(manager_salaries),
     }

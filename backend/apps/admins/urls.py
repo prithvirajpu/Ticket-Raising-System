@@ -3,7 +3,7 @@ from .views import (UserManagementView,SLARulesView,PendingUsersView,AgentApplic
                     ClientListView,AgentListView,ToggleAgentStatusView,AssignHierarchyView,AllUsersView,HierarchyView,
                     WithdrawRequestView,ApproveWithdrawalView,RejectWithdrawalView,AdminWalletTransactionAPIView,
                     AdminDashboardAPIView,AdminFinanceAPIView,SubscriptionPlanCreateAPIView,
-                    FinanceReportCSVView,DashboardReportCSVView,
+                    FinanceReportCSVView,DashboardReportCSVView,SalaryDistributionConfigAPIView,
                     )
 
 urlpatterns=[
@@ -34,5 +34,6 @@ urlpatterns=[
     path("dashboard/export/",DashboardReportCSVView.as_view()),
     path('plans/',SubscriptionPlanCreateAPIView.as_view()),
     path('plans/<int:plan_id>/',SubscriptionPlanCreateAPIView.as_view()),
+    path('salary-config/',SalaryDistributionConfigAPIView.as_view()),
 
 ]

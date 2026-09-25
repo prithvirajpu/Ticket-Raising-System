@@ -41,6 +41,7 @@ class Ticket(models.Model):
     issue_type=models.CharField(max_length=100,choices=ISSUE_TYPES,default='ORDER_ISSUE')
     priority=models.CharField(max_length=10,choices=PRIORITY_CHOICES,default='MEDIUM')
     status=models.CharField(max_length=20,choices=STATUS_CHOICES,default='OPEN')
+    closed_at = models.DateTimeField(null=True,blank=True)
     is_ai_generated = models.BooleanField(default=False)
 
     is_training_ticket = models.BooleanField(default=False)
