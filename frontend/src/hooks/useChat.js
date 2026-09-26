@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getTicketMessages } from "../services/ticketService";
+import { getTicketMessages } from "../services/tickets/ticketService";
 import { useAuth } from "../auth/AuthContext";
 import { useCall } from "../auth/CallContext";
 import { refreshAccessToken } from "../auth/authService";

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import DashboardLayout from '../../layouts/DashboardLayout'
 import StatsCard from '../../components/StatsCard'
 import Pagination from '../../components/Pagination'
-import { getUserData } from '../../services/ticketService'
+import { getUserData } from '../../services/admin/ticketService'
 import { Users, UserCheck, UserX, Mail, Phone, Building2, CheckCircle2, AlertCircle } from 'lucide-react'
 
 const UserManagement = () => {

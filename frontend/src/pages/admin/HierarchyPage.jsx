@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../../api/axios";
-import { assignHierarchy, getAllUsers, getHierarchy } from "../../services/ticketService";
+import { assignHierarchy, getAllUsers, getHierarchy } from "../../services/admin/ticketService";
 import { notifyError, notifySuccess } from "../../utils/notify";
 import { 
   Building2, 

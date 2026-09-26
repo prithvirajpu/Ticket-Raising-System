@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getTeamLeadTickets } from '../../../services/ticketService';
+import { getTeamLeadTickets } from '../../../services/teamLead/ticketService';
 import { ShieldAlert, ChevronRight } from 'lucide-react'
 import Loader from '../../../components/modals/Loader';
 import DashboardLayout from '../../../layouts/DashboardLayout';

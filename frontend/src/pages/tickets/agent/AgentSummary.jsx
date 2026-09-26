@@ -7,7 +7,7 @@ import {
   AlertCircle 
 } from 'lucide-react';
 import DashboardLayout from '../../../layouts/DashboardLayout'
-import { getAgentSummary } from '../../../services/ticketService';
+import { getAgentSummary } from '../../../services/agent/ticketService';
 import Lottie from 'lottie-react';
 
 // Imported locally from your assets folder

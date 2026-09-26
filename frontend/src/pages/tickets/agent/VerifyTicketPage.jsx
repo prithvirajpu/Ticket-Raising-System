@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import Loader from "../../../components/modals/Loader";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
-import { getAgentTicketDetail,verifyTicketDetails } from "../../../services/ticketService";
+import { getAgentTicketDetail,verifyTicketDetails } from "../../../services/agent/ticketService";
 import { ISSUE_FIELDS } from "../../../constants/ticketConstants";
 import OrderIssueDetails from "../../../components/verify/OrderIssueDetails";
 import PaymentIssueDetails from "../../../components/verify/PaymentIssueDetails";

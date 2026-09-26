@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
-import { getProfile, updateClientProfile, updateProfile } from '../../../services/ticketService';
+import { getProfile, updateProfile } from '../../../services/user/ticketService';
+import { updateClientProfile } from '../../../services/client/ticketService';
 import Loader from '../../../components/modals/Loader';
 import EditProfileModal from '../../../components/modals/EditProfileModal';
 import { useAuth } from '../../../auth/AuthContext';

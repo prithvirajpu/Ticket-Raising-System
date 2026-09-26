@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Upload, FileText, CheckCircle2, Loader2 } from 'lucide-react';
 import DashboardLayout from '../../../layouts/DashboardLayout';
-import { uploadDocument } from '../../../services/ticketService';
+import { uploadDocument } from '../../../services/client/ticketService';
 import { notifyInfo, notifySuccess } from '../../../utils/notify';
 
 const UploadFile = () => {

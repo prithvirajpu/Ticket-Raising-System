@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import {
     getSubscriptionPlansAdmin,
     updateSubscriptionPlan
-} from '../../services/ticketService'
+} from '../../services/admin/ticketService'
 import Loader from '../../components/modals/Loader'
 import EditSubscriptionPlanModal from '../../components/modals/EditSubscriptionPlanModal'
 import ConfirmModal from '../../components/modals/ConfirmModal'

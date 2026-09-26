@@ -1,676 +1,711 @@
-import { ServerCog } from 'lucide-react'
-import api from '../api/axios'
-import { notifyError } from '../utils/notify'
-
-export const createTicket= async(data)=>{
-    try {
-        const response= await api.post('/users/tickets/create/',data)
-    return response.data.data
-    } catch (error) {
-        console.log("CREATE TICKET FAILED ❌",error.response?.data?.errors?.details)
-        throw error
-    }
-}
-
-export const getTickets=async ({search='',sort='newest',page=1})=>{
-    const params={sort,page};
-    if (search){
-        params.search=search;
-    }
-    const response=await api.get(`/users/tickets/list/`,{params})
-    return response.data.data
-}
-
-export const getUserTicketDetail= async(id)=>{
-    const response=await api.get(`/users/details/${id}/`);
-    return response.data.data
-}
-
-export const getAgentTicketDetail= async(id)=>{
-    const response=await api.get(`/agents/details/${id}/`);
-    return response.data.data
-}
-
-export const getAgentRequests=async ({search='',sort='newest',page=1})=>{
-    const params={sort,page}
-    if (search){
-        params.search=search
-    }
-    const res= await api.get(`/agents/requests/`,{params})
-    return res.data.data
-}
-
-export const acceptTicket = async (id) => {
-    try {
-        const res = await api.post(`/agents/${id}/accept/`);
-        return res.data.data;
-    } catch (error) {
-        console.log("❌ TICKET ACCEPT API CALL FAILED =====================");
-        throw error;
-    }
-};
-
-export const rejectTicket =async (id)=>{
-    const res= await api.post(`/agents/${id}/reject/`)
-    return res.data.data
-}
-
-export const getOngoingTickets = async ({search='',sort='newest',page=1}) => {
-    const params={sort,page}
-    if (search){
-        params.search=search
-    }
-  const res = await api.get(`/agents/in-progress/`,{params});
-  return res.data.data;
-};
-
-export const resolveTicket = async (id) => {
-  const res = await api.post(`/tickets/${id}/resolve/`);
-  return res.data.data;
-};
-
-export const closeTicket= async (id) =>{
-    const res = await api.post(`/users/tickets/${id}/close/`)
-    return res.data.data
-}
-
-export const submitReview=async(id,data)=>{
-    const res= await api.post(`/users/tickets/${id}/review/`,data);
-    return res.data.data
-}
-
-export const escalateTicket=async(id)=>{
-    try {
-        const res= await api.post(`/tickets/${id}/escalate/`);
-    return res.data.data
-    } catch (error) {
-        const err=error.response?.data?.errors?.details ||'my error'
-        console.log(err)
-    }
-}
-
-export const getProfile=async()=>{
-    const res= await api.get('/users/profile/')
-    return res.data.data
-}
-
-export const updateProfile= async (data)=>{
-    const res = await api.put('/users/profile/update/',data)
-    return res.data.data
-}
-export const updateClientProfile= async (data)=>{
-    const res = await api.put('/clients/profile/update/',data)
-    return res.data.data
-}
-
-export const getTeamLeadTickets=async()=>{
-    const res= await api.get('/team-leads/assigned-tickets/');
-    return res.data.data 
-}
-
-export const getManagerTickets=async ()=>{
-    const res= await api.get('/managers/tickets/');
-    return res.data.data
-}
-
-export const uploadDocument= async (formData)=>{
-    const res = await api.post ('/clients/upload/',formData,{
-        headers:{
-            'Content-Type':'multipart/form-data'
-        }
-    });
-    return res.data.data
-}
-
-export const getClientsWithDocs=async()=>{
-    const res= await api.get('/managers/clients-docs/');
-    return res.data.data;
-}
-
-export const getClientDocs= async(clientId)=>{
-    try {
-    const res= await api.get(`/managers/clients-docs/${clientId}/`);
-    return res.data.data    
-    } catch (error) {
-        console.log(error?.response?.data?.errors?.details ||' something wrong')
-        throw error
-    }
-}
-
-export const summarizeAllDocuments=async (docId)=>{
-    const res= await api.post(`/managers/summarize/${docId}/`)
-    return res.data.data
-}
-
-export const summarySubmit =async (docId,data)=>{
-    const res= await api.post(`/managers/submit-summary/${docId}/`,data)
-    return res.data.data
-}
-
-export const getTeamLeadSummaries = async() =>{
-    const res = await api.get('/team-leads/summaries/');
-    return res.data.data
-}
-
-export const generateAgentSummary= async (summary_id)=>{
-    const res= await api.post(`/team-leads/generate-agent-summary/${summary_id}/`);
-    return res.data.data
-}
-
-export const submitAgentSummary= async (summary_id,data)=>{
-    const res = await api.post(`/team-leads/submit-summary/${summary_id}/`,data);
-    return res.data.data
-}
-
-export const getAgentSummary=async ()=>{
-    try {
-        const res= await api.get('/agents/summary/')
-        return res.data.data
-    } catch (error) {
-        console.log(error ||'something wrong')
-    }
-}
-
-export const getAgentDashboard=async (role)=>{
-    try {
-        const res= await api.get('/agents/dashboard/')
-        return res.data.data
-    } catch (error) {
-        console.log('something went wrong')
-    }
-}
-export const getUserDashboard=async (role)=>{
-    try {
-        const res= await api.get('/users/dashboard/')
-        return res.data.data
-    } catch (error) {
-        console.log('something went wrong in user dashboard')
-    }
-}
-
-export const generateFakeTickets= async (summary)=>{
-    try {
-        const res= await api.post('/team-leads/generate-fake-tickets/',{
-        summary:summary,
-        count:3,
-    });
-    return res.data.data
-    } catch (error) {
-            console.log(error);
-    console.log(error.response);
-    console.log(error.response?.data);
-
-    console.log(
-        error.response?.data?.errors?.details ||
-        'Failed to generate tickets'
-    );
-    }
-}
-
-export const getAgentFakeTickets= async()=>{
-    try {
-        const res= await api.get('/agents/fake-tickets/');
-    return res.data.data
-    } catch (error) {
-        console.log('fake ticket fetch error')
-    }
-}
-
-export const getFakeTicketDetail = async(id)=>{
-    try {
-        const res= await api.get(`/agents/fake-tickets/${id}/`);
-        console.log(res.data.data.message)
-    return res.data.data
-    } catch (error) {
-        console.log('fake ticket detail page error')
-    }
-}
-
-export const getTicketMessages= async(ticketId)=>{
-    try {
-        const res= await api.get(`/tickets/${ticketId}/messages/`)
-        return res.data
-    } catch (error) {
-        console.log("Error fetching messages:", error);
-        throw error;
-    }
-}
-
-export const sendMessage=async(ticketId,message)=>{
-    try {
-        const res= await api.post(`/tickets/${ticketId}/send-message/`,{message});
-        return res.data
-    } catch (error) {
-        console.log('error sending message: ',error);
-        throw error;       
-    }
-}
-
-export const reopenTicket= async(ticketId)=>{
-   try {
-     const res= await api.patch(`/users/${ticketId}/reopen/`)
-    return res.data.data
-   } catch (error) {
-    console.log('something wrong with REOPEN')
-    console.log(error.response?.data)
-    console.log(error)
-   }
-}
-
-export const getTicketTimeline= async(ticketId)=>{
-   try {
-     const res= await api.get(`/users/${ticketId}/timeline/`)
-    return res.data.data
-   } catch (error) {
-    console.log('something wrong with timeline')
-    console.log(error.response?.data)
-    console.log(error)
-   }
-}
-
-export const verifyTicketDetails =async (payload)=>{
-    try {
-        const res= await api.post('/agents/verify/',payload);
-        return res.data.data
-    } catch (error) {
-        console.log('verify error: ',error.response?.data)
-
-        console.log('something wrong with verifyticket')
-        throw error.response?.data ||error
-    }
-}
-
-export const getIntegrationKeys = async ()=>{
-    try {
-        const res= await api.get("/clients/integration-keys/");
-        return res.data.data
-    } catch (error) {
-        console.log('integration key error')
-        console.log(error?.response?.data?.errors?.details)
-        throw error
-    }
-}
-
-export const regenerateIntegrationKeys = async ()=>{
-    try {
-        const res= await api.patch("/clients/integration/keys/regenerate/");
-        return res.data.data
-    } catch (error) {
-        console.log('regenerate key error')
-        console.log(error?.response?.data?.errors?.details)
-        throw error
-    }
-}
-
-export const getSubscriptionPlans= async ()=>{
-    try {
-        const res= await api.get('/clients/subscription/plans/')
-        return res.data.data
-    } catch (error) {
-        console.log('error in fetch plans')
-    }
-}
-
-export const getCurrentPlan= async()=>{
-    try {
-        const res= await api.get('/clients/subscription/current/');
-        return res.data.data
-    } catch (error) {
-        console.log('current subscription plan fetch error')
-        throw error
-    }
-}
-
-export const cancelSubscription=async()=>{
-    try {
-        const res= await api.post('/clients/subscription/cancel/');
-    return res.data.data
-    } catch (error) {
-        console.log('cancel subscription error ')
-    }
-}
-
-export const createCheckoutSession= async(planId)=>{
-    try {
-        const res= await api.post(`/clients/subscriptions/checkout/`,{plan_id:planId})
-        return res.data.data
-    } catch (error) {
-        console.log('error in payment')
-        throw error
-    }
-}
-
-export const slaRulesInAdminSide = async () => {
-    try {
-        const res = await api.get('admins/sla-rules/')
-        return res.data.data
-    } catch (error) {
-        console.log('Error in SLA rules admin:', error)
-        throw error
-    }
-}
-
-export const createSlaRuleInAdminSide = async (data) => {
-    try {
-        const res = await api.post(
-            'admins/sla-rules/',
-            data
-        )
-        return res.data
-    } catch (error) {
-        console.log('Error creating SLA rule:', error)
-        throw error
-    }
-}
-
-export const getUserData = async (page = 1) => {
-    try {
-        const res = await api.get(`/admins/users/?page=${page}`)
-        return res
-    } catch (error) {
-        console.log('Error fetching users:', error)
-        throw error
-    }
-}
-
-export const assignHierarchy = async (payload) => {
-  try {
-    const res = await api.post(
-      "/admins/assign-hierarchy/",
-      payload
-    );
-    return res.data;
-  } catch (err) {
-    throw err;
-  }
-};
-
-export const getAllUsers = async () => {
-  try {
-    const res = await api.get("/admins/users/all/");
-    return res.data.data;
-  } catch (err) {
-    throw err;
-  }
-};
-
-export const getNotifications= async()=>{
-    const res= await api.get('/tickets/notifications/');
-    return res.data.data
-}
-
-export const markNotificationRead= async(Id)=>{
-    const res= await api.patch(`/tickets/notifications/${Id}/read/`)
-    return res.data.data
-}
-export const markAllNotificationsRead= async()=>{
-    const res= await api.put(`/tickets/notifications/mark-all-read/`)
-    return res.data.data
-}
-
-export const getHierarchy= async()=>{
-    try {
-        const res= await api.get("/admins/hierarchy/")
-        return res.data       
-    } catch (error) {
-        console.log(error)
-    }
-
-}
-export const getTrainingMessages=async(Id)=>{
-    try {
-        const res= await api.get(`/tickets/training-tickets/${Id}/messages/`)
-        return res.data.data
-    } catch (error) {
-        console.log(error)
-    }
-}
-export const retryTraining =async(Id)=>{
-    try {
-        const res= await api.post(`/agents/training/${Id}/retry/`)
-        return res.data.data
-    } catch (error) {
-        console.log(error)
-    }
-}
-export const connectStripe =async()=>{
-    try {
-        const res= await api.post(`/payments/connect-account/`)
-        return res.data.data
-    } catch (error) {
-        console.log(error)
-    }
-}
-export const getWalletMoney =async()=>{
-    try {
-        const res= await api.get(`/payments/wallet/`)
-        return res.data.data
-    } catch (error) {
-        console.log(error)
-    }
-}
-export const getWalletTransactions =async()=>{
-    try {
-        const res= await api.get(`/payments/wallet/transactions/`)
-        return res.data.data
-    } catch (error) {
-        console.log(error)
-    }
-}
-export const createWithdrawRequest =async(amount)=>{
-    try {
-        const res= await api.post(`/payments/withdraw/`,amount)
-        return res.data.data
-    } catch (error) {
-        console.log(error)
-        notifyError(error?.response?.data?.errors?.details)
-        throw error
-    }
-}
-export const getWithdrawRequests =async(page=1)=>{
-    try {
-        const res= await api.get(`/admins/wallet/requests/?page${page}`)
-        return {
-           message: res.data.data.message,
-            paginator: res.data.paginator,
-        }
-    } catch (error) {
-        console.log(error)
-        console.log(error?.response?.data?.errors)
-    }
-}
-
-export const approveWithdrawal = async(id)=>{
-    try {
-        const res = await api.post(
-        `/admins/wallet/requests/${id}/approve/`
-    )
-    return res.data.data
-    } catch (error) {
-        console.log(error)
-    }
-}
-
-export const rejectWithdrawal = async(id)=>{
-    try {
-        const res = await api.post(
-        `/admins/wallet/requests/${id}/reject/`
-    )
-    return res.data.data
-    } catch (error) {
-        console.log(error)
-    }
-}
-export const getClientDashboard = async()=>{
-    try {
-        const res = await api.get(`/clients/dashboard/`)
-        return res.data.data
-    } catch (error) {
-        console.log(error)
-    }
-}
-export const getTLDashboard = async()=>{
-    try {
-        const res = await api.get(`/team-leads/dashboard/`)
-        return res.data.data
-    } catch (error) {
-        console.log(error)
-        throw error.response.data.errors.details
-    }
-}
-export const getManagerDashboard = async()=>{
-    try {
-        const res = await api.get(`/managers/dashboard/`)
-        return res.data.data
-    } catch (error) {
-        console.log(error)
-        throw error.response.data.errors.details
-    }
-}
-export const getAdminWalletTransactions = async(page=1)=>{
-    try {
-        const res = await api.get(`/admins/wallet-transactions/?page=${page}`)
-        return {
-            message: res.data.data.message,
-            paginator: res.data.paginator,
-        }
-    } catch (error) {
-        console.log(error)
-        throw error
-    }
-}
-export const getAdminDashboard = async(period='7d')=>{
-    try {
-        const res = await api.get(`/admins/dashboard/?period=${period}`)
-        return res.data.data
-    } catch (error) {
-        console.log(error)
-        throw error
-    }
-}
-export const getRevenueDashboard  = async(salaryPage, subscriptionPage)=>{
-    try {
-        const res = await api.get(`/admins/finance/`,{
-            params:{
-                salary_page: salaryPage,
-                subscription_page: subscriptionPage,
-            }
-        })
-        return res.data.data
-    } catch (error) {
-        console.log(error)
-        throw error
-    }
-}
-
-export const updateAppUrl = async (appUrl) => {
-    const response = await api.patch("/clients/app-url/", {
-        app_url: appUrl,
-    });
-
-    return response.data;
-};
-export const sendClientNotification  = async (ticketId,subject,message) => {
-    const response = await api.post("/clients/notify-client/", {
-        ticket_id: ticketId,
-        subject,message,
-    });
-
-    return response.data;
-};
-
-export const downloadFinanceReport = async () => {
-    try {
-        const response = await api.get(
-            "/admins/finance/export/",
-            {
-                responseType: "blob",
-            }
-        );
-
-        const url = window.URL.createObjectURL(
-            new Blob([response.data])
-        );
-
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = "finance_report.csv";
-
-        document.body.appendChild(link);
-        link.click();
-
-        link.remove();
-        window.URL.revokeObjectURL(url);
-
-    } catch (error) {
-        notifyError(
-            error?.response?.data?.errors?.details ||
-            "Unable to download report."
-        );
-    }
-};
-
-export const downloadDashboardReport = async (period = "7d") => {
-    try {
-        const response = await api.get(
-            `/admins/dashboard/export/?period=${period}`,
-            {
-                responseType: "blob",
-            }
-        );
-
-        const url = window.URL.createObjectURL(
-            new Blob([response.data])
-        );
-
-        const link = document.createElement("a");
-
-        link.href = url;
-        link.download = `dashboard_report_${period}.csv`;
-
-        document.body.appendChild(link);
-
-        link.click();
-
-        link.remove();
-
-        window.URL.revokeObjectURL(url);
-
-    } catch (error) {
-        notifyError(
-            error?.response?.data?.errors?.details ||
-            "Unable to download dashboard report."
-        );
-    }
-};
-
-export const getClientTickets=async(status='',page=1)=>{
-    try{
-        const params= {page}
-        if(status){
-            params.status=status
-        }
-        const res=await api.get(`/clients/tickets/all/`,{params})
-        return res.data
-    }catch(error){
-        console.log('Get client tickets failed',
-            error.response?.data?.error?.details
-        )
-        throw error
-    }
-}
-
-export const createSubscriptionPlan = async (planData) => {
-    const response = await api.post("/admins/plans/",planData);
-    return response.data;
-};
-
-export const getSubscriptionPlansAdmin = async () => {
-    const response = await api.get("/admins/plans/");
-    return response.data;
-};
-
-export const updateSubscriptionPlan = async (planId, data) => {
-    const response = await api.patch(`/admins/plans/${planId}/`, data);
-    return response.data;
-};
+// import { ServerCog } from 'lucide-react'
+// import api from '../api/axios'
+// import { notifyError, notifySuccess } from '../utils/notify'
+
+// export const createTicket= async(data)=>{
+//     try {
+//         const response= await api.post('/users/tickets/create/',data)
+//     return response.data.data
+//     } catch (error) {
+//         console.log("CREATE TICKET FAILED ❌",error.response?.data?.errors?.details)
+//         throw error
+//     }
+// }
+
+// export const getTickets=async ({search='',sort='newest',page=1})=>{
+//     const params={sort,page};
+//     if (search){
+//         params.search=search;
+//     }
+//     const response=await api.get(`/users/tickets/list/`,{params})
+//     return response.data.data
+// }
+
+// export const getUserTicketDetail= async(id)=>{
+//     const response=await api.get(`/users/details/${id}/`);
+//     return response.data.data
+// }
+
+// export const getAgentTicketDetail= async(id)=>{
+//     const response=await api.get(`/agents/details/${id}/`);
+//     return response.data.data
+// }
+
+// export const getAgentRequests=async ({search='',sort='newest',page=1})=>{
+//     const params={sort,page}
+//     if (search){
+//         params.search=search
+//     }
+//     const res= await api.get(`/agents/requests/`,{params})
+//     return res.data.data
+// }
+
+// export const acceptTicket = async (id) => {
+//     try {
+//         const res = await api.post(`/agents/${id}/accept/`);
+//         return res.data.data;
+//     } catch (error) {
+//         console.log("❌ TICKET ACCEPT API CALL FAILED =====================");
+//         throw error;
+//     }
+// };
+
+// export const rejectTicket =async (id)=>{
+//     const res= await api.post(`/agents/${id}/reject/`)
+//     return res.data.data
+// }
+
+// export const getOngoingTickets = async ({search='',sort='newest',page=1}) => {
+//     const params={sort,page}
+//     if (search){
+//         params.search=search
+//     }
+//   const res = await api.get(`/agents/in-progress/`,{params});
+//   return res.data.data;
+// };
+
+// export const resolveTicket = async (id) => {
+//   const res = await api.post(`/tickets/${id}/resolve/`);
+//   return res.data.data;
+// };
+
+// export const closeTicket= async (id) =>{
+//     const res = await api.post(`/users/tickets/${id}/close/`)
+//     return res.data.data
+// }
+
+// export const submitReview=async(id,data)=>{
+//     const res= await api.post(`/users/tickets/${id}/review/`,data);
+//     return res.data.data
+// }
+
+// export const escalateTicket=async(id)=>{
+//     try {
+//         const res= await api.post(`/tickets/${id}/escalate/`);
+//     return res.data.data
+//     } catch (error) {
+//         const err=error.response?.data?.errors?.details ||'my error'
+//         console.log(err)
+//     }
+// }
+
+// export const getProfile=async()=>{
+//     const res= await api.get('/users/profile/')
+//     return res.data.data
+// }
+
+// export const updateProfile= async (data)=>{
+//     const res = await api.put('/users/profile/update/',data)
+//     return res.data.data
+// }
+// export const updateClientProfile= async (data)=>{
+//     const res = await api.put('/clients/profile/update/',data)
+//     return res.data.data
+// }
+
+// export const getTeamLeadTickets=async()=>{
+//     const res= await api.get('/team-leads/assigned-tickets/');
+//     return res.data.data 
+// }
+
+// export const getManagerTickets=async ()=>{
+//     const res= await api.get('/managers/tickets/');
+//     return res.data.data
+// }
+
+// export const uploadDocument= async (formData)=>{
+//     const res = await api.post ('/clients/upload/',formData,{
+//         headers:{
+//             'Content-Type':'multipart/form-data'
+//         }
+//     });
+//     return res.data.data
+// }
+
+// export const getClientsWithDocs=async()=>{
+//     const res= await api.get('/managers/clients-docs/');
+//     return res.data.data;
+// }
+
+// export const getClientDocs= async(clientId)=>{
+//     try {
+//     const res= await api.get(`/managers/clients-docs/${clientId}/`);
+//     return res.data.data    
+//     } catch (error) {
+//         console.log(error?.response?.data?.errors?.details ||' something wrong')
+//         throw error
+//     }
+// }
+
+// export const summarizeAllDocuments=async (docId)=>{
+//     const res= await api.post(`/managers/summarize/${docId}/`)
+//     return res.data.data
+// }
+
+// export const summarySubmit =async (docId,data)=>{
+//     const res= await api.post(`/managers/submit-summary/${docId}/`,data)
+//     return res.data.data
+// }
+
+// export const getTeamLeadSummaries = async() =>{
+//     const res = await api.get('/team-leads/summaries/');
+//     return res.data.data
+// }
+
+// export const generateAgentSummary= async (summary_id)=>{
+//     const res= await api.post(`/team-leads/generate-agent-summary/${summary_id}/`);
+//     return res.data.data
+// }
+
+// export const submitAgentSummary= async (summary_id,data)=>{
+//     const res = await api.post(`/team-leads/submit-summary/${summary_id}/`,data);
+//     return res.data.data
+// }
+
+// export const getAgentSummary=async ()=>{
+//     try {
+//         const res= await api.get('/agents/summary/')
+//         return res.data.data
+//     } catch (error) {
+//         console.log(error ||'something wrong')
+//     }
+// }
+
+// export const getAgentDashboard=async (role)=>{
+//     try {
+//         const res= await api.get('/agents/dashboard/')
+//         return res.data.data
+//     } catch (error) {
+//         console.log('something went wrong')
+//     }
+// }
+// export const getUserDashboard=async (role)=>{
+//     try {
+//         const res= await api.get('/users/dashboard/')
+//         return res.data.data
+//     } catch (error) {
+//         console.log('something went wrong in user dashboard')
+//     }
+// }
+
+// export const generateFakeTickets= async (summary)=>{
+//     try {
+//         const res= await api.post('/team-leads/generate-fake-tickets/',{
+//         summary:summary,
+//         count:3,
+//     });
+//     return res.data.data
+//     } catch (error) {
+//             console.log(error);
+//     console.log(error.response);
+//     console.log(error.response?.data);
+
+//     console.log(
+//         error.response?.data?.errors?.details ||
+//         'Failed to generate tickets'
+//     );
+//     }
+// }
+
+// export const getAgentFakeTickets= async()=>{
+//     try {
+//         const res= await api.get('/agents/fake-tickets/');
+//     return res.data.data
+//     } catch (error) {
+//         console.log('fake ticket fetch error')
+//     }
+// }
+
+// export const getFakeTicketDetail = async(id)=>{
+//     try {
+//         const res= await api.get(`/agents/fake-tickets/${id}/`);
+//         console.log(res.data.data.message)
+//     return res.data.data
+//     } catch (error) {
+//         console.log('fake ticket detail page error')
+//     }
+// }
+
+// export const getTicketMessages= async(ticketId)=>{
+//     try {
+//         const res= await api.get(`/tickets/${ticketId}/messages/`)
+//         return res.data
+//     } catch (error) {
+//         console.log("Error fetching messages:", error);
+//         throw error;
+//     }
+// }
+
+// export const sendMessage=async(ticketId,message)=>{
+//     try {
+//         const res= await api.post(`/tickets/${ticketId}/send-message/`,{message});
+//         return res.data
+//     } catch (error) {
+//         console.log('error sending message: ',error);
+//         throw error;       
+//     }
+// }
+
+// export const reopenTicket= async(ticketId)=>{
+//    try {
+//      const res= await api.patch(`/users/${ticketId}/reopen/`)
+//     return res.data.data
+//    } catch (error) {
+//     console.log('something wrong with REOPEN')
+//     console.log(error.response?.data)
+//     console.log(error)
+//    }
+// }
+
+// export const getTicketTimeline= async(ticketId)=>{
+//    try {
+//      const res= await api.get(`/users/${ticketId}/timeline/`)
+//     return res.data.data
+//    } catch (error) {
+//     console.log('something wrong with timeline')
+//     console.log(error.response?.data)
+//     console.log(error)
+//    }
+// }
+
+// export const verifyTicketDetails =async (payload)=>{
+//     try {
+//         const res= await api.post('/agents/verify/',payload);
+//         return res.data.data
+//     } catch (error) {
+//         console.log('verify error: ',error.response?.data)
+
+//         console.log('something wrong with verifyticket')
+//         throw error.response?.data ||error
+//     }
+// }
+
+// export const getIntegrationKeys = async ()=>{
+//     try {
+//         const res= await api.get("/clients/integration-keys/");
+//         return res.data.data
+//     } catch (error) {
+//         console.log('integration key error')
+//         console.log(error?.response?.data?.errors?.details)
+//         throw error
+//     }
+// }
+
+// export const regenerateIntegrationKeys = async ()=>{
+//     try {
+//         const res= await api.patch("/clients/integration/keys/regenerate/");
+//         return res.data.data
+//     } catch (error) {
+//         console.log('regenerate key error')
+//         console.log(error?.response?.data?.errors?.details)
+//         throw error
+//     }
+// }
+
+// export const getSubscriptionPlans= async ()=>{
+//     try {
+//         const res= await api.get('/clients/subscription/plans/')
+//         return res.data.data
+//     } catch (error) {
+//         console.log('error in fetch plans')
+//     }
+// }
+
+// export const getCurrentPlan= async()=>{
+//     try {
+//         const res= await api.get('/clients/subscription/current/');
+//         return res.data.data
+//     } catch (error) {
+//         console.log('current subscription plan fetch error')
+//         throw error
+//     }
+// }
+
+// export const cancelSubscription=async()=>{
+//     try {
+//         const res= await api.post('/clients/subscription/cancel/');
+//     return res.data.data
+//     } catch (error) {
+//         console.log('cancel subscription error ')
+//     }
+// }
+
+// export const createCheckoutSession= async(planId)=>{
+//     try {
+//         const res= await api.post(`/clients/subscriptions/checkout/`,{plan_id:planId})
+//         return res.data.data
+//     } catch (error) {
+//         console.log('error in payment')
+//         throw error
+//     }
+// }
+
+// export const slaRulesInAdminSide = async () => {
+//     try {
+//         const res = await api.get('admins/sla-rules/')
+//         return res.data.data
+//     } catch (error) {
+//         console.log('Error in SLA rules admin:', error)
+//         throw error
+//     }
+// }
+
+// export const createSlaRuleInAdminSide = async (data) => {
+//     try {
+//         const res = await api.post(
+//             'admins/sla-rules/',
+//             data
+//         )
+//         return res.data
+//     } catch (error) {
+//         console.log('Error creating SLA rule:', error)
+//         throw error
+//     }
+// }
+
+// export const getUserData = async (page = 1) => {
+//     try {
+//         const res = await api.get(`/admins/users/?page=${page}`)
+//         return res
+//     } catch (error) {
+//         console.log('Error fetching users:', error)
+//         throw error
+//     }
+// }
+
+// export const assignHierarchy = async (payload) => {
+//   try {
+//     const res = await api.post(
+//       "/admins/assign-hierarchy/",
+//       payload
+//     );
+//     return res.data;
+//   } catch (err) {
+//     throw err;
+//   }
+// };
+
+// export const getAllUsers = async () => {
+//   try {
+//     const res = await api.get("/admins/users/all/");
+//     return res.data.data;
+//   } catch (err) {
+//     throw err;
+//   }
+// };
+
+// export const getNotifications= async()=>{
+//     const res= await api.get('/tickets/notifications/');
+//     return res.data.data
+// }
+
+// export const markNotificationRead= async(Id)=>{
+//     const res= await api.patch(`/tickets/notifications/${Id}/read/`)
+//     return res.data.data
+// }
+// export const markAllNotificationsRead= async()=>{
+//     const res= await api.put(`/tickets/notifications/mark-all-read/`)
+//     return res.data.data
+// }
+
+// export const getHierarchy= async()=>{
+//     try {
+//         const res= await api.get("/admins/hierarchy/")
+//         return res.data       
+//     } catch (error) {
+//         console.log(error)
+//     }
+
+// }
+// export const getTrainingMessages=async(Id)=>{
+//     try {
+//         const res= await api.get(`/tickets/training-tickets/${Id}/messages/`)
+//         return res.data.data
+//     } catch (error) {
+//         console.log(error)
+//     }
+// }
+// export const retryTraining =async(Id)=>{
+//     try {
+//         const res= await api.post(`/agents/training/${Id}/retry/`)
+//         return res.data.data
+//     } catch (error) {
+//         console.log(error)
+//     }
+// }
+// export const connectStripe =async()=>{
+//     try {
+//         const res= await api.post(`/payments/connect-account/`)
+//         return res.data.data
+//     } catch (error) {
+//         console.log(error)
+//     }
+// }
+// export const getWalletMoney =async()=>{
+//     try {
+//         const res= await api.get(`/payments/wallet/`)
+//         return res.data.data
+//     } catch (error) {
+//         console.log(error)
+//     }
+// }
+// export const getWalletTransactions =async()=>{
+//     try {
+//         const res= await api.get(`/payments/wallet/transactions/`)
+//         return res.data.data
+//     } catch (error) {
+//         console.log(error)
+//     }
+// }
+// export const createWithdrawRequest =async(amount)=>{
+//     try {
+//         const res= await api.post(`/payments/withdraw/`,amount)
+//         return res.data.data
+//     } catch (error) {
+//         console.log(error)
+//         notifyError(error?.response?.data?.errors?.details)
+//         throw error
+//     }
+// }
+// export const getWithdrawRequests =async(page=1)=>{
+//     try {
+//         const res= await api.get(`/admins/wallet/requests/?page${page}`)
+//         return {
+//            message: res.data.data.message,
+//             paginator: res.data.paginator,
+//         }
+//     } catch (error) {
+//         console.log(error)
+//         console.log(error?.response?.data?.errors)
+//     }
+// }
+
+// export const approveWithdrawal = async(id)=>{
+//     try {
+//         const res = await api.post(
+//         `/admins/wallet/requests/${id}/approve/`
+//     )
+//     return res.data.data
+//     } catch (error) {
+//         console.log(error)
+//     }
+// }
+
+// export const rejectWithdrawal = async(id)=>{
+//     try {
+//         const res = await api.post(
+//         `/admins/wallet/requests/${id}/reject/`
+//     )
+//     return res.data.data
+//     } catch (error) {
+//         console.log(error)
+//     }
+// }
+// export const getClientDashboard = async()=>{
+//     try {
+//         const res = await api.get(`/clients/dashboard/`)
+//         return res.data.data
+//     } catch (error) {
+//         console.log(error)
+//     }
+// }
+// export const getTLDashboard = async()=>{
+//     try {
+//         const res = await api.get(`/team-leads/dashboard/`)
+//         return res.data.data
+//     } catch (error) {
+//         console.log(error)
+//         throw error.response.data.errors.details
+//     }
+// }
+// export const getManagerDashboard = async()=>{
+//     try {
+//         const res = await api.get(`/managers/dashboard/`)
+//         return res.data.data
+//     } catch (error) {
+//         console.log(error)
+//         throw error.response.data.errors.details
+//     }
+// }
+// export const getAdminWalletTransactions = async(page=1)=>{
+//     try {
+//         const res = await api.get(`/admins/wallet-transactions/?page=${page}`)
+//         return {
+//             message: res.data.data.message,
+//             paginator: res.data.paginator,
+//         }
+//     } catch (error) {
+//         console.log(error)
+//         throw error
+//     }
+// }
+// export const getAdminDashboard = async(period='7d')=>{
+//     try {
+//         const res = await api.get(`/admins/dashboard/?period=${period}`)
+//         return res.data.data
+//     } catch (error) {
+//         console.log(error)
+//         throw error
+//     }
+// }
+// export const getRevenueDashboard  = async(salaryPage, subscriptionPage)=>{
+//     try {
+//         const res = await api.get(`/admins/finance/`,{
+//             params:{
+//                 salary_page: salaryPage,
+//                 subscription_page: subscriptionPage,
+//             }
+//         })
+//         return res.data.data
+//     } catch (error) {
+//         console.log(error)
+//         throw error
+//     }
+// }
+
+// export const updateAppUrl = async (appUrl) => {
+//     const response = await api.patch("/clients/app-url/", {
+//         app_url: appUrl,
+//     });
+
+//     return response.data;
+// };
+// export const sendClientNotification  = async (ticketId,subject,message) => {
+//     const response = await api.post("/clients/notify-client/", {
+//         ticket_id: ticketId,
+//         subject,message,
+//     });
+
+//     return response.data;
+// };
+
+// export const downloadFinanceReport = async () => {
+//     try {
+//         const response = await api.get(
+//             "/admins/finance/export/",
+//             {
+//                 responseType: "blob",
+//             }
+//         );
+
+//         const url = window.URL.createObjectURL(
+//             new Blob([response.data])
+//         );
+
+//         const link = document.createElement("a");
+//         link.href = url;
+//         link.download = "finance_report.csv";
+
+//         document.body.appendChild(link);
+//         link.click();
+
+//         link.remove();
+//         window.URL.revokeObjectURL(url);
+
+//     } catch (error) {
+//         notifyError(
+//             error?.response?.data?.errors?.details ||
+//             "Unable to download report."
+//         );
+//     }
+// };
+
+// export const downloadDashboardReport = async (period = "7d") => {
+//     try {
+//         const response = await api.get(
+//             `/admins/dashboard/export/?period=${period}`,
+//             {
+//                 responseType: "blob",
+//             }
+//         );
+
+//         const url = window.URL.createObjectURL(
+//             new Blob([response.data])
+//         );
+
+//         const link = document.createElement("a");
+
+//         link.href = url;
+//         link.download = `dashboard_report_${period}.csv`;
+
+//         document.body.appendChild(link);
+
+//         link.click();
+
+//         link.remove();
+
+//         window.URL.revokeObjectURL(url);
+
+//     } catch (error) {
+//         notifyError(
+//             error?.response?.data?.errors?.details ||
+//             "Unable to download dashboard report."
+//         );
+//     }
+// };
+
+// export const getClientTickets=async(status='',page=1)=>{
+//     try{
+//         const params= {page}
+//         if(status){
+//             params.status=status
+//         }
+//         const res=await api.get(`/clients/tickets/all/`,{params})
+//         return res.data
+//     }catch(error){
+//         console.log('Get client tickets failed',
+//             error.response?.data?.error?.details
+//         )
+//         throw error
+//     }
+// }
+
+// export const createSubscriptionPlan = async (planData) => {
+//     const response = await api.post("/admins/plans/",planData);
+//     return response.data;
+// };
+
+// export const getSubscriptionPlansAdmin = async () => {
+//     const response = await api.get("/admins/plans/");
+//     return response.data;
+// };
+
+// export const updateSubscriptionPlan = async (planId, data) => {
+//     const response = await api.patch(`/admins/plans/${planId}/`, data);
+//     return response.data;
+// };
+
+// export const getSalaryConfig = async () => {
+//     try {
+//         const res = await api.get("/admins/salary-config/");
+//         return res.data
+//     } catch (error) {
+//         console.log(error.response?.data?.errors ||
+//                 "Something went wrong",)
+//         throw error
+//     }
+// };
+
+// export const createSalaryConfig  = async (payload) => {
+//     try {
+//         const res = await api.post("/admins/salary-config/",payload);
+//         notifySuccess('Created successfully')
+//         return res.data
+//     } catch (error) {
+//         console.log(error.response?.data?.errors ||
+//         "Something went wrong",)
+//         throw error
+//     }
+// };
+
+// export const updateSalaryConfig  = async (payload) => {
+//     try {
+//         const res = await api.patch("/admins/salary-config/",payload);
+//         notifySuccess('Successfully updated')
+//         return res.data
+//     } catch (error) {
+//         console.log(error.response?.data?.errors ||
+//         "Something went wrong",)
+//         throw error
+//     }
+// };

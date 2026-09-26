@@ -1,11 +1,13 @@
 import React, { Suspense, useEffect, useState } from "react";
-import { connectStripe, createWithdrawRequest, getWalletMoney, getWalletTransactions, } from "../../services/ticketService";
+import { connectStripe, createWithdrawRequest, getWalletMoney, getWalletTransactions, } from "../../services/payments/ticketService";
 import DashboardLayout from '../../layouts/DashboardLayout'
 import { notifySuccess } from "../../utils/notify";
 import { Wallet, DollarSign, CreditCard, ArrowUpRight, History, Calendar, FileText, ArrowDownLeft, Landmark, AlertTriangle } from "lucide-react";
 import { lazy } from "react";
 import Loader from '../../components/modals/Loader'
-const ConfirmModal= lazy(()=>import('../../components/modals/ConfirmModal'))
+import Pagination from "../../components/Pagination";
+
+const ConfirmModal = lazy(() => import('../../components/modals/ConfirmModal'))
 
 const WalletPage = () => {
   const [loading, setLoading] = useState(false);
@@ -14,14 +16,23 @@ const WalletPage = () => {
   const [transactions, setTransactions] = useState([]);
   const [withdrawAmount, setWithdrawAmount] = useState("");
   
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [nextPage, setNextPage] = useState(null);
+  const [previousPage, setPreviousPage] = useState(null);
+
   // Modal State Mechanics
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
 
   useEffect(() => {
     fetchWalletMoney();
+  }, []);
+
+  useEffect(() => {
     fetchWalletTransactions();
-  }, [])
+  }, [currentPage]);
 
   const fetchWalletMoney = async () => {
     const res = await getWalletMoney();
@@ -29,10 +40,19 @@ const WalletPage = () => {
     setAmount(res.message.balance)
     setIsStripeConnected(res.message.is_stripe_connected);
   }
+
   const fetchWalletTransactions = async () => {
-    const res = await getWalletTransactions();
-    console.log("transactions", res);
-    setTransactions(res.message);
+    try {
+      const res = await getWalletTransactions(currentPage);
+      console.log("transactions", res);
+      setTransactions(res.data.message);
+      const paginator = res.paginator;
+      setNextPage(paginator.next);
+      setPreviousPage(paginator.previous);
+      setTotalPages(Math.ceil(paginator.count / paginator.page_size));
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   // Intercept action to trigger confirmation interface
@@ -104,16 +124,15 @@ const WalletPage = () => {
               <p className="text-xs text-slate-400 mt-1">Cleared context earnings ready for settlement</p>
             </div>
             
-            {!isStripeConnected  && (
-                <button
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 rounded-xl transition-colors shadow-sm"
-              onClick={handleConnectStripe}
-              disabled={loading}
-            >
-              <CreditCard className="w-4 h-4" />
-              {loading ? "Connecting..." : "Connect Stripe Account"}
-            </button>
-
+            {!isStripeConnected && (
+              <button
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 rounded-xl transition-colors shadow-sm"
+                onClick={handleConnectStripe}
+                disabled={loading}
+              >
+                <CreditCard className="w-4 h-4" />
+                {loading ? "Connecting..." : "Connect Stripe Account"}
+              </button>
             )}
             
           </div>
@@ -182,10 +201,13 @@ const WalletPage = () => {
                   transactions.map((item, index) => {
                     const isDeduction = item.transaction_type === "WITHDRAWAL" || item.transaction_type === "PENALTY";
                     
+                    const pageSize = 10;
+                    const serialNumber = (currentPage - 1) * pageSize + index + 1;
+
                     return (
                       <tr key={item.id} className="hover:bg-slate-50/40 transition-colors group">
                         {/* Index */}
-                        <td className="p-4 font-mono text-xs text-slate-400">{index + 1}</td>
+                        <td className="p-4 font-mono text-xs text-slate-400">{serialNumber}</td>
 
                         {/* Type Badge */}
                         <td className="p-4">
@@ -252,19 +274,30 @@ const WalletPage = () => {
               </tbody>
             </table>
           </div>
+
+          {/* TABLE FOOTER CONTROL PANEL (PAGINATION) */}
+          <div className="p-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-end">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              hasNext={!!nextPage}
+              hasPrevious={!!previousPage}
+            />
+          </div>
         </div>
 
       </div>
       <Suspense fallback={<Loader />}>
-            <ConfirmModal
-        isOpen={isModalOpen}
-        loading={modalLoading}
-        title="Confirm Payout Action Request"
-        message={`Are you sure you want to initialize a withdrawal payload balance clearance transfer containing a total value sequence value amount equal to $${withdrawAmount}?`}
-        confirmText="Confirm Settlement"
-        onConfirm={handleConfirmWithdraw}
-        onCancel={() => setIsModalOpen(false)}
-      />
+        <ConfirmModal
+          isOpen={isModalOpen}
+          loading={modalLoading}
+          title="Confirm Payout Action Request"
+          message={`Are you sure you want to initialize a withdrawal payload balance clearance transfer containing a total value sequence value amount equal to $${withdrawAmount}?`}
+          confirmText="Confirm Settlement"
+          onConfirm={handleConfirmWithdraw}
+          onCancel={() => setIsModalOpen(false)}
+        />
       </Suspense>
 
     </DashboardLayout>

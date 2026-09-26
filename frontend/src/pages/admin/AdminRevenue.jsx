@@ -3,9 +3,10 @@ import DashboardLayout from "../../layouts/DashboardLayout";
 import {
   getRevenueDashboard,
   downloadFinanceReport,
-} from "../../services/ticketService";
+} from "../../services/admin/ticketService";
 import Loader from "../../components/modals/Loader";
 import Pagination from "../../components/Pagination";
+import SalaryConfiguration from "./SalaryConfiguration";
 
 const AdminRevenue = () => {
   const [revenue, setRevenue] = useState(null);
@@ -47,6 +48,7 @@ const AdminRevenue = () => {
 
   return (
     <DashboardLayout title="Revenue Dashboard">
+      
       <div className="flex justify-end mb-8">
         <div className="relative inline-block w-48"></div>
         <button
@@ -253,6 +255,7 @@ const AdminRevenue = () => {
           </div>
         </div>
       </div>
+      <SalaryConfiguration/>
     </DashboardLayout>
   );
 };

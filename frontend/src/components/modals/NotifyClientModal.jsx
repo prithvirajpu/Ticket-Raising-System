@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { sendClientNotification } from "../../services/ticketService";
+import { sendClientNotification } from "../../services/client/ticketService";
 import { notifyError, notifySuccess } from "../../utils/notify";
 import { X, Send, Loader2 } from "lucide-react";
 

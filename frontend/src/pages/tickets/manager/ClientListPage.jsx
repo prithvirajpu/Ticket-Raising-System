@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import DashboardLayout from "../../../layouts/DashboardLayout"
-import { getClientsWithDocs } from "../../../services/ticketService"
+import { getClientsWithDocs } from "../../../services/manager/ticketService"
 import { useNavigate } from "react-router-dom"
 import { ChevronRight } from "lucide-react"
 import Lottie from 'lottie-react';

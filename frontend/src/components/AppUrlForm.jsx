@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { updateAppUrl } from "../services/ticketService";
+import { updateAppUrl } from "../services/client/ticketService";
 import { notifyError, notifySuccess } from "../utils/notify";
 
 function AppUrlForm() {

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import DashboardLayout from '../../layouts/DashboardLayout'
 import axios from 'axios'
-import { createSlaRuleInAdminSide, getSubscriptionPlans, slaRulesInAdminSide } from '../../services/ticketService'
+import { createSlaRuleInAdminSide, slaRulesInAdminSide } from '../../services/admin/ticketService'
+import { getSubscriptionPlans } from '../../services/client/ticketService'
 import { notifyError, notifySuccess } from '../../utils/notify'
 import HierarchyPage from './HierarchyPage'
 import { Clock, Sliders, ChevronDown, ShieldCheck } from 'lucide-react';

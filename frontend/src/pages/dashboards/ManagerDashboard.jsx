@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import DashboardLayout from '../../layouts/DashboardLayout'
 import {  Users, Ticket, Info, CheckCircle  } from 'lucide-react'
 import StatsCard from '../../components/StatsCard'
-import { getManagerDashboard } from '../../services/ticketService';
+import { getManagerDashboard } from '../../services/manager/ticketService';
 
 
 const ManagerDashboard = () => {

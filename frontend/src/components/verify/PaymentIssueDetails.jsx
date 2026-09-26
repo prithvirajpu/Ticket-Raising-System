@@ -7,10 +7,17 @@ const PaymentIssueDetails = ({ data }) => {
         customer,
         payment,
         billing,
-        order,
+        shipping_address,
         wallet,
         summary,
     } = data;
+
+    console.log("PaymentIssueDetails data:", data);
+    console.log("payment:", payment);
+    console.log("billing:", billing);
+    console.log("shipping_address:", shipping_address);
+    console.log("wallet:", wallet);
+    console.log("summary:", summary);
 
     return (
 
@@ -24,27 +31,82 @@ const PaymentIssueDetails = ({ data }) => {
 
             <Section title="Payment Information">
 
-                <Info label="Order ID" value={payment.order_id} />
-                <Info label="Payment Method" value={payment.payment_method} />
-                <Info label="Payment Status" value={payment.payment_status} />
-                <Info label="Total Amount" value={`$ ${payment.total_amount}`} />
-                <Info label="Final Amount" value={`$ ${payment.final_total}`} />
-                <Info label="Created" value={payment.created_at} />
+                <Info label="Order ID" value={payment?.order_id} />
+                <Info label="Payment Method" value={payment?.payment_method} />
+                <Info label="Payment Status" value={payment?.payment_status} />
+                <Info label="Final Amount" value={`$ ${billing?.grand_total}`} />
+                <Info label="Created" value={payment?.created_at} />
 
             </Section>
 
-            <Section title="Billing Information">
+<Section title="Billing Information">
 
-                <Info label="Billing Name" value={billing.full_name} />
-                <Info label="Email" value={billing.email} />
-                <Info label="Phone" value={billing.mobile} />
-                <Info label="Address" value={billing.street_address} />
-                <Info label="District" value={billing.district} />
-                <Info label="State" value={billing.state} />
-                <Info label="Country" value={billing.country} />
-                <Info label="Pincode" value={billing.pincode} />
+    <Info label="Subtotal" value={`$ ${billing?.subtotal}`} />
 
-            </Section>
+    <Info
+        label="Coupon Code"
+        value={billing?.coupon_code}
+    />
+
+    <Info
+        label="Coupon Discount"
+        value={`$ ${billing?.coupon_discount}`}
+    />
+
+    <Info
+        label="Shipping Charge"
+        value={`$ ${billing?.shipping_charge}`}
+    />
+
+    <Info
+        label="Grand Total"
+        value={`$ ${billing?.grand_total}`}
+    />
+
+</Section>
+<Section title="Shipping Address">
+
+    <Info
+        label="Full Name"
+        value={shipping_address?.full_name}
+    />
+
+    <Info
+        label="Email"
+        value={shipping_address?.email}
+    />
+
+    <Info
+        label="Phone"
+        value={shipping_address?.mobile}
+    />
+
+    <Info
+        label="Address"
+        value={shipping_address?.street_address}
+    />
+
+    <Info
+        label="District"
+        value={shipping_address?.district}
+    />
+
+    <Info
+        label="State"
+        value={shipping_address?.state}
+    />
+
+    <Info
+        label="Country"
+        value={shipping_address?.country}
+    />
+
+    <Info
+        label="Pincode"
+        value={shipping_address?.pincode}
+    />
+
+</Section>
 
             {wallet && (
 

@@ -2,7 +2,7 @@ import DashboardLayout from '../../layouts/DashboardLayout'
 import StatsCard from '../../components/StatsCard'
 import { Ticket, Info, History, CheckCircle, Star, Settings } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { getAgentDashboard } from '../../services/ticketService'
+import { getAgentDashboard } from '../../services/agent/ticketService'
 
 const AgentDashboard = () => {
   // const seconds= useAgentTimer()

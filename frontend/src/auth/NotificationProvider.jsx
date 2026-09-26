@@ -1,6 +1,6 @@
 import { createContext,useContext,useEffect,useState } from "react"
 import { useAuth } from "./AuthContext"
-import { getNotifications, markAllNotificationsRead, markNotificationRead } from "../services/ticketService"
+import { getNotifications, markAllNotificationsRead, markNotificationRead } from "../services/tickets/ticketService"
 import { notifySuccess } from "../utils/notify"
 
 const BASE_WS= import.meta.env.VITE_WS_URL

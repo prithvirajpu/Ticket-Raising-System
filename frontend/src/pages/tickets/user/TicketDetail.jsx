@@ -6,9 +6,8 @@ import {
   reopenTicket,
   closeTicket,
   getUserTicketDetail,
-  sendMessage,
   submitReview,
-} from "../../../services/ticketService";
+} from "../../../services/user/ticketService";
 import {
   ArrowLeft,
   Tag,

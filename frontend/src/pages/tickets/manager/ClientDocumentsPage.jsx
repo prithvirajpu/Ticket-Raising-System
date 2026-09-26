@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import DashboardLayout from "../../../layouts/DashboardLayout";
-import { getClientDocs, summarizeAllDocuments } from "../../../services/ticketService";
+import { getClientDocs, summarizeAllDocuments } from "../../../services/manager/ticketService";
 import { useNavigate, useParams } from "react-router-dom";
 import { FileText, ExternalLink, AlertCircle, Loader2, ChevronRight } from "lucide-react";
 import Loader from "../../../components/modals/Loader";

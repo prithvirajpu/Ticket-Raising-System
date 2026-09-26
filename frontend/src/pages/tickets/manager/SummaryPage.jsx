@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../../layouts/DashboardLayout';
 import { FileText, ArrowLeft, Calendar, User, Hash, Sparkles, Edit3, X, Check, Send } from 'lucide-react';
 import { useState } from 'react';
-import { summarySubmit } from '../../../services/ticketService';
+import { summarySubmit } from '../../../services/manager/ticketService';
 import ConfirmModal from '../../../components/modals/ConfirmModal'; // Ensure this path is correct
 import { notifySuccess } from '../../../utils/notify';
 

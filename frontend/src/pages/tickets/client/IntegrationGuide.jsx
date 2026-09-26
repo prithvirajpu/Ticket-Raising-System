@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import DashboardLayout from "../../../layouts/DashboardLayout";
-import { getIntegrationKeys, regenerateIntegrationKeys } from "../../../services/ticketService";
+import { getIntegrationKeys, regenerateIntegrationKeys } from "../../../services/client/ticketService";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
 import { notifySuccess } from "../../../utils/notify";
 import AppUrlForm from "../../../components/AppUrlForm"; // <-- Imported your component here

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getOngoingTickets } from "../../../services/ticketService";
+import { getOngoingTickets } from "../../../services/agent/ticketService";
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import { useNavigate } from "react-router-dom";
 import { Search, Loader2, ArrowUpDown, Tag, Calendar, ChevronRight } from "lucide-react";

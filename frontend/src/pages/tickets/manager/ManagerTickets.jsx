@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getManagerTickets } from '../../../services/ticketService'
+import { getManagerTickets } from '../../../services/manager/ticketService'
 import { Fingerprint, ChevronRight } from 'lucide-react'
 import Loader from '../../../components/modals/Loader'
 import DashboardLayout from '../../../layouts/DashboardLayout'

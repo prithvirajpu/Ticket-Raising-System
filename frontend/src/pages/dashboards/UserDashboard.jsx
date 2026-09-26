@@ -14,7 +14,7 @@ import DashboardLayout from '../../layouts/DashboardLayout';
 import { useNavigate } from 'react-router-dom';
 import StatsCard from '../../components/StatsCard';
 import Footer from '../../components/Footer';
-import { getUserDashboard } from '../../services/ticketService';
+import { getUserDashboard } from '../../services/user/ticketService';
 import BlackHole from '../../components/BlackHole';
 
 const UserDashboard = () => {

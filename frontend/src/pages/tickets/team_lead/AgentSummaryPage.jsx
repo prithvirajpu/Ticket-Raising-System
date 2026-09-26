@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Loader from "../../../components/modals/Loader";
 import DashboardLayout from "../../../layouts/DashboardLayout";
-import { generateAgentSummary, generateFakeTickets, submitAgentSummary } from "../../../services/ticketService";
+import { generateAgentSummary, generateFakeTickets, submitAgentSummary } from "../../../services/teamLead/ticketService";
 import { Check, X, Send, Edit3, ArrowLeft, Sparkles, FileText, Calendar, Hash, User } from "lucide-react";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
 import { notifySuccess } from "../../../utils/notify";

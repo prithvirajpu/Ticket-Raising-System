@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getClientTickets } from "../../../services/ticketService";
+import { getClientTickets } from "../../../services/client/ticketService";
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import Loader from "../../../components/modals/Loader";
 import Pagination from "../../../components/Pagination";

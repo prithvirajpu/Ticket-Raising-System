@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getTickets } from '../../../services/ticketService'
+import { getTickets } from '../../../services/user/ticketService'
 import DashboardLayout from '../../../layouts/DashboardLayout'
 import { Plus, Search, ChevronDown, ChevronRight, ArrowUpDown, Calendar, Loader2, ClipboardList } from 'lucide-react'
 import Pagination from '../../../components/Pagination'

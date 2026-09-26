@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
-import { approveWithdrawal, getWithdrawRequests, rejectWithdrawal } from "../../services/ticketService";
+import { approveWithdrawal, getWithdrawRequests, rejectWithdrawal } from "../../services/admin/ticketService";
 import { notifySuccess } from "../../utils/notify";
 import Pagination from "../../components/Pagination";
 import { Wallet, Mail, DollarSign, Calendar, CheckCircle2, XCircle, AlertCircle } from 'lucide-react'

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { createTicket } from "../../../services/ticketService";
+import { createTicket } from "../../../services/user/ticketService";
 import { useState } from "react";
 import Loader from "../../../components/modals/Loader";
 import DashboardLayout from "../../../layouts/DashboardLayout";

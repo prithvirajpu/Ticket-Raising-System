@@ -2,7 +2,7 @@ import DashboardLayout from '../../layouts/DashboardLayout'
 import StatsCard from '../../components/StatsCard'
 import { TrendingUp, Users, Ticket, Star, Settings, CreditCard } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { getClientDashboard } from '../../services/ticketService'
+import { getClientDashboard } from '../../services/client/ticketService'
 
 const ClientDashboard = () => {
   const [data, setData] = useState({});

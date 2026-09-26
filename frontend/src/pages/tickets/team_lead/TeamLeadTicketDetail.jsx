@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { escalateTicket, getUserTicketDetail, resolveTicket } from "../../../services/ticketService";
+import { escalateTicket, resolveTicket } from "../../../services/tickets/ticketService";
+import {  getUserTicketDetail } from "../../../services/user/ticketService";
 import Loader from "../../../components/modals/Loader";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Send, Phone, User, Clock, AlertCircle, Calendar, CheckCheck, Check, Bell } from "lucide-react";

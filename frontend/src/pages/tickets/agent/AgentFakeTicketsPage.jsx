@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { getAgentFakeTickets } from "../../../services/ticketService"
+import { getAgentFakeTickets } from "../../../services/agent/ticketService"
 import DashboardLayout from "../../../layouts/DashboardLayout"
 import { useNavigate } from "react-router-dom"
 import Lottie from 'lottie-react';

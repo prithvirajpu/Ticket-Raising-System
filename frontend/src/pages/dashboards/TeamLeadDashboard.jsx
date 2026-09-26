@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout"
-import { getTLDashboard } from "../../services/ticketService";
+import { getTLDashboard } from "../../services/teamLead/ticketService";
 import StatsCard from '../../components/StatsCard'
 import {  Users, Ticket, Info, CheckCircle  } from 'lucide-react'
 

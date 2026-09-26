@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import DashboardLayout from '../../../layouts/DashboardLayout'
-import { getSubscriptionPlans, createCheckoutSession, getCurrentPlan, cancelSubscription } from '../../../services/ticketService'
+import { getSubscriptionPlans, createCheckoutSession, getCurrentPlan, cancelSubscription } from '../../../services/client/ticketService'
 import { notifyError, notifySuccess } from '../../../utils/notify'
 import Loader from '../../../components/modals/Loader'
 import ConfirmModal from '../../../components/modals/ConfirmModal' // Adjust path if necessary

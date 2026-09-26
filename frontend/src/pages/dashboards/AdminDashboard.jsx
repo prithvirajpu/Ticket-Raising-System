@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import Loader from "../../components/modals/Loader";
-import { getAdminDashboard,downloadDashboardReport } from "../../services/ticketService";
+import { getAdminDashboard,downloadDashboardReport } from "../../services/admin/ticketService";
 import { Ticket, Users, Wallet, Clock, ChevronDown } from "lucide-react";
 import {
   ResponsiveContainer, PieChart, Pie, Cell, Tooltip,

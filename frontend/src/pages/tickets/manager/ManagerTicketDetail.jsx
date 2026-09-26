@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import {
-  getUserTicketDetail,
-  resolveTicket,
-} from "../../../services/ticketService";
+import {getUserTicketDetail} from "../../../services/user/ticketService";
+import {resolveTicket} from "../../../services/tickets/ticketService";
 import Loader from "../../../components/modals/Loader";
 import { useParams, useNavigate } from "react-router-dom";
 import {

@@ -4,7 +4,7 @@ import {
   acceptTicket,
   getAgentRequests,
   rejectTicket,
-} from "../../../services/ticketService";
+} from "../../../services/agent/ticketService";
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import { useNavigate } from "react-router-dom";
 import { Search, Loader2, ArrowUpDown, ChevronDown } from "lucide-react";

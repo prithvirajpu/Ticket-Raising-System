@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createSubscriptionPlan } from "../../services/ticketService";
+import { createSubscriptionPlan } from "../../services/admin/ticketService";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import SubscriptionPlansAdmin from "./SubscriptionPlansAdmin";
 

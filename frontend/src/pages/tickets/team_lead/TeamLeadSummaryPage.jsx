@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getTeamLeadSummaries } from "../../../services/ticketService";
+import { getTeamLeadSummaries } from "../../../services/teamLead/ticketService";
 import Loader from "../../../components/modals/Loader";
 import DashboardLayout from "../../../layouts/DashboardLayout";
 import { useNavigate } from "react-router-dom";

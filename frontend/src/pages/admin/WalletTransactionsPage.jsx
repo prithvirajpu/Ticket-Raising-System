@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
-import { getAdminWalletTransactions } from "../../services/ticketService";
+import { getAdminWalletTransactions } from "../../services/admin/ticketService";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../../components/Pagination";
 
