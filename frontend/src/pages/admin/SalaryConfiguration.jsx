@@ -28,6 +28,7 @@ const SalaryConfiguration = () => {
 
     try {
       const result = await getSalaryConfig();
+      console.log("SALARY UPDATE RESULT:", result);
       const data = result?.data;
 
       if (data) {
@@ -99,6 +100,7 @@ const SalaryConfiguration = () => {
       let result;
       if (config) {
         result = await updateSalaryConfig(payload);
+        console.log("SALARY CREATE RESULT:", result);
       } else {
         result = await createSalaryConfig(payload);
       }

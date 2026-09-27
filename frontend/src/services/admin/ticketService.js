@@ -1,4 +1,5 @@
 import api from "../../api/axios";
+import {notifySuccess} from '../../utils/notify'
 
 export const slaRulesInAdminSide = async () => {
     try {
@@ -229,6 +230,10 @@ export const createSalaryConfig  = async (payload) => {
     } catch (error) {
         console.log(error.response?.data?.errors ||
         "Something went wrong",)
+        console.log("SALARY CONFIG ERROR:", error);
+    console.log("STATUS:", error.response?.status);
+    console.log("BACKEND RESPONSE:", error.response?.data);
+    console.log("BACKEND ERRORS:", error.response?.data?.errors);
         throw error
     }
 };
@@ -241,6 +246,10 @@ export const updateSalaryConfig  = async (payload) => {
     } catch (error) {
         console.log(error.response?.data?.errors ||
         "Something went wrong",)
+        console.log("SALARY CONFIG ERROR:", error);
+    console.log("STATUS:", error.response?.status);
+    console.log("BACKEND RESPONSE:", error.response?.data);
+    console.log("BACKEND ERRORS:", error.response?.data?.errors);
         throw error
     }
 };
