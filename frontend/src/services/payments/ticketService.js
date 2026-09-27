@@ -1,5 +1,5 @@
 import api from "../../api/axios";
-import { notifyError, notifySuccess } from '../utils/notify'
+import { notifyError, notifySuccess } from '../../utils/notify'
 
 export const connectStripe =async()=>{
     try {

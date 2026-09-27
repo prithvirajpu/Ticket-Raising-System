@@ -1,5 +1,5 @@
 import api from "../../api/axios";
-import { notifyError, notifySuccess } from '../utils/notify'
+import { notifyError, notifySuccess } from '../../utils/notify'
 
 export const getAgentTicketDetail= async(id)=>{
     const response=await api.get(`/agents/details/${id}/`);
