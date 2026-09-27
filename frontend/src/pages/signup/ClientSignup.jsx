@@ -34,8 +34,8 @@ const handleGoogleSuccess = async (credentialResponse) => {
       role: "CLIENT",
     });
     console.log(res.data)
-    const { access, refresh, role, profile_completed } = res.data.data;
-    login(access, refresh, role,profile_completed);
+    const { access, refresh, role, profile_completed,approved_status,user_id } = res.data.data;
+    login(access, role,profile_completed,approved_status,user_id);
     notifySuccess("✅ Google login successful!");
     if (!profile_completed) {
       navigate("/client/complete-profile");
