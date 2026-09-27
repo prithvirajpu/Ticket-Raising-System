@@ -1,4 +1,5 @@
 import api from "../../api/axios";
+import { notifyError, notifySuccess } from '../utils/notify'
 
 export const resolveTicket = async (id) => {
   const res = await api.post(`/tickets/${id}/resolve/`);

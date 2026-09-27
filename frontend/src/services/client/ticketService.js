@@ -1,4 +1,5 @@
 import api from "../../api/axios";
+import { notifyError, notifySuccess } from '../utils/notify'
 
 export const updateClientProfile= async (data)=>{
     const res = await api.put('/clients/profile/update/',data)
