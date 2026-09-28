@@ -231,15 +231,16 @@ def get_agent_list_service(request):
     
 def toggle_agent_status_service(agent_id,is_active):
     try:
-        agent=User.objects.get(id=agent_id)
-        agent.is_active=is_active
-        agent.save(update_fields=['is_active'])
         if is_active is None:
             return {
                 "data": None,
                 "errors": {"details": "is_active is required"},
                 "status": status.HTTP_400_BAD_REQUEST
             }
+        agent=User.objects.get(id=agent_id)
+        agent.is_active=is_active
+        agent.save(update_fields=['is_active'])
+        
         return {
             'data':{
                 'message':'Agent status updated successfully',

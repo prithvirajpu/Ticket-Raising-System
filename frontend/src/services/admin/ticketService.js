@@ -65,7 +65,7 @@ export const getHierarchy= async()=>{
 }
 export const getWithdrawRequests =async(page=1)=>{
     try {
-        const res= await api.get(`/admins/wallet/requests/?page${page}`)
+        const res= await api.get(`/admins/wallet/requests/?page=${page}`)
         return {
            message: res.data.data.message,
             paginator: res.data.paginator,

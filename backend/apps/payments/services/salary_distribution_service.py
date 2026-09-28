@@ -52,19 +52,21 @@ def get_monthly_revenue(month_start, month_end):
 def distribute_monthly_salary():
 
     current_date = timezone.now()
+    month=current_date.month
+    year=current_date.year
 
     # Salary is for the previous month
-    if current_date.month == 1:
-        month = 12
-        year = current_date.year - 1
-    else:
-        month = current_date.month - 1
-        year = current_date.year
+    # if current_date.month == 1:
+    #     month = 12
+    #     year = current_date.year - 1
+    # else:
+    #     month = current_date.month - 1
+    #     year = current_date.year
 
-    days_in_month = monthrange(
-        year,
-        month
-    )[1]
+    # days_in_month = monthrange(
+    #     year,
+    #     month
+    # )[1]
 
     month_start = timezone.make_aware(
         datetime(
@@ -73,17 +75,18 @@ def distribute_monthly_salary():
             1
         )
     )
+    month_end=current_date
 
-    month_end = timezone.make_aware(
-        datetime(
-            year,
-            month,
-            days_in_month,
-            23,
-            59,
-            59
-        )
-    )
+    # month_end = timezone.make_aware(
+    #     datetime(
+    #         year,
+    #         month,
+    #         days_in_month,
+    #         23,
+    #         59,
+    #         59
+    #     )
+    # )
 
     # -----------------------------------------
     # Prevent duplicate salary distribution
